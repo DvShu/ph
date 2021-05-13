@@ -184,4 +184,6 @@ termColor.style = function (text: string, styls: string[]) {
   return `${prefixs.join('')}${text}\x1b[0m`
 }
 
+var i = 1
+
 export = termColor
