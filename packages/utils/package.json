@@ -1,8 +1,0 @@
-{
-  "name": "ph-utils",
-  "description": "开源工具集工作区",
-  "version": "0.0.1",
-  "dependencies": {
-    "ph-terminal-colors": "0.0.1"
-  }
-}
