@@ -1,1 +1,4 @@
 .prettierrc.js
+.eslintrc.js
+.pnp.js
+packages/terminal-colors/*.js

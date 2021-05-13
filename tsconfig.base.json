@@ -17,6 +17,7 @@
     "noFallthroughCasesInSwitch": true,
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
-    "declaration": true
+    "declaration": true,
+    "alwaysStrict": false
   }
 }

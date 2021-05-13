@@ -1,2 +1,3 @@
 /.yarn/*
 /*.js
+/packages/terminal-colors/*.js
