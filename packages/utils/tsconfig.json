@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM"],
+    "outDir": "./",
+    "outFile": "./web.js",
+    "strict": true,
+    "target": "ES2016",
+    "module": "system",
+    "pretty": true,
+    "moduleResolution": "Node",
+    "sourceMap": false,
+    "esModuleInterop": true,
+    "noEmit": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "declaration": true
+  },
+  "include": ["lib/index.ts", "lib/web.ts"],
+  "exclude": ["node_modules", ".yarn"]
+}
