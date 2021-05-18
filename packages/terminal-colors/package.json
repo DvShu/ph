@@ -19,7 +19,8 @@
     "typescript": "^4.2.4"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "nv": "node --version"
   },
   "files": [
     "index.js",

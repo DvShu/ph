@@ -4,7 +4,7 @@ module.exports = {
     // 你的环境变量（包含多个预定义的全局变量）
     //
     // browser: true,
-    // node: true,
+    node: true,
     // mocha: true,
     // jest: true,
     // jquery: true
@@ -18,5 +18,8 @@ module.exports = {
     // 自定义你的规则
     'no-eq-null': 'off',
     eqeqeq: ['error', 'always', { null: 'ignore' }],
+    'no-param-reassign': 'off',
+    'max-params': ['error', 5],
+    '@typescript-eslint/no-require-imports': 'off'
   },
 }

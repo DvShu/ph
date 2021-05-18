@@ -1,0 +1,40 @@
+{
+  "name": "ph-utils",
+  "description": "命令行工具简单的颜色样式集",
+  "main": "lib/index.js",
+  "module": "lib/index.mjs",
+  "types": "lib/index.d.ts",
+  "browser": "lib/index.mjs",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https//gitee.com/towardly/ph.git",
+    "directory": "packages/utils"
+  },
+  "license": "MIT",
+  "author": "DvShu <1456207945@qq.com>",
+  "bugs": {
+    "url": "https://gitee.com/towardly/ph/issues"
+  },
+  "homepage": "https://gitee.com/towardly/ph/blob/master/utils/#readme",
+  "devDependencies": {
+    "@types/node": "^15.0.3",
+    "typescript": "^4.2.4"
+  },
+  "scripts": {
+    "buildq": "tsc",
+    "build": "node scripts/build.js",
+    "s": "node scripts/b.js"
+  },
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "node",
+    "utils",
+    "javascript",
+    "date",
+    "dom",
+    "file"
+  ]
+}

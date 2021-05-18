@@ -1,3 +1,5 @@
 /.yarn/*
 /*.js
 /packages/terminal-colors/*.js
+/packages/utils/scripts/*.js
+/packages/utils/lib/**

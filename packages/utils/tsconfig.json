@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "es6",
+    "resolveJsonModule": false,
+    "outDir": "./"
+  },
+  "files": ["src/index.ts"]
+}
