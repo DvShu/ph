@@ -1,7 +1,6 @@
 /**
  * node 端工具
  */
-/* eslint-disable-next-line */
 const crypto = require('crypto')
 
 /**

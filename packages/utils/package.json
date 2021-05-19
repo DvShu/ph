@@ -2,9 +2,9 @@
   "name": "ph-utils",
   "description": "命令行工具简单的颜色样式集",
   "main": "lib/index.js",
-  "module": "lib/index.mjs",
+  "module": "lib/index_m.js",
   "types": "lib/index.d.ts",
-  "browser": "lib/index.mjs",
+  "browser": "lib/index_m.js",
   "version": "0.0.1",
   "repository": {
     "type": "git",

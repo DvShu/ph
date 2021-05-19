@@ -25,7 +25,7 @@ function p(s: number, l = 2) {
  * @param date      日期
  * @param pattern   格式化字符串 yyyy - 年, mm - 月, dd - 日, HH - 小时, MM - 分钟, ss - 秒
  */
-export function format(date: Date | string | number | null, pattern = 'yyyy-mm-dd HH:MM') {
+export function format(date?: Date | string | number, pattern = 'yyyy-mm-dd HH:MM') {
   date = parse(date)
   let d = date.getDate()
   let y = date.getFullYear()
@@ -63,7 +63,7 @@ export function format(date: Date | string | number | null, pattern = 'yyyy-mm-d
  * 参考 dayjs 实现, 也可以参考 https://github.com/nomiddlename/date-format
  * @param date 待解析的日期参数
  */
-export function parse(date: Date | string | number | null) {
+export function parse(date?: Date | string | number) {
   if (date == null) return new Date()
   if (date instanceof Date) return date
   if (typeof date === 'string' && !/Z$/i.test(date)) {
@@ -81,7 +81,7 @@ export function parse(date: Date | string | number | null) {
  * @param {String} unit 单位，H Hours, 默认为 H
  * @param {Boolean} isEnd true则为 endOf
  */
-export function startOf(date: Date | string | number | null, unit?: string, isEnd = false) {
+export function startOf(date?: Date | string | number, unit?: string, isEnd = false) {
   const argumentStart = [0, 0, 0, 0]
   const argumentEnd = [23, 59, 59, 999]
   date = parse(date)

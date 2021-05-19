@@ -8,7 +8,7 @@ const vendorPrefix = ['', '-webkit', '-moz-']
  * 根据选择器获取节点
  * @param {string} selector 选择器
  */
-export function elem(selector: string, dom: HTMLElement) {
+export function elem(selector: string, dom?: HTMLElement) {
   return (dom || document).querySelectorAll(selector)
 }
 
