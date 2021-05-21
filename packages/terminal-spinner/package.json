@@ -1,38 +1,39 @@
 {
-  "name": "ph-utils",
+  "name": "ph-terminal-spinner",
   "description": "命令行工具简单的颜色样式集",
-  "main": "lib/index.js",
-  "module": "lib/index_m.js",
-  "types": "lib/index.d.ts",
-  "browser": "lib/index_m.js",
+  "main": "index.js",
+  "types": "index.d.ts",
   "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "git+https//gitee.com/towardly/ph.git",
-    "directory": "packages/utils"
+    "directory": "packages/ph-terminal-spinner"
   },
   "license": "MIT",
   "author": "DvShu <1456207945@qq.com>",
   "bugs": {
     "url": "https://gitee.com/towardly/ph/issues"
   },
-  "homepage": "https://gitee.com/towardly/ph/tree/master/packages/utils",
+  "homepage": "https://gitee.com/towardly/ph/tree/master/packages/ph-terminal-spinner",
   "devDependencies": {
-    "@types/node": "^15.0.3",
     "typescript": "^4.2.4"
   },
   "scripts": {
-    "build": "node scripts/build.js"
+    "build": "tsc"
   },
   "files": [
-    "lib"
+    "index.js",
+    "index.d.ts"
   ],
   "keywords": [
-    "node",
-    "utils",
-    "javascript",
-    "date",
-    "dom",
-    "file"
+    "nodejs",
+    "terminal",
+    "cli",
+    "style",
+    "console",
+    "spinner",
+    "loading",
+    "progress",
+    "wait"
   ]
 }

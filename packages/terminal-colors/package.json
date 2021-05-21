@@ -14,13 +14,12 @@
   "bugs": {
     "url": "https://gitee.com/towardly/ph/issues"
   },
-  "homepage": "https://gitee.com/towardly/ph/blob/master/terminal-colors/#readme",
+  "homepage": "https://gitee.com/towardly/ph/tree/master/packages/terminal-colors",
   "devDependencies": {
     "typescript": "^4.2.4"
   },
   "scripts": {
-    "build": "tsc",
-    "nv": "node --version"
+    "build": "tsc"
   },
   "files": [
     "index.js",
