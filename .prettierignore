@@ -3,3 +3,4 @@
 .pnp.js
 packages/terminal-colors/*.js
 packages/utils/lib/*
+/packages/terminal-spinner/index.js

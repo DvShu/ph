@@ -10,3 +10,4 @@ yarn.lock
 .yarn
 /packages/**/LICENSE
 /packages/utils/lib/*
+/packages/terminal-spinner/index.js

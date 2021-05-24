@@ -15,11 +15,17 @@
     "url": "https://gitee.com/towardly/ph/issues"
   },
   "homepage": "https://gitee.com/towardly/ph/tree/master/packages/ph-terminal-spinner",
+  "dependencies": {
+    "ph-terminal-colors": "workspace:packages/terminal-colors",
+    "ph-terminal-icons": "workspace:packages/terminal-icons"
+  },
   "devDependencies": {
+    "@types/node": "^15.6.0",
     "typescript": "^4.2.4"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "node test.js"
   },
   "files": [
     "index.js",
