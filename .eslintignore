@@ -3,7 +3,5 @@
 /packages/terminal-colors/*.js
 /packages/utils/scripts/*.js
 /packages/utils/lib/**
-
 /packages/terminal-icons/index.js
-
 /packages/terminal-spinner/index.js
