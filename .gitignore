@@ -11,3 +11,6 @@ yarn.lock
 /packages/**/LICENSE
 /packages/utils/lib/*
 /packages/terminal-spinner/index.js
+/packages/terminal-spinner/index.d.ts
+/packages/monorepo-cli/index.d.ts
+/**/*.js

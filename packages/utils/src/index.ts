@@ -47,3 +47,34 @@ export function isNumeric(str: string): boolean {
 export function isBoolean(str: string): boolean {
   return ['true', 'false'].indexOf(str) >= 0
 }
+
+/**
+ * 带有错误名称标记的错误类型
+ */
+export class BaseError extends Error {
+  /**
+   * 错误名称，类似于 Java 中的不同的 Exception[NullPointerException]；
+   * 增加 name 字段，表明不同的错误，当需要根据不同的错误执行不同的处理的时候，会很有用
+   */
+  public name: string
+  /**
+   * 构造一个 name = BaseError 的错误信息
+   * @param message 错误描述
+   */
+  public constructor(message: string)
+  /**
+   *
+   * @param name 错误名称
+   * @param message 错误描述
+   */
+  public constructor(name: String, message: string)
+  public constructor() {
+    if (arguments.length === 1) {
+      super(arguments[0])
+      this.name = 'BaseError'
+    } else {
+      super(arguments[1])
+      this.name = arguments[0]
+    }
+  }
+}

@@ -24,7 +24,7 @@ setTimeout(() => {
 
 ### API
 
-1. `start()`  
+1. `start(text: string)`  
    开启加载动画。
 
 2. `succeed(text: string)`  

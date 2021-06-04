@@ -1,0 +1,55 @@
+{
+  "name": "monorepo-cli",
+  "description": "基于 yarn v2 berry 的 monorepo 项目的创建",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https//gitee.com/towardly/ph.git",
+    "directory": "packages/monorepo-cli"
+  },
+  "license": "MIT",
+  "author": "DvShu <1456207945@qq.com>",
+  "bugs": {
+    "url": "https://gitee.com/towardly/ph/issues"
+  },
+  "homepage": "https://gitee.com/towardly/ph/tree/master/packages/monorepo-cli",
+  "dependencies": {
+    "ansi-colors": "^4.1.1",
+    "commander": "^7.2.0",
+    "ph-terminal-spinner": "workspace:packages/terminal-spinner",
+    "ph-utils": "workspace:packages/utils"
+  },
+  "devDependencies": {
+    "@types/node": "^15.6.0",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.2.4"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "ts-node index.ts create sa4 --director E:/workspace1",
+    "ws": "ts-node index.ts workspace a --director E:/workspace1/sa4",
+    "js-style": "ts-node index.ts js-style"
+  },
+  "bin": {
+    "monorepo": "index.js"
+  },
+  "files": [
+    "index.js",
+    "templates/"
+  ],
+  "keywords": [
+    "nodejs",
+    "ph",
+    "cli",
+    "monorepo",
+    "workspace",
+    "packages",
+    "yarn",
+    "lerna",
+    "init",
+    "generate",
+    "create"
+  ]
+}

@@ -1,11 +1,11 @@
 {
   "name": "ph-utils",
-  "description": "命令行工具简单的颜色样式集",
+  "description": "js 开发工具集，前后端都可以使用(commonjs和es module)",
   "main": "lib/index.js",
   "module": "lib/index_m.js",
   "types": "lib/index.d.ts",
   "browser": "lib/index_m.js",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "repository": {
     "type": "git",
     "url": "git+https//gitee.com/towardly/ph.git",

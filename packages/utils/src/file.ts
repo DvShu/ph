@@ -1,6 +1,6 @@
 /** nodejs 文件操作工具类 */
 const path = require('path')
-const fs = require('fs')
+import fs = require('fs')
 
 export = {
   /**
@@ -23,11 +23,19 @@ export = {
   /**
    * 写入 JSON 格式的数据到文件
    * @param file 待写入的文件
-   * @param data 待写入的数据, JSON 格式
+   * @param data 待写入的数据
+   * @param opts 写入配置
+   * @property opts.json 是否写入 JSON 格式的数据，写入数据时对数据进行 JSON 格式化，默认为：true
+   * @property opts.format 是否在写入 json 数据时，将 JSON 数据格式化2个空格写入, 默认为 true
    */
-  writeJSON(file: string, data: object) {
+  write(file: string, data: any, opts?: { json: boolean; format: boolean }) {
     const writeStream = fs.createWriteStream(path.resolve(file))
-    writeStream.write(JSON.stringify(data))
+    let writeData: string = data.toString()
+    opts = { json: true, format: true, ...(opts || {}) }
+    if (opts.json === true && typeof data === 'object') {
+      writeData = JSON.stringify(data, null, opts.format === true ? 2 : 0)
+    }
+    writeStream.write(writeData)
     writeStream.close()
   },
 

@@ -1,9 +1,9 @@
 {
   "name": "ph-terminal-spinner",
-  "description": "命令行工具简单的颜色样式集",
+  "description": "命令行工具简单的加载提示工具",
   "main": "index.js",
   "types": "index.d.ts",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "repository": {
     "type": "git",
     "url": "git+https//gitee.com/towardly/ph.git",
@@ -16,8 +16,7 @@
   },
   "homepage": "https://gitee.com/towardly/ph/tree/master/packages/ph-terminal-spinner",
   "dependencies": {
-    "ph-terminal-colors": "workspace:packages/terminal-colors",
-    "ph-terminal-icons": "workspace:packages/terminal-icons"
+    "ansi-colors": "^4.1.1"
   },
   "devDependencies": {
     "@types/node": "^15.6.0",

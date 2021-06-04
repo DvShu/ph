@@ -1,20 +1,4 @@
-import readline = require('readline')
-import colors = require('ph-terminal-colors')
-import icons = require('ph-terminal-icons')
-
-/**
- * 帧动画配置项
- */
-interface AnimStepsOption {
-  /**
-   * 定义帧动画的每一帧字符
-   */
-  frames: string[]
-  /**
-   * 定义帧动画的过渡时间
-   */
-  interval: number
-}
+import colors = require('ansi-colors')
 
 /**
  * 命令行加载提示类
@@ -24,35 +8,22 @@ class Spinner {
    * 命令行提示文本
    */
   public text: string
-  /**
-   * 配置动画
-   */
-  public animSteps: AnimStepsOption
-  /**
-   * 获取输入输出读取写入
-   */
-  public rl: readline.Interface
-  private _interval: number
+  // eslint-disable-next-line
+  public stream: NodeJS.WriteStream
+  public frames: string[]
+  private _interval: any
   private _frameIndex: number
-  private _lastText: string
 
   /**
    * 构造命令行提示器
    * @param text 提示文本
    */
-  public constructor(text: string) {
-    this.text = text
-    this.animSteps = {
-      frames: ['|', '/', '—', '\\'],
-      interval: 200,
-    }
+  public constructor(text?: string) {
+    this.text = text || ''
+    this.frames = ['|', '/', '—', '\\']
     this._interval = -1
     this._frameIndex = 0
-    this.rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    })
-    this._lastText = ''
+    this.stream = process.stdout
   }
 
   /**
@@ -60,25 +31,23 @@ class Spinner {
    */
   public clear() {
     // 清除之前的渲染
-    readline.clearLine(process.stdout, 0)
+    this.stream.clearLine(0)
     // 移动光标到开始位置
-    readline.moveCursor(process.stdout, -(this._lastText.length * 2 + 2), 0) // * 2 一个中文占两个字符
+    this.stream.cursorTo(0)
   }
 
   /**
    * 开启模拟加载动画
    */
-  public start() {
-    this._render()
-    if (this._interval === -1) {
+  public start(text?: string) {
+    if (text) this.text = text
+    this.clear()
+    this.stream.write('\u001b[?25l') // 隐藏光标
+    if (this._interval == null) {
+      this._render()
       this._interval = setInterval(() => {
-        if (this._frameIndex < this.animSteps.frames.length - 1) {
-          this._frameIndex++
-        } else {
-          this._frameIndex = 0
-        }
         this._render()
-      }, this.animSteps.interval) as any
+      }, 200)
     }
   }
 
@@ -87,7 +56,7 @@ class Spinner {
    * @param {String} text 显示文本
    */
   public succeed(text?: string) {
-    this._resetStatus('success', text)
+    this._stopAndPersist(colors.green('✔'), text || this.text)
   }
 
   /**
@@ -95,7 +64,15 @@ class Spinner {
    * @param {String} text
    */
   public fail(text?: string) {
-    this._resetStatus('error', text)
+    this._stopAndPersist(colors.red('✖'), text || this.text)
+  }
+
+  public warn(text?: string) {
+    this._stopAndPersist(colors.yellow('⚠'), text || this.text)
+  }
+
+  public info(text?: string) {
+    this._stopAndPersist(colors.blue('ℹ'), text || this.text)
   }
 
   /**
@@ -103,34 +80,29 @@ class Spinner {
    */
   public stop() {
     clearInterval(this._interval)
-    this.rl.close()
+    this._interval = null
+    this.clear()
+    this.stream.write('\u001b[?25h') // 显示光标
   }
 
-  private _resetStatus(status?: string, text?: string) {
-    clearInterval(this._interval)
-    this._interval = -1
-    this.clear()
-    this._lastText = ''
-    this.rl.write(icons[status || 'info'] || 'X' + ' ' + (text || this.text) + '\r\n')
+  private _stopAndPersist(icon: string, text: string) {
+    this.stop()
+    this.stream.write(icon + ' ' + text + '\r\n')
+  }
+
+  private _frame() {
+    let frame = this.frames[this._frameIndex]
+    this._frameIndex = ++this._frameIndex % this.frames.length
+    return frame + ' ' + this.text
   }
 
   /**
    * 重新渲染文本
-   * @param text 待渲染的文本
    */
-  private _render(text?: string) {
+  private _render() {
     this.clear()
-    this._lastText = text || this.text
-    this.rl.write(colors.blue(this.animSteps.frames[this._frameIndex] + ' ' + this._lastText))
+    this.stream.write(this._frame())
   }
 }
 
-/**
- * 构造加载提示器
- * @param text 加载时的提示文本
- * @returns
- */
-function loadSpinner(text: string): Spinner {
-  return new Spinner(text)
-}
-export = loadSpinner
+export = Spinner
