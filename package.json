@@ -16,7 +16,11 @@
     "typescript": "^4.2.4"
   },
   "scripts": {
-    "init": "node createPackages.js",
-    "c": "ts-node packages/monorepo-cli/index.ts create sa1 --no-ts"
+    "init": "node createPackages.js"
+  },
+  "author": "DvShu <1456207945@qq.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitee.com/towardly/ph.git"
   }
 }

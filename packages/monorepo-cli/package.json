@@ -3,7 +3,7 @@
   "description": "基于 yarn v2 berry 的 monorepo 项目的创建",
   "main": "index.js",
   "types": "index.d.ts",
-  "version": "0.0.1",
+  "version": "0.0.8",
   "repository": {
     "type": "git",
     "url": "git+https//gitee.com/towardly/ph.git",
@@ -18,6 +18,7 @@
   "dependencies": {
     "ansi-colors": "^4.1.1",
     "commander": "^7.2.0",
+    "enquirer": "^2.3.6",
     "ph-terminal-spinner": "workspace:packages/terminal-spinner",
     "ph-utils": "workspace:packages/utils"
   },
@@ -27,10 +28,11 @@
     "typescript": "^4.2.4"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "node build.js",
     "test": "ts-node index.ts create sa4 --director E:/workspace1",
     "ws": "ts-node index.ts workspace a --director E:/workspace1/sa4",
-    "js-style": "ts-node index.ts js-style"
+    "js-style": "ts-node index.ts js-style",
+    "fastify": "ts-node index.ts fastify a --director E:/workspace1"
   },
   "bin": {
     "monorepo": "index.js"

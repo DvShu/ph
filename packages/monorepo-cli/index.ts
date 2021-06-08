@@ -9,10 +9,13 @@ import colors = require('ansi-colors')
 import https = require('https')
 import Spinner = require('ph-terminal-spinner')
 import serverUtils = require('ph-utils/lib/server')
+import { URL } from 'url'
+import pkg from './package.json'
+const enquirer = require('enquirer')
 /** 模板文件地址 */
 const TEMPLATE_PATH = path.join(__dirname, 'templates')
 
-program.version('0.0.1')
+program.version(pkg.version)
 const spinner = new Spinner()
 
 /** 工程的 package.json 模板内容 */
@@ -37,8 +40,15 @@ const eslintConfig: any = {
     'max-params': ['error', 5],
   },
 }
+
+interface RepositoryInfo {
+  type: string
+  url: string
+  directory?: string
+}
 // 工作区(workspace) pcakge.json 模板内容
 let wsPkg: any = {
+  name: '',
   description: '',
   main: 'index.js',
   types: 'index.d.ts',
@@ -60,7 +70,7 @@ let wsPkg: any = {
 
 // eslint prettier git 通用的忽略
 const eslintIgnore = ['/.yarn/*', '/**/*.d.ts', '.pnp.js']
-const gitignore = ['node_modules', '*.log', '.idea', '/packages/**/LICENSE', '/**/*.d.ts']
+const gitignore = ['node_modules', '*.log', '.idea', '.vscode', '/packages/**/LICENSE', '/**/*.d.ts']
 
 /**
  * 下载更新 yarn 版本到 berry，类似于执行命令 yarn set version berry
@@ -96,6 +106,7 @@ interface WorkspaceConfig {
   isTs: boolean
   isNode: boolean
   proPath: string
+  repository?: RepositoryInfo
 }
 
 /**
@@ -107,7 +118,14 @@ interface WorkspaceConfig {
 function initWorkspace(workspaceConfig: WorkspaceConfig, wsDevs: string[]) {
   return new Promise((resolve) => {
     spinner.start('初始化工作区文件')
-    wsPkg = { name: workspaceConfig.name, author: workspaceConfig.author || '', ...wsPkg }
+    wsPkg = { ...wsPkg, name: workspaceConfig.name, author: workspaceConfig.author || '' }
+    if (workspaceConfig.repository != null) {
+      wsPkg.repository = { ...workspaceConfig.repository, directory: 'packages/' + workspaceConfig.name }
+      const url = new URL(workspaceConfig.repository.url)
+      const urlAddr = path.parse(url.pathname)
+      wsPkg.bugs = { url: `https://${url.host}${urlAddr.dir}/${urlAddr.name}/issues` }
+      wsPkg.homepage = `https://${url.host}${urlAddr.dir}/${urlAddr.name}/tree/master/packages/${workspaceConfig.name}`
+    }
     // 复制 LICENSE 文件
     fs.copyFile(path.join(workspaceConfig.proPath, 'LICENSE'), path.join(workspaceConfig.path, 'LICENSE'), () => {})
 
@@ -364,6 +382,13 @@ function accessTs(tsconfigPath: string): Promise<boolean> {
   })
 }
 
+interface PackageInfo {
+  /** 开发人员 */
+  author: string
+  /** 工程仓库地址 */
+  repository: RepositoryInfo
+}
+
 // 定义构建工作区的命令
 program
   .command('workspace <name>')
@@ -379,17 +404,21 @@ program
     fsp
       .mkdir(workspacePath)
       .then(() => {
-        // 检查项目根目录是否存在 tsconfig_base.json
-        return accessTs(path.join(proPath, 'tsconfig_base.json'))
+        // 检查项目根目录是否存在 tsconfig_base.json 和 读取根目录 package.json
+        return Promise.all([
+          accessTs(path.join(proPath, 'tsconfig_base.json')),
+          fileUtils.readJSON<PackageInfo>(path.join(proPath, 'package.json')),
+        ])
       })
-      .then((isTs: boolean) => {
+      .then((val: [boolean, PackageInfo]) => {
         return initWorkspace(
           {
             name,
             proPath: proPath,
             path: workspacePath,
-            isTs,
+            isTs: val[0],
             isNode: config.node,
+            repository: (val[1] as any).repository,
           },
           wsDevs,
         )
@@ -408,7 +437,15 @@ program
       })
       .then(() => {
         spinner.succeed('安装工作区依赖成功')
-        spinner.succeed('初始化工作区成功')
+        spinner.start('添加开发工具支持')
+        return serverUtils.execPromise('yarn dlx @yarnpkg/pnpify --sdk vscode', {
+          cwd: proPath,
+          errorName: 'EditorSetupError',
+        })
+      })
+      .then(() => {
+        spinner.succeed('添加开发工具支持成功')
+        console.log(colors.green('\r\n添加 eslint 成功 \r\n'))
         console.log(colors.green('请先完善工作区下面的 package.json 文件再进行开发'))
       })
       .catch(() => {
@@ -511,6 +548,333 @@ program
       })
       .catch(() => {
         spinner.fail('添加 eslint 失败')
+      })
+  })
+
+interface Answer1Intf {
+  static: boolean
+  view: boolean
+  mysql: boolean
+}
+
+interface Answer2Intf {
+  host: string
+  user: string
+  password: string
+  database: string
+}
+
+function isWorkspace(proPath: string): Promise<{ ws: number; repository?: any }> {
+  return new Promise((resolve) => {
+    fileUtils
+      .readJSON<{ private: boolean; workspaces: string[]; repository: any }>(path.join(proPath, 'package.json'))
+      .then((proPkgInfo) => {
+        if (proPkgInfo.private === true && proPkgInfo.workspaces != null) {
+          resolve({ ws: 1, repository: proPkgInfo.repository })
+        } else {
+          resolve({ ws: 0 })
+        }
+      })
+      .catch(() => {
+        resolve({ ws: -1 })
+      })
+  })
+}
+
+interface FastifyConfig {
+  app: boolean
+  eslint: boolean
+  prettier: boolean
+  director?: string
+}
+
+interface FastifyCreateConfig {
+  /** 是否需要处理静态资源文件 */
+  static: boolean
+  /** 是否需要模板渲染引擎 */
+  view: boolean
+  /** 是否需要 mysql */
+  mysql: boolean
+  /** 工程目录 */
+  path: string
+  /** mysql连接项 */
+  mysqlConn: string
+  demoMysqlConn: string
+  name: string
+  app: boolean
+}
+
+/**
+ * 初始化 fastify app 项目
+ */
+function initFastify(config: FastifyCreateConfig, deps: string[]) {
+  return new Promise((resolve) => {
+    spinner.start('初始化 fastify app 项目')
+    // 新建存放路径文件的文件夹
+    fs.mkdir(path.join(config.path, 'routes'), () => {})
+    // 新建单元测试文件夹
+    fs.mkdir(path.join(config.path, 'test/routes'), { recursive: true }, () => {})
+    if (config.static) {
+      // 需要处理静态资源文件, 新建 public 文件夹
+      fs.mkdir(path.join(config.path, 'public'), () => {})
+      deps.push('fastify-static')
+    }
+    if (config.view) {
+      // 需要模板渲染引擎, 新建 views 文件夹
+      fs.mkdir(path.join(config.path, 'views'), () => {})
+      deps.push('nunjucks point-of-view')
+    }
+    if (config.mysql) {
+      deps.push('mysql2 fastify-bookshelf')
+    }
+
+    // 构建 config.js 和 config_demo.js
+    fileUtils.write(
+      path.join(config.path, 'config.js'),
+      `module.exports = {\r\n  port: 3000,\r\n  mysql: '${config.mysqlConn}',\r\n};`,
+    )
+    fileUtils.write(
+      path.join(config.path, 'config_demo.js'),
+      `module.exports = {\r\n  port: 3000,\r\n  mysql: '${config.demoMysqlConn}',\r\n};`,
+    )
+    // 重新替换 .gitignore
+    fs.readFile(path.join(config.path, '.gitignore'), 'utf-8', (err, gitignoreContent: string) => {
+      if (err == null) {
+        gitignoreContent += '\r\n.yarn\r\n.pnp.js\r\n.yarnrc.yml\r\nconfig.js'
+        fileUtils.write(path.join(config.path, '.gitignore'), gitignoreContent)
+      }
+    })
+    // 复制开发工具配置文件
+    fs.copyFile(path.join(TEMPLATE_PATH, 'nodemon.json'), path.join(config.path, 'nodemon.json'), () => {})
+
+    // 写 server.js 内容
+    fs.readFile(path.join(TEMPLATE_PATH, 'fastify_server.txt'), 'utf-8', (err, serverContent: string) => {
+      if (err == null) {
+        serverContent = serverContent.replace(/@\{name\}/g, config.name)
+        let scs = serverContent.split('!-----!')
+        let writeContent = [scs[0]]
+        if (config.mysql) {
+          writeContent.push(scs[1])
+        }
+        if (config.static) {
+          writeContent.push(scs[2])
+        }
+        if (config.view) {
+          writeContent.push(scs[3])
+        }
+        writeContent.push(scs[4])
+        fileUtils.write(path.join(config.path, 'server.js'), writeContent.join(''))
+      }
+    })
+
+    // 修改 package.json 的 scripts
+    fileUtils.readJSON<{ scripts: object; workspaces?: object }>(path.join(config.path, 'package.json')).then((pkg) => {
+      pkg.scripts = {
+        test: 'mocha',
+        dev: 'nodemon server.js',
+      }
+      if (config.app) delete pkg.workspaces
+      fileUtils.write(path.join(config.path, 'package.json'), pkg)
+    })
+
+    if (config.app === false) {
+      // workspace 工程，删除 index.ts 和 LICENSE
+      fs.rm(path.join(config.path, 'LICENSE'), () => {})
+      fs.rm(path.join(config.path, 'index.ts'), () => {})
+    }
+
+    // 新建路由文件夹
+    setTimeout(() => {
+      fs.copyFile(path.join(TEMPLATE_PATH, 'api.js'), path.join(config.path, 'routes/api.js'), () => {})
+      fs.copyFile(path.join(TEMPLATE_PATH, 'root.js'), path.join(config.path, 'routes/root.js'), () => {})
+      // 复制单元测试所需文件
+      fs.copyFile(path.join(TEMPLATE_PATH, '.mocharc.js'), path.join(config.path, '.mocharc.js'), () => {})
+      fs.copyFile(path.join(TEMPLATE_PATH, 'helper.js'), path.join(config.path, 'test/helper.js'), () => {})
+      fs.copyFile(path.join(TEMPLATE_PATH, 'api.test.js'), path.join(config.path, 'test/routes/api.test.js'), () => {})
+    }, 150)
+
+    spinner.succeed('初始化fastify app 项目成功')
+    resolve(0)
+  })
+}
+
+program
+  .command('fastify <name>')
+  .alias('f')
+  .description('创建 fastify 项目')
+  .option('-e, --eslint', '是否需要 eslint ，默认为：true', true)
+  .option('--no-eslint', '不需要 eslint ')
+  .option('-p, --prettier', '是否需要 prettier 进行格式化，默认为：true', true)
+  .option('--no-prettier', '不需要prettier')
+  .option('-d, --director <director>', '项目的目录地址，默认为：执行命令的目录')
+  .action((name: string, config: FastifyConfig) => {
+    let asw1: Answer1Intf
+    let asw2: Answer2Intf
+    let proPath = config.director || process.cwd()
+    let devs: string[] = ['mocha pino-smart']
+    let deps: string[] = ['fastify']
+    let isApp = true
+    enquirer
+      .prompt([
+        {
+          message: '是否需要处理静态文件?',
+          type: 'confirm',
+          initial: false,
+          name: 'static',
+        },
+        {
+          name: 'view',
+          type: 'confirm',
+          initial: false,
+          message: '是否需要模板渲染引擎?',
+        },
+        {
+          name: 'mysql',
+          type: 'confirm',
+          initial: false,
+          message: '是否需要使用mysql数据库?',
+        },
+      ])
+      .then((a: Answer1Intf) => {
+        asw1 = a
+        if (a.mysql) {
+          return enquirer.prompt([
+            {
+              header: '-----------------------',
+              name: 'host',
+              type: 'input',
+              message: '请输入mysql数据库host:',
+            },
+            {
+              name: 'user',
+              type: 'input',
+              message: '请输入mysql数据库user:',
+            },
+            {
+              name: 'password',
+              type: 'input',
+              message: '请输入mysql数据库password:',
+            },
+            {
+              name: 'database',
+              type: 'input',
+              message: '请输入mysql数据库database:',
+            },
+          ])
+        } else {
+          return Promise.resolve(0)
+        }
+      })
+      .then((a2: Answer2Intf | number) => {
+        if (a2 !== 0) {
+          asw2 = a2 as Answer2Intf
+        }
+        return isWorkspace(proPath)
+      })
+      .then((wsInfo: any) => {
+        if (wsInfo.ws === 0) {
+          console.log(colors.red('目录错误！'))
+          return Promise.reject(new Error('director error'))
+        } else if (wsInfo.ws === -1) {
+          // 新建独立的工程
+          proPath = path.join(proPath, name)
+          fs.mkdir(proPath, () => {})
+          return initProject(
+            proPath,
+            {
+              ts: false,
+              license: false,
+              node: true,
+              eslint: config.eslint,
+              prettier: config.prettier,
+            },
+            devs,
+          )
+        } else {
+          isApp = false
+          // workspace
+          proPath = path.join(proPath, 'packages', name)
+          fs.mkdir(proPath, () => {})
+          return initWorkspace(
+            {
+              name,
+              isTs: false,
+              isNode: true,
+              path: proPath,
+              proPath: '',
+              repository: wsInfo.repository,
+            },
+            devs,
+          )
+        }
+      })
+      .then(() =>
+        initFastify(
+          {
+            ...asw1,
+            path: proPath,
+            mysqlConn: asw1.mysql ? `mysql://${asw2.user}:${asw2.password}@${asw2.host}:3306/${asw2.database}` : '',
+            demoMysqlConn: asw1.mysql ? `mysql://${asw2.user}:${asw2.password}@127.0.0.1:3306/${asw2.database}` : '',
+            name,
+            app: isApp,
+          },
+          deps,
+        ),
+      )
+      .then(() => {
+        if (isApp === true) {
+          return updateYarn(proPath)
+        } else {
+          return Promise.resolve(0)
+        }
+      })
+      .then(() => {
+        spinner.start('安装开发依赖')
+        if (devs.length === 0) {
+          return Promise.resolve(0)
+        } else {
+          let cmd = isApp
+            ? `yarn add ${devs.join(' ')} --dev`
+            : `yarn workspace ${name} add ${devs.join(' ')} --dev --cached`
+          // 安装工作区依赖
+          return serverUtils.execPromise(cmd, {
+            cwd: proPath,
+            errorName: 'DevError',
+          })
+        }
+      })
+      .then(() => {
+        spinner.succeed('安装开发依赖成功')
+        spinner.start('安装工程依赖')
+        if (deps.length === 0) {
+          return Promise.resolve(0)
+        } else {
+          let cmd = isApp ? `yarn add ${deps.join(' ')}` : `yarn workspace ${name} add ${deps.join(' ')} --cached`
+          // 安装工作区依赖
+          return serverUtils.execPromise(cmd, {
+            cwd: proPath,
+            errorName: 'DepError',
+          })
+        }
+      })
+      .then(() => {
+        spinner.succeed('安装工程依赖成功')
+        spinner.start('添加开发工具支持')
+        if (isApp) {
+          return serverUtils.execPromise('yarn dlx @yarnpkg/pnpify --sdk vscode', {
+            cwd: proPath,
+            errorName: 'EditorSetupError',
+          })
+        } else {
+          return Promise.resolve(0)
+        }
+      })
+      .then(() => {
+        spinner.succeed('添加开发工具支持成功')
+        console.log(colors.green('\r\n项目构建成功\r\n'))
+      })
+      .catch(() => {
+        spinner.fail('构建失败')
       })
   })
 

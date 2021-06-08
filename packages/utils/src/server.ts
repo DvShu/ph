@@ -93,7 +93,7 @@ export = {
           err.name = errorName
         } else {
           if (stdout != null) {
-            if (stdout.includes('error') || stdout.includes('Error')) {
+            if (stdout.includes('ERROR') || stdout.includes('Error')) {
               err = new Error(stdout)
               err.name = errorName
             } else {

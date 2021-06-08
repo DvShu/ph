@@ -1,8 +1,7 @@
 .prettierrc.js
 .eslintrc.js
 .pnp.js
-packages/terminal-colors/*.js
 packages/utils/lib/*
 /packages/terminal-spinner/index.js
 /packages/terminal-spinner/index.d.ts
-/packages/monorepo-cli/index.js
+/packages/monorepo-cli/*.js
