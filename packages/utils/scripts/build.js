@@ -66,7 +66,7 @@ const mjsOption = {
 }
 
 // 进行过修改的文件，只编译修改过的文件
-const updatedFiles = ['server'] // ['date', 'dom', 'file', 'index', 'server', 'web']
+const updatedFiles = ['file'] // ['date', 'dom', 'file', 'index', 'server', 'web']
 
 const nodes = []
 const web = []

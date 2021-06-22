@@ -29,14 +29,20 @@ export = {
    * @property opts.format 是否在写入 json 数据时，将 JSON 数据格式化2个空格写入, 默认为 true
    */
   write(file: string, data: any, opts?: { json: boolean; format: boolean }) {
-    const writeStream = fs.createWriteStream(path.resolve(file))
-    let writeData: string = data.toString()
-    opts = { json: true, format: true, ...(opts || {}) }
-    if (opts.json === true && typeof data === 'object') {
-      writeData = JSON.stringify(data, null, opts.format === true ? 2 : 0)
-    }
-    writeStream.write(writeData)
-    writeStream.close()
+    return new Promise((resolve, reject) => {
+      let writeData: string = data.toString()
+      opts = { json: true, format: true, ...(opts || {}) }
+      if (opts.json === true && typeof data === 'object') {
+        writeData = JSON.stringify(data, null, opts.format === true ? 2 : 0)
+      }
+      fs.writeFile(path.resolve(file), writeData, (err) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(0)
+        }
+      })
+    })
   },
 
   /**

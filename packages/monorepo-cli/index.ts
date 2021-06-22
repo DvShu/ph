@@ -10,7 +10,7 @@ import https = require('https')
 import Spinner = require('ph-terminal-spinner')
 import serverUtils = require('ph-utils/lib/server')
 import { URL } from 'url'
-import pkg from './package.json'
+import pkg = require('./package.json')
 const enquirer = require('enquirer')
 /** 模板文件地址 */
 const TEMPLATE_PATH = path.join(__dirname, 'templates')
@@ -26,8 +26,7 @@ let pPkg: any = {
   author: '',
   repository: {
     type: 'git',
-    url: 'git+https//gitee.com/towardly/x.git',
-    directory: 'packages/x',
+    url: 'git+https://gitee.com/towardly/x.git',
   },
 }
 const eslintConfig: any = {
@@ -55,7 +54,7 @@ let wsPkg: any = {
   version: '0.0.1',
   repository: {
     type: 'git',
-    url: 'git+https//gitee.com/towardly/x.git',
+    url: 'git+https://gitee.com/towardly/x.git',
     directory: 'packages/x',
   },
   license: 'MIT',
@@ -203,6 +202,7 @@ function initProject(proPath: string, config: CreateConfig, proDevs: string[]) {
       fs.copyFile(path.join(TEMPLATE_PATH, 'LICENSE'), path.join(proPath, 'LICENSE'), () => {})
     }
     if (config.ts === true) {
+      proDevs.push('typescript')
       // 使用 ts
       fs.copyFile(path.join(TEMPLATE_PATH, 'tsconfig_base.json'), path.join(proPath, 'tsconfig_base.json'), () => {})
       eslintIgnore.push('/**/*.js')
@@ -225,7 +225,7 @@ function initProject(proPath: string, config: CreateConfig, proDevs: string[]) {
       }
       // 需要 eslint
       fileUtils.write(path.join(proPath, '.eslintignore'), eslintIgnore.join('\r\n'))
-      fileUtils.write(path.join(proPath, '.eslint.js'), 'module.exports = ' + JSON.stringify(eslintConfig, null, 2))
+      fileUtils.write(path.join(proPath, '.eslintrc.js'), 'module.exports = ' + JSON.stringify(eslintConfig, null, 2))
     }
     // 新建 package.json
     fileUtils.write(path.join(proPath, 'package.json'), pPkg)
@@ -274,6 +274,7 @@ program
   .action((name: string, destination: CreateConfig) => {
     const spinner = new Spinner()
     pPkg = { name, ...pPkg }
+    pPkg.repository = { type: 'git', url: `'git+https://gitee.com/towardly/${name}.git'` }
     const projectPath = path.join(destination.director || process.cwd(), name) // 项目目录
     let workspacePath = path.join(projectPath, 'packages') // 工作区目录
     if (!utils.isBlank(destination.workspace)) {
@@ -340,6 +341,14 @@ program
             })
             .then(() => {
               spinner.succeed('依赖安装成功')
+              spinner.start('添加开发工具支持')
+              return serverUtils.execPromise('yarn dlx @yarnpkg/pnpify --sdk vscode', {
+                cwd: projectPath,
+                errorName: 'EditorSetupError',
+              })
+            })
+            .then(() => {
+              spinner.succeed('添加开发工具成功')
               spinner.succeed('初始化项目成功，请先按以下步骤执行，再进行项目开发：')
               spinner.stop()
               const steps = [
@@ -493,7 +502,7 @@ function initStyle(proPath: string, config: JsStyleConfig, devs: string[]) {
     }
     // 需要 eslint
     fileUtils.write(path.join(proPath, '.eslintignore'), eslintIgnore.join('\r\n'))
-    fileUtils.write(path.join(proPath, '.eslint.js'), 'module.exports = ' + JSON.stringify(eslintConfig, null, 2))
+    fileUtils.write(path.join(proPath, '.eslintrc.js'), 'module.exports = ' + JSON.stringify(eslintConfig, null, 2))
     spinner.succeed('样式文件初始化成功')
     resolve(0)
   })
@@ -711,7 +720,7 @@ program
     let asw1: Answer1Intf
     let asw2: Answer2Intf
     let proPath = config.director || process.cwd()
-    let devs: string[] = ['mocha pino-smart']
+    let devs: string[] = ['mocha pino-smart nodemon']
     let deps: string[] = ['fastify']
     let isApp = true
     enquirer
@@ -871,7 +880,24 @@ program
       })
       .then(() => {
         spinner.succeed('添加开发工具支持成功')
-        console.log(colors.green('\r\n项目构建成功\r\n'))
+        spinner.stop()
+        console.log(colors.green('\r\n项目构建成功, 请按照以下步骤以次执行：\r\n'))
+        const steps = []
+        if (isApp) {
+          steps.push(`  1. 进入工程目录：cd ${proPath}`)
+          steps.push(`  2. 安装工程依赖：yarn add ${deps.join(' ')}`)
+          steps.push(`  3. 安装开发依赖：yarn add ${devs.join(' ')} --dev`)
+          steps.push('  4. 添加 vscode 开发工具支持：yarn dlx @yarnpkg/pnpify --sdk vscode')
+          steps.push(`  5. 编辑 ${name} -- > package.json 中 repository 和 author 字段以自动填充工作区初始化`)
+          steps.push(
+            '  6. 如果需要 LICENSE 文件的话请在项目根目录下放置一份，这样后续构建工作区的时候会自动拷贝到每一个工作区',
+          )
+        } else {
+          steps.push(`  1. 安装工程依赖：yarn workspace ${name} add ${deps.join(' ')} --cached`)
+          steps.push(`  2. 安装开发依赖：yarn workspace ${name} add ${devs.join(' ')} --dev --cached`)
+          steps.push(`  3. 完善 packages/${name} --> package.json 文件`)
+        }
+        console.log(colors.green(steps.join('\r\n')))
       })
       .catch(() => {
         spinner.fail('构建失败')

@@ -16,7 +16,8 @@
     "typescript": "^4.2.4"
   },
   "scripts": {
-    "init": "node createPackages.js"
+    "init": "node createPackages.js",
+    "build:spinner": "cd packages/terminal-spinner && yarn build"
   },
   "author": "DvShu <1456207945@qq.com>",
   "repository": {
