@@ -28,13 +28,13 @@ monorepo --help
 
 1. `--ts`：使用 `typescript`，默认使用 `typescript`
 2. `--no-ts`：不使用 `typescript`
-3. `-e, --eslint`：使用 `eslint` 进行代码规范校验，默认
+3. `-e, --eslint`：使用 `eslint` 进行代码规范校验，默认: `true`
 4. `--no-eslint`：不使用 `eslint`
 5. `-p, --prettier`：使用 `prettier` 进行代码格式化，默认
 6. `--no-prettier`：不使用 `prettier`
-7. `-n, --node`：NodeJs(Commonjs)项目，默认
+7. `-n, --node`：NodeJs(Commonjs)项目，默认: `true`
 8. `--no-node`：不是 NodeJs(Commonjs)项目，而是 WEB(ES Module) 项目
-9. `-l, --license`：需要 LICENSE 文件，默认
+9. `-l, --license`：需要 LICENSE 文件，默认: `true`
 10. `--no-license`：不需要 LICENSE
 11. `-w --workspace <name>`：新建项目的同时创建工作区
 12. `-d, --director <director>`: 创建项目的目录地址，默认为：执行命令的目录[ `process.cwd()` ]
@@ -43,10 +43,19 @@ monorepo --help
 
 构建基于 `yarn v2(berry)` 的 `monorepo` 项目的工作区
 
-1. `-n, --node`：NodeJs(Commonjs)项目，默认
+1. `-n, --node`：NodeJs(Commonjs)项目，默认: `true`
 2. `--no-node`：不是 NodeJs(Commonjs)项目，而是 WEB(ES Module) 项目
 3. `-d, --director <director>`: 项目的目录地址，默认为：执行命令的目录[ `process.cwd()` ]
 
 ### 3. `monorepo js-style`
 
-为工程添加样式 5. `-p, --prettier`：使用 `prettier` 进行代码格式化，默认 6. `--no-prettier`：不使用 `prettier` 12. `-d, --director <director>`: 项目的目录地址，默认为：执行命令的目录[ `process.cwd()` ] 4. `-t, --tool <package-tool>`：使用的包管理工具，只能是 `berry`、`npm` 中的一个，默认为：`berry`
+为工程添加样式
+
+1. `-p, --prettier`：使用 `prettier` 进行代码格式化，默认: `true`
+2. `--no-prettier`：不使用 `prettier`
+3. `-d, --director <director>`: 项目的目录地址，默认为：执行命令的目录[ `process.cwd()` ]
+4. `-t, --tool <package-tool>`：使用的包管理工具，只能是 `berry`、`npm` 中的一个，默认为：`berry`
+
+### 4. `monorepo fastify|f <name>`
+
+构建基于 `yarn v2(berry)` 的 `fastify` 项目

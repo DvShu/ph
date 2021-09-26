@@ -700,7 +700,7 @@ function initFastify(config: FastifyCreateConfig, deps: string[]) {
       fs.copyFile(path.join(TEMPLATE_PATH, '.mocharc.js'), path.join(config.path, '.mocharc.js'), () => {})
       fs.copyFile(path.join(TEMPLATE_PATH, 'helper.js'), path.join(config.path, 'test/helper.js'), () => {})
       fs.copyFile(path.join(TEMPLATE_PATH, 'api.test.js'), path.join(config.path, 'test/routes/api.test.js'), () => {})
-    }, 150)
+    }, 200)
 
     spinner.succeed('初始化fastify app 项目成功')
     resolve(0)
@@ -884,18 +884,12 @@ program
         console.log(colors.green('\r\n项目构建成功, 请按照以下步骤以次执行：\r\n'))
         const steps = []
         if (isApp) {
-          steps.push(`  1. 进入工程目录：cd ${proPath}`)
-          steps.push(`  2. 安装工程依赖：yarn add ${deps.join(' ')}`)
-          steps.push(`  3. 安装开发依赖：yarn add ${devs.join(' ')} --dev`)
-          steps.push('  4. 添加 vscode 开发工具支持：yarn dlx @yarnpkg/pnpify --sdk vscode')
-          steps.push(`  5. 编辑 ${name} -- > package.json 中 repository 和 author 字段以自动填充工作区初始化`)
+          steps.push(`  1. 编辑 ${name} -- > package.json 中 repository 和 author 字段以自动填充工作区初始化`)
           steps.push(
-            '  6. 如果需要 LICENSE 文件的话请在项目根目录下放置一份，这样后续构建工作区的时候会自动拷贝到每一个工作区',
+            '  2. 如果需要 LICENSE 文件的话请在项目根目录下放置一份，这样后续构建工作区的时候会自动拷贝到每一个工作区',
           )
         } else {
-          steps.push(`  1. 安装工程依赖：yarn workspace ${name} add ${deps.join(' ')} --cached`)
-          steps.push(`  2. 安装开发依赖：yarn workspace ${name} add ${devs.join(' ')} --dev --cached`)
-          steps.push(`  3. 完善 packages/${name} --> package.json 文件`)
+          steps.push(`  1. 完善 packages/${name} --> package.json 文件`)
         }
         console.log(colors.green(steps.join('\r\n')))
       })

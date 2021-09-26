@@ -9,7 +9,7 @@ const vendorPrefix = ['', '-webkit', '-moz-']
  * @param {string} selector 选择器
  */
 export function elem(selector: string, dom?: HTMLElement) {
-  return (dom || document).querySelectorAll(selector)
+  return (dom || document).querySelectorAll<HTMLElement>(selector)
 }
 
 /**
@@ -61,6 +61,6 @@ export function transform(element: HTMLElement, value: string) {
  * @param {function}    event     事件处理函数
  * @param {boolean}     once      是否是只运行一次的处理函数
  */
-export function on(element: HTMLElement, listener: string, event: () => void, once = false) {
+export function on(element: HTMLElement, listener: string, event: (e?: Event) => void, once = false) {
   element.addEventListener(listener, event, { once })
 }

@@ -33,10 +33,16 @@ export function shieldMobile(mobile: string) {
 /**
  * 验证参数是否是数字
  * @param str 待验证的字符串
+ * @param numericParam 通过参数标记是否包含小数、正数
+ * @param numericParam.isPositive 是否是正数
+ * @param numericParam.isFloat 是否是小数
  * @returns true 是数字, false 不是数字
  */
-export function isNumeric(str: string): boolean {
-  return /^[+-]?([0-9]*[.])?[0-9]+$/.test(str)
+export function isNumeric(str: string, numericParam?: { isPositive?: boolean; isFloat?: boolean }): boolean {
+  numericParam = { isPositive: false, isFloat: true, ...(numericParam || {}) }
+  let symbol = numericParam.isPositive ? '[+]?' : '[+-]?'
+  let main = numericParam.isFloat ? '([0-9]*[.])?[0-9]+' : '[0-9]+'
+  return new RegExp('^' + symbol + main + '$').test(str)
 }
 
 /**

@@ -3,7 +3,7 @@
   "description": "基于 yarn v2 berry 的 monorepo 项目的创建",
   "main": "index.js",
   "types": "index.d.ts",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "repository": {
     "type": "git",
     "url": "git+https//gitee.com/towardly/ph.git",
