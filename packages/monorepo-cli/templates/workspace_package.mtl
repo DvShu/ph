@@ -1,0 +1,28 @@
+{
+  "name": "{{& name }}",
+  "description": "",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://{{& projectRepository }}.git",
+    "directory": "packages/{{& name }}"
+  },
+  "license": "MIT",
+  "author": "{{& author }}",
+  "bugs": {
+    "url": "https://{{& projectRepository }}/issues"
+  },
+  "homepage": "https://{{& projectRepository }}/tree/master/packages/{{& name }}",
+  "devDependencies": {
+    {{#packages}}
+    "{{& name }}": "^{{ version }}"{{#start}},{{/start}}
+    {{/packages}}
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "files": ["index.js", "index.d.ts"],
+  "keywords": ["nodejs", "ph"]
+}

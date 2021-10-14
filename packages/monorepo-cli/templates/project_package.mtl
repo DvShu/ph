@@ -1,0 +1,16 @@
+ {
+  "name": "{{ name }}",
+  "description": "",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "devDependencies": {
+    {{#packages}}
+    "{{& name }}": "^{{ version }}"{{#start}},{{/start}}
+    {{/packages}}
+  },
+  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitee.com/towardly/{{ name }}.git"
+  }
+}

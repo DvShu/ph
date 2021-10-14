@@ -12,23 +12,23 @@ import serverUtils = require('ph-utils/lib/server')
 import { URL } from 'url'
 import pkg = require('./package.json')
 const enquirer = require('enquirer')
+const Mustache = require('mustache')
 /** 模板文件地址 */
 const TEMPLATE_PATH = path.join(__dirname, 'templates')
+
+const devDepends: any = {
+  typescript: '4.4.3',
+  prettier: '2.4.1',
+  eslint: '7.32.0',
+  'eslint-config-alloy': '4.3.0',
+  '@typescript-eslint/eslint-plugin': '4.33.0',
+  '@typescript-eslint/parser': '4.33.0',
+  '@types/node': '16.10.3',
+}
 
 program.version(pkg.version)
 const spinner = new Spinner()
 
-/** 工程的 package.json 模板内容 */
-let pPkg: any = {
-  description: '',
-  private: true,
-  workspaces: ['packages/*'],
-  author: '',
-  repository: {
-    type: 'git',
-    url: 'git+https://gitee.com/towardly/x.git',
-  },
-}
 const eslintConfig: any = {
   extends: ['alloy'],
   rules: {
@@ -44,27 +44,6 @@ interface RepositoryInfo {
   type: string
   url: string
   directory?: string
-}
-// 工作区(workspace) pcakge.json 模板内容
-let wsPkg: any = {
-  name: '',
-  description: '',
-  main: 'index.js',
-  types: 'index.d.ts',
-  version: '0.0.1',
-  repository: {
-    type: 'git',
-    url: 'git+https://gitee.com/towardly/x.git',
-    directory: 'packages/x',
-  },
-  license: 'MIT',
-  author: '',
-  bugs: {
-    url: 'https://gitee.com/towardly/x/issues',
-  },
-  homepage: 'https://gitee.com/towardly/x/tree/master/packages/x',
-  files: ['index.js', 'index.d.ts'],
-  keywords: ['nodejs', 'ph'],
 }
 
 // eslint prettier git 通用的忽略
@@ -98,6 +77,92 @@ function downloadBerry(yarnPath: string, rc: number, cb: (isError: boolean) => v
   })
 }
 
+/**
+ * https GET 请求
+ * @param {String} url 请求 url 地址
+ */
+let get = function (url: string) {
+  return new Promise((resolve, reject) => {
+    https
+      .get(url, (res) => {
+        let resData = ''
+        let statusCode = res.statusCode as number
+        res.setEncoding('utf8')
+        res.on('data', (chunk) => {
+          resData += chunk
+        })
+        res.on('end', () => {
+          if (statusCode >= 200 && statusCode < 300) {
+            resolve(JSON.parse(resData))
+          } else {
+            reject(new Error(statusCode + ' & ' + (res as any).statusText))
+          }
+        })
+      })
+      .on('error', (e) => {
+        reject(e)
+      })
+  })
+}
+
+interface PackageVersion {
+  name: string
+  version: string
+}
+
+/**
+ * 根据应用包名获取应用的详细信息
+ * @param {String} packageName 应用包名
+ */
+function queryPackage(packageName: string) {
+  // https://registry.npmjs.org/koa/latest
+  return get(`https://registry.npm.taobao.org/${packageName}/latest`).then((r: any) => {
+    return { name: r.name, version: r.version }
+  })
+}
+
+/**
+ * 检查依赖版本项
+ */
+function checkDependencies(pkgs: string[]): Promise<PackageVersion[]> {
+  return new Promise((resolve) => {
+    let dev1: any[] = []
+    let dev2: any[] = []
+    let len = pkgs.length
+    if (len === 0) {
+      resolve([])
+    }
+    for (let i = 0; i < len; i++) {
+      let name = pkgs[i] as string
+      queryPackage(name)
+        .then((pka: any) => {
+          pka.start = true
+          if (name.startsWith('@')) {
+            dev1.push(pka)
+          } else {
+            dev2.push(pka)
+          }
+        })
+        .catch(() => {
+          if (name.startsWith('@')) {
+            dev1.push({ name, version: devDepends[name], start: true })
+          } else {
+            dev2.push({ name, version: devDepends[name], start: true })
+          }
+        })
+        .finally(() => {
+          if (dev1.length + dev2.length === len) {
+            dev1 = dev1.sort((a, b) => a.name.localeCompare(b.name))
+            dev2 = dev2.sort((a, b) => a.name.localeCompare(b.name))
+            let dev = dev1.concat(dev2)
+            dev[dev.length - 1].start = false
+            resolve(dev)
+          }
+        })
+    }
+  })
+}
+
 interface WorkspaceConfig {
   name: string
   author?: string
@@ -114,17 +179,9 @@ interface WorkspaceConfig {
  * @param wsDevs
  * @returns
  */
-function initWorkspace(workspaceConfig: WorkspaceConfig, wsDevs: string[]) {
+function initWorkspace(workspaceConfig: WorkspaceConfig) {
   return new Promise((resolve) => {
-    spinner.start('初始化工作区文件')
-    wsPkg = { ...wsPkg, name: workspaceConfig.name, author: workspaceConfig.author || '' }
-    if (workspaceConfig.repository != null) {
-      wsPkg.repository = { ...workspaceConfig.repository, directory: 'packages/' + workspaceConfig.name }
-      const url = new URL(workspaceConfig.repository.url)
-      const urlAddr = path.parse(url.pathname)
-      wsPkg.bugs = { url: `https://${url.host}${urlAddr.dir}/${urlAddr.name}/issues` }
-      wsPkg.homepage = `https://${url.host}${urlAddr.dir}/${urlAddr.name}/tree/master/packages/${workspaceConfig.name}`
-    }
+    let wsDevs: string[] = []
     // 复制 LICENSE 文件
     fs.copyFile(path.join(workspaceConfig.proPath, 'LICENSE'), path.join(workspaceConfig.path, 'LICENSE'), () => {})
 
@@ -133,8 +190,6 @@ function initWorkspace(workspaceConfig: WorkspaceConfig, wsDevs: string[]) {
     // README.md
     fileUtils.write(path.join(workspaceConfig.path, 'README.md'), `#${workspaceConfig.name}\r\n---`)
     if (workspaceConfig.isTs) {
-      wsPkg.scripts = { build: 'tsc' }
-      wsDevs.push('typescript')
       let tsConfig: any = {
         extends: '../../tsconfig_base.json',
         compilerOptions: {
@@ -155,10 +210,7 @@ function initWorkspace(workspaceConfig: WorkspaceConfig, wsDevs: string[]) {
       // 写入 tsconfig.json 文件
       fileUtils.write(path.join(workspaceConfig.path, 'tsconfig.json'), tsConfig)
     }
-    // 写入 package.json
-    fileUtils.write(path.join(workspaceConfig.path, 'package.json'), wsPkg)
-    spinner.succeed('初始化工作区成功')
-    resolve(0)
+    resolve(wsDevs)
   })
 }
 
@@ -195,9 +247,9 @@ function updateYarn(proPath: string) {
  * @param proDevs 工程依赖
  * @returns
  */
-function initProject(proPath: string, config: CreateConfig, proDevs: string[]) {
+function initProject(proPath: string, config: CreateConfig): Promise<string[]> {
   return new Promise((resolve) => {
-    spinner.start('构建项目文件')
+    let proDevs: string[] = []
     if (config.license === true) {
       fs.copyFile(path.join(TEMPLATE_PATH, 'LICENSE'), path.join(proPath, 'LICENSE'), () => {})
     }
@@ -219,21 +271,38 @@ function initProject(proPath: string, config: CreateConfig, proDevs: string[]) {
       fileUtils.write(path.join(proPath, '.prettierignore'), eslintIgnore.join('\r\n'))
     }
     if (config.eslint === true) {
-      proDevs.push('eslint eslint-config-alloy')
+      proDevs.push('eslint')
+      proDevs.push('eslint-config-alloy')
       if (config.ts === true) {
-        proDevs.push('@typescript-eslint/eslint-plugin @typescript-eslint/parser')
+        proDevs.push('@typescript-eslint/eslint-plugin')
+        proDevs.push('@typescript-eslint/parser')
       }
       // 需要 eslint
       fileUtils.write(path.join(proPath, '.eslintignore'), eslintIgnore.join('\r\n'))
       fileUtils.write(path.join(proPath, '.eslintrc.js'), 'module.exports = ' + JSON.stringify(eslintConfig, null, 2))
     }
     // 新建 package.json
-    fileUtils.write(path.join(proPath, 'package.json'), pPkg)
+    // fileUtils.write(path.join(proPath, 'package.json'), pPkg)
     // .gitignore
     fileUtils.write(path.join(proPath, '.gitignore'), gitignore.join('\r\n'))
-    spinner.succeed('项目文件构建成功')
-    resolve(0)
+
+    resolve(proDevs)
   })
+}
+
+/**
+ * 渲染模板文件
+ * @param from 模板文件路径
+ * @param data 数据源
+ * @param to 目标文件
+ */
+function template(from: string, data: any, to: string) {
+  fs.readFile(from, 'utf-8', (err, tpl) => {
+    if (err == null) {
+      fileUtils.write(to, Mustache.render(tpl, data))
+    }
+  })
+  return Promise.resolve(0)
 }
 
 /** 创建 monorepo 项目时需要的参数 */
@@ -252,13 +321,15 @@ interface CreateConfig {
   node: boolean
   /** 创建项目的目录地址，默认为：执行命令的目录 */
   director?: string
+  /** 包管理工具，默认为：yarn2 */
+  tool: string
 }
 
 // 定义创建项目的命令
 program
   .command('create <name>')
   .alias('c')
-  .description('创建基于 yarn v2 的 monorepo 项目')
+  .description('创建 monorepo 项目')
   .option('--ts', '是否使用ts，默认为：true', true)
   .option('--no-ts', '不使用ts')
   .option('-e, --eslint', '是否需要 eslint ，默认为：true', true)
@@ -269,107 +340,137 @@ program
   .option('--no-node', '不是nodejs项目')
   .option('-l, --license', '是否需要 LICENSE 文件，默认为：true', true)
   .option('--no-license', '不需要 license 文件，一般私有项目开发时配置')
+  .option('-t, --tool <tool>', '包管理工具, 默认为：yarn2')
   .option('-w --workspace <name>', '新建项目的同时创建工作区')
   .option('-d, --director <director>', '创建项目的目录地址，默认为：执行命令的目录')
   .action((name: string, destination: CreateConfig) => {
+    destination.tool = destination.tool === 'npm' ? 'npm' : 'yarn'
     const spinner = new Spinner()
-    pPkg = { name, ...pPkg }
-    pPkg.repository = { type: 'git', url: `'git+https://gitee.com/towardly/${name}.git'` }
     const projectPath = path.join(destination.director || process.cwd(), name) // 项目目录
     let workspacePath = path.join(projectPath, 'packages') // 工作区目录
     if (!utils.isBlank(destination.workspace)) {
       // 创建项目的同时创建工作区
       workspacePath = path.join(workspacePath, destination.workspace as string)
     }
-    const proDevs: string[] = [] // 工程依赖
-    const wsDevs: string[] = [] // 工作区依赖
     // 验证文件是否存在
-    fsp
-      .access(projectPath, fs.constants.F_OK)
-      .then(
-        () => {
-          console.error(colors.red(`目录 ${projectPath} 已经存在！`))
-        },
-        () => {
-          spinner.start('创建项目目录')
-          // 创建文件夹
-          fsp
-            .mkdir(workspacePath, { recursive: true })
-            .then(() => {
-              spinner.succeed('创建项目目录成功')
-              // 初始化项目
-              return initProject(projectPath, destination, proDevs)
-            })
-            .then(() => updateYarn(projectPath))
-            .then(() => {
-              // 初始化 工作区文件
-              if (!utils.isBlank(destination.workspace)) {
-                return initWorkspace(
-                  {
-                    name: destination.workspace as string,
-                    isTs: destination.ts,
-                    path: workspacePath,
-                    isNode: destination.node,
-                    proPath: projectPath,
-                  },
-                  wsDevs,
-                )
+    fsp.access(projectPath, fs.constants.F_OK).then(
+      () => {
+        console.error(colors.red(`目录 ${projectPath} 已经存在！`))
+      },
+      () => {
+        spinner.start('创建项目目录')
+        // 创建文件夹
+        fsp
+          .mkdir(workspacePath, { recursive: true })
+          .then(() => {
+            spinner.succeed('创建项目目录成功')
+            spinner.start('构建项目文件')
+            // 初始化项目
+            return initProject(projectPath, destination)
+          })
+          .then((pkgs: string[]) => {
+            spinner.succeed('项目文件构建成功')
+            spinner.start('检查依赖……')
+            return checkDependencies(pkgs)
+          })
+          .then((pkgs: PackageVersion[]) => {
+            spinner.succeed('依赖检查成功')
+            return template(
+              path.join(TEMPLATE_PATH, 'project_package.mtl'),
+              {
+                name,
+                packages: pkgs,
+              },
+              path.join(projectPath, 'package.json'),
+            )
+          })
+          .then(() => {
+            if (destination.tool === 'yarn') {
+              spinner.start('更新 yarn 版本')
+              return updateYarn(projectPath)
+            } else {
+              return Promise.resolve(1)
+            }
+          })
+          .then((s: any) => {
+            if (s === 0) {
+              spinner.succeed('更新 yarn 版本成功')
+            }
+            // 初始化 工作区文件
+            if (!utils.isBlank(destination.workspace)) {
+              spinner.start('初始化工作区文件')
+              return initWorkspace({
+                name: destination.workspace as string,
+                isTs: destination.ts,
+                path: workspacePath,
+                isNode: destination.node,
+                proPath: projectPath,
+              })
+            } else {
+              return Promise.resolve(0)
+            }
+          })
+          .then((s: any) => {
+            if (s !== 0) {
+              spinner.succeed('初始化工作区文件成功')
+              if (s.length !== 0) {
+                spinner.start('检查工作区依赖')
+                return checkDependencies(s)
               } else {
-                return Promise.resolve(0)
+                return Promise.resolve(0) as any
               }
-            })
-            .then(() => {
-              spinner.start('安装依赖')
-              if (proDevs.length === 0) {
-                return Promise.resolve(0)
-              }
-              // 安装项目依赖
-              return serverUtils.execPromise(`yarn add ${proDevs.join(' ')} --dev`, {
-                cwd: projectPath,
-                errorName: 'ProjectDevError',
-              })
-            })
-            .then(() => {
-              if (wsDevs.length === 0) {
-                return Promise.resolve(0)
-              }
-              // 安装工作区依赖
-              return serverUtils.execPromise(
-                `yarn workspace ${destination.workspace} add ${wsDevs.join(' ')} --dev --cached`,
-                { cwd: projectPath, errorName: 'WorkspaceDevError' },
+            } else {
+              return Promise.resolve(0) as any
+            }
+          })
+          .then((s: any) => {
+            if (s !== 0) {
+              spinner.succeed('检查工作区依赖成功')
+              return template(
+                path.join(TEMPLATE_PATH, 'workspace_package.mtl'),
+                {
+                  name: destination.workspace as string,
+                  author: '',
+                  projectRepository: '',
+                  packages: s,
+                },
+                path.join(workspacePath, 'package.json'),
               )
-            })
-            .then(() => {
-              spinner.succeed('依赖安装成功')
-              spinner.start('添加开发工具支持')
-              return serverUtils.execPromise('yarn dlx @yarnpkg/pnpify --sdk vscode', {
-                cwd: projectPath,
-                errorName: 'EditorSetupError',
-              })
-            })
-            .then(() => {
-              spinner.succeed('添加开发工具成功')
-              spinner.succeed('初始化项目成功，请先按以下步骤执行，再进行项目开发：')
-              spinner.stop()
-              const steps = [
-                `  1. 编辑 ${name} -- > package.json 中 repository 和 author 字段以自动填充工作区初始化\r\n`,
-                '  2. 如果需要 LICENSE 文件的话请在项目根目录下放置一份，这样后续构建工作区的时候会自动拷贝到每一个工作区',
-              ]
-              if (!utils.isBlank(destination.workspace)) {
-                steps.push(`  3. 完善 ${destination.workspace} --> package.json 文件\r\n`)
-              }
-              console.log(colors.green(steps.join('')))
-            })
-            .catch((err) => {
-              console.log(err)
-              spinner.fail('依赖安装失败')
-              spinner.stop()
-            })
-        },
-      )
-      .catch((err) => {
-        console.log(err)
-      })
+            } else {
+              return Promise.resolve(1)
+            }
+          })
+          .then((s: any) => {
+            if (s === 0) {
+              spinner.succeed('工作区依赖检查成功')
+            }
+            spinner.succeed('添加开发工具成功')
+            spinner.succeed('初始化项目成功，请先按以下步骤执行，再进行项目开发：')
+            spinner.stop()
+            const steps = [
+              `  1. 进入目录：${projectPath}: cd ${name}\r\n`,
+              `  2. 编辑 ${name} -- > package.json 中 repository 和 author 字段以自动填充工作区初始化\r\n`,
+              '  3. 如果需要 LICENSE 文件的话请在项目根目录下放置一份，这样后续构建工作区的时候会自动拷贝到每一个工作区\r\n',
+              `  4. 安装依赖：${destination.tool === 'npm' ? 'npm' : 'yarn'} install\r\n`,
+            ]
+            let i = 5
+            if (!utils.isBlank(destination.workspace)) {
+              steps.push(`  ${i}. 完善 ${destination.workspace} --> package.json 文件\r\n`)
+              i++
+            }
+            if (destination.tool === 'yarn') {
+              steps.push(`  ${i}. 添加开发工具支持：yarn dlx @yarnpkg/pnpify --sdk vscode\r\n`)
+              i++
+            }
+            console.log(colors.green(steps.join('')))
+          })
+          .catch((err) => {
+            console.log(err)
+            spinner.fail('依赖安装失败')
+            spinner.stop()
+          })
+      },
+    )
   })
 
 interface CreateWorkspaceConfig {
@@ -379,9 +480,10 @@ interface CreateWorkspaceConfig {
   director?: string
 }
 
-function accessTs(tsconfigPath: string): Promise<boolean> {
+/** 测试文件或目录是否存在 */
+function accessTs(p: string): Promise<boolean> {
   return new Promise((resolve) => {
-    fs.access(tsconfigPath, fs.constants.F_OK, (err) => {
+    fs.access(p, fs.constants.F_OK, (err) => {
       if (err) {
         resolve(false)
       } else {
@@ -402,63 +504,69 @@ interface PackageInfo {
 program
   .command('workspace <name>')
   .alias('ws')
-  .description('构建基于 yarn v2(berry) 的 monorepo 项目的工作区')
+  .description('构建 monorepo 项目的工作区')
   .option('-n, --node', '是否是NodeJs(Commonjs)项目，而非 WEB(ES Module)，默认为：true', true)
   .option('--no-node', '不是nodejs项目')
   .option('-d, --director <director>', '项目的目录地址，默认为：执行命令的目录')
   .action((name: string, config: CreateWorkspaceConfig) => {
     const proPath = config.director || process.cwd()
     const workspacePath = path.join(proPath, 'packages', name)
-    const wsDevs: string[] = []
+    const spinner = new Spinner()
     fsp
       .mkdir(workspacePath)
       .then(() => {
+        spinner.start('构建工作区文件')
         // 检查项目根目录是否存在 tsconfig_base.json 和 读取根目录 package.json
-        return Promise.all([
-          accessTs(path.join(proPath, 'tsconfig_base.json')),
-          fileUtils.readJSON<PackageInfo>(path.join(proPath, 'package.json')),
-        ])
+        return accessTs(path.join(proPath, 'tsconfig_base.json'))
       })
-      .then((val: [boolean, PackageInfo]) => {
-        return initWorkspace(
-          {
-            name,
-            proPath: proPath,
-            path: workspacePath,
-            isTs: val[0],
-            isNode: config.node,
-            repository: (val[1] as any).repository,
-          },
-          wsDevs,
-        )
-      })
-      .then(() => {
-        spinner.start('安装工作区依赖')
-        if (wsDevs.length === 0) {
-          return Promise.resolve(0)
-        } else {
-          // 安装工作区依赖
-          return serverUtils.execPromise(`yarn workspace ${name} add ${wsDevs.join(' ')} --dev --cached`, {
-            cwd: proPath,
-            errorName: 'WorkspaceDevError',
-          })
-        }
-      })
-      .then(() => {
-        spinner.succeed('安装工作区依赖成功')
-        spinner.start('添加开发工具支持')
-        return serverUtils.execPromise('yarn dlx @yarnpkg/pnpify --sdk vscode', {
-          cwd: proPath,
-          errorName: 'EditorSetupError',
+      .then((val: boolean) => {
+        return initWorkspace({
+          name,
+          proPath: proPath,
+          path: workspacePath,
+          isTs: val,
+          isNode: config.node,
         })
       })
-      .then(() => {
-        spinner.succeed('添加开发工具支持成功')
-        console.log(colors.green('\r\n添加 eslint 成功 \r\n'))
-        console.log(colors.green('请先完善工作区下面的 package.json 文件再进行开发'))
+      .then((s: any) => {
+        spinner.succeed('构建工作区文件成功')
+        spinner.start('检查工作区依赖')
+        return Promise.all([checkDependencies(s), fileUtils.readJSON<PackageInfo>(path.join(proPath, 'package.json'))])
+      })
+      .then((vals: [PackageVersion[], PackageInfo]) => {
+        let projectRepository = ''
+        if (vals[1].repository != null) {
+          const url = new URL(vals[1].repository.url)
+          const urlAddr = path.parse(url.pathname)
+          projectRepository = `${url.host}${urlAddr.dir}/${urlAddr.name}`
+        }
+        return Promise.all([
+          accessTs(path.join(proPath, '.yarnrc.yml')),
+          template(
+            path.join(TEMPLATE_PATH, 'workspace_package.mtl'),
+            {
+              name,
+              author: vals[1].author,
+              projectRepository,
+              packages: vals[0],
+            },
+            path.join(workspacePath, 'package.json'),
+          ),
+        ])
+      })
+      .then((vals: [boolean, number]) => {
+        spinner.succeed('工作区依赖检查成功')
+        spinner.stop()
+        const steps = [
+          `  1. 安装依赖：${vals[0] ? 'yarn workspace' : 'npm -w'} ${name} install\r\n`,
+          `  2. 完善 packages/${name} --> package.json 文件\r\n`,
+        ]
+        console.log(colors.green(steps.join('')))
+        spinner.stop()
       })
       .catch(() => {
         console.error(colors.red('错误的项目目录地址'))
+        spinner.stop()
       })
   })
 
@@ -788,33 +896,27 @@ program
           // 新建独立的工程
           proPath = path.join(proPath, name)
           fs.mkdir(proPath, () => {})
-          return initProject(
-            proPath,
-            {
-              ts: false,
-              license: false,
-              node: true,
-              eslint: config.eslint,
-              prettier: config.prettier,
-            },
-            devs,
-          )
+          return initProject(proPath, {
+            ts: false,
+            license: false,
+            node: true,
+            eslint: config.eslint,
+            prettier: config.prettier,
+            tool: '',
+          })
         } else {
           isApp = false
           // workspace
           proPath = path.join(proPath, 'packages', name)
           fs.mkdir(proPath, () => {})
-          return initWorkspace(
-            {
-              name,
-              isTs: false,
-              isNode: true,
-              path: proPath,
-              proPath: '',
-              repository: wsInfo.repository,
-            },
-            devs,
-          )
+          return initWorkspace({
+            name,
+            isTs: false,
+            isNode: true,
+            path: proPath,
+            proPath: '',
+            repository: wsInfo.repository,
+          })
         }
       })
       .then(() =>

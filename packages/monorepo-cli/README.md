@@ -37,7 +37,8 @@ monorepo --help
 9. `-l, --license`：需要 LICENSE 文件，默认: `true`
 10. `--no-license`：不需要 LICENSE
 11. `-w --workspace <name>`：新建项目的同时创建工作区
-12. `-d, --director <director>`: 创建项目的目录地址，默认为：执行命令的目录[ `process.cwd()` ]
+12. `-t, --tool <tool>`: 使用的包管理工具，默认为：yarn2
+13. `-d, --director <director>`: 创建项目的目录地址，默认为：执行命令的目录[ `process.cwd()` ]
 
 ### 2. `monorepo workspace|ws <name>`
 
