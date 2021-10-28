@@ -28,52 +28,43 @@ export const formJson = function <T>(form: HTMLFormElement): T {
   return value
 }
 
+interface QueryRes {
+  [index: string]: number | boolean | string | string[]
+}
 /**
  * 获取 url query 参数 (get 请求的参数)
  * @param key 获取指定 key 的参数，可选，如果不传该参数，则返回解析到的所有的参数列表
  * @param search 如果是 React 应用就需要传递 useLocation().search
  * @returns
  */
-export function query(key?: string | string[], search?: string | string[]): unknown {
+export function query(key?: string | string[], search?: string): QueryRes {
   if (isBlank(search)) {
-	search = location.search
+    search = location.search
   }
-  let query: { [index: string]: number | boolean | string | any[] } = {}
-  if (search.indexOf('?') !== -1) {
-    search = search.substring(1).split('&')
-    search.forEach((item: any) => {
-      item = (item as string).split('=')
-      let oldValue: any = query[item[0]]
-      let value: any = decodeURIComponent(item[1])
-      if (isBoolean(value)) {
-        // boolean
-        value = Boolean(value)
-      } else if (isNumeric(value)) {
-        // 数字
-        value = Number(value)
+  let query: QueryRes = {}
+  /*
+    使用正则表达式解析，主要利用 反向字符集
+  */
+  search.replace(/([^?&=]+)=([^&]+)/g, (_: string, k: string, v: string) => {
+    let oldValue: any = query[k]
+    let value: any = decodeURIComponent(v)
+    if (isBoolean(value)) {
+      value = Boolean(value)
+    } else if (isNumeric(value)) {
+      value = Number(value)
+    }
+    if (oldValue != null) {
+      if (oldValue instanceof Array) {
+        oldValue.push(value)
+        value = oldValue
+      } else {
+        value = [value, oldValue]
       }
-      if (oldValue != null) {
-        if (oldValue instanceof Array) {
-          oldValue.push(value)
-          value = oldValue
-        } else {
-          value = [oldValue, value]
-        }
-      }
-      query[item[0]] = value
-    })
-  }
-  if (key == null) {
-    return query
-  } else if (typeof key === 'string') {
-    return query[key]
-  } else {
-    const res: { [index: string]: number | boolean | string | any[] | undefined } = {}
-    key.forEach((ki: string) => {
-      res[ki] = query[ki]
-    })
-    return res
-  }
+    }
+    query[k] = value
+    return v
+  })
+  return query
 }
 
 interface RandomOpts {
