@@ -33,11 +33,10 @@ interface QueryRes {
 }
 /**
  * 获取 url query 参数 (get 请求的参数)
- * @param key 获取指定 key 的参数，可选，如果不传该参数，则返回解析到的所有的参数列表
  * @param search 如果是 React 应用就需要传递 useLocation().search
  * @returns
  */
-export function query(key?: string | string[], search?: string): QueryRes {
+export function query(search?: string): QueryRes {
   if (isBlank(search)) {
     search = location.search
   }
