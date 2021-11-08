@@ -19,14 +19,14 @@
     "ansi-colors": "^4.1.1",
     "commander": "^7.2.0",
     "enquirer": "^2.3.6",
+    "mustache": "^4.2.0",
     "ph-terminal-spinner": "workspace:packages/terminal-spinner",
-    "ph-utils": "workspace:packages/utils",
-    "mustache": "^4.2.0"
+    "ph-utils": "workspace:packages/utils"
   },
   "devDependencies": {
     "@types/node": "^15.6.0",
     "ts-node": "^10.0.0",
-    "typescript": "^4.2.4"
+    "typescript": "^4.4.4"
   },
   "scripts": {
     "build": "node build.js",

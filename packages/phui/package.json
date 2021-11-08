@@ -1,0 +1,41 @@
+{
+  "name": "phui",
+  "description": "Componentization of commonly used front-end modules.",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitee.com/towardly/ph.git",
+    "directory": "packages/phui"
+  },
+  "license": "MIT",
+  "author": "DvShu <1456207945@qq.com>",
+  "bugs": {
+    "url": "https://gitee.com/towardly/ph/issues"
+  },
+  "homepage": "https://gitee.com/towardly/ph/tree/master/packages/phui",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "less": "^4.1.2",
+    "typescript": "^4.4.4",
+    "vite": "^2.6.4"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "keywords": [
+    "nodejs",
+    "ph",
+    "phui",
+    "front",
+    "ui",
+    "component",
+    "module"
+  ]
+}
