@@ -20,6 +20,10 @@ function p(s: number, l = 2) {
   return ('000' + s).slice(l * -1)
 }
 
+function getUnit(unit: string): string {
+  return unit.substring(0, 1).toUpperCase() + unit.substring(1)
+}
+
 /**
  * 将日期格式化为指定形式的字符串
  * @param date      日期
@@ -85,8 +89,49 @@ export function startOf(date?: Date | string | number, unit?: string, isEnd = fa
   const argumentStart = [0, 0, 0, 0]
   const argumentEnd = [23, 59, 59, 999]
   date = parse(date)
-  let fn = 'set' + unit || 'Hours'
+  let u = getUnit(unit || 'Hours')
+  let fn = 'set' + u
   let args: any = isEnd === true ? argumentEnd : argumentStart
   ;(Date as any).prototype[fn].apply(date, args)
   return date
+}
+
+/**
+ * 日期加上指定时间后的日期
+ * @param date 指定的日期
+ * @param num  需要添加的数字, 如果这个参数传递一个小于0的数字，则就是日期减去相应的数字
+ * @param unit 需要添加的单位，date - 加减天数
+ */
+export function add(date: Date | string | number | null, num: number, unit: string): Date
+/**
+ * 日期加上指定时间后的日期
+ * @param date    指定的日期, 传递为 null ，则表示为当前日期
+ * @param num     需要添加的数字, 如果这个参数传递一个小于0的数字，则就是日期减去相应的数字
+ * @param unit    需要添加的单位，date - 加减天数
+ * @param fmt     如果传递了格式化的单位，则返回格式化后的日期, 格式化字符串 yyyy - 年, mm - 月, dd - 日, HH - 小时, MM - 分钟, ss - 秒
+ */
+export function add(date: Date | string | number | null, num: number, unit: string, fmt: string): string
+/**
+ * 日期加上指定时间后的日期
+ * @param date  指定的日期
+ * @param num   需要添加的数字, 如果这个参数传递一个小于0的数字，则就是日期减去相应的数字
+ * @param unit  需要添加的单位，date - 加减天数
+ * @param fmt   可选参数，如果传递了格式化的单位，则返回格式化后的日期, 格式化字符串 yyyy - 年, mm - 月, dd - 日, HH - 小时, MM - 分钟, ss - 秒
+ * @returns {Date | string} 如果传递了 fmt 参数，则返回 string，否则返回 Date
+ */
+export function add(date: Date | string | number | null, num: number, unit: string, fmt?: string): any {
+  let sdate = new Date()
+  if (date != null) {
+    sdate = parse(date)
+  }
+  unit = getUnit(unit)
+  let fn = 'set' + unit
+  let gn = 'get' + unit
+  let oldValue = Date.prototype[gn].apply(sdate)
+  Date.prototype[fn].apply(sdate, [oldValue + num])
+  if (typeof fmt === 'string') {
+    return format(sdate, fmt)
+  } else {
+    return sdate
+  }
 }

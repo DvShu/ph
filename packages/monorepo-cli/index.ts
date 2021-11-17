@@ -672,6 +672,8 @@ interface Answer1Intf {
   static: boolean
   view: boolean
   mysql: boolean
+  mongo: boolean
+  session: boolean
 }
 
 interface Answer2Intf {
@@ -681,13 +683,21 @@ interface Answer2Intf {
   database: string
 }
 
-function isWorkspace(proPath: string): Promise<{ ws: number; repository?: any }> {
+function isWorkspace(proPath: string): Promise<{ ws: number; repository?: any; author?: string }> {
   return new Promise((resolve) => {
     fileUtils
-      .readJSON<{ private: boolean; workspaces: string[]; repository: any }>(path.join(proPath, 'package.json'))
+      .readJSON<{ private: boolean; workspaces: string[]; repository: any; author: string }>(
+        path.join(proPath, 'package.json'),
+      )
       .then((proPkgInfo) => {
         if (proPkgInfo.private === true && proPkgInfo.workspaces != null) {
-          resolve({ ws: 1, repository: proPkgInfo.repository })
+          let projectRepository = ''
+          if (proPkgInfo.repository != null) {
+            const url = new URL(proPkgInfo.repository.url)
+            const urlAddr = path.parse(url.pathname)
+            projectRepository = `${url.host}${urlAddr.dir}/${urlAddr.name}`
+          }
+          resolve({ ws: 1, repository: projectRepository, author: proPkgInfo.author })
         } else {
           resolve({ ws: 0 })
         }
@@ -710,6 +720,7 @@ interface FastifyCreateConfig {
   static: boolean
   /** 是否需要模板渲染引擎 */
   view: boolean
+  mongo: boolean
   /** 是否需要 mysql */
   mysql: boolean
   /** 工程目录 */
@@ -717,8 +728,12 @@ interface FastifyCreateConfig {
   /** mysql连接项 */
   mysqlConn: string
   demoMysqlConn: string
+  /** mongo 连接项 */
+  mongoConn: string
+  demoMongoConn: string
   name: string
   app: boolean
+  session: boolean
 }
 
 /**
@@ -730,7 +745,12 @@ function initFastify(config: FastifyCreateConfig, deps: string[]) {
     // 新建存放路径文件的文件夹
     fs.mkdir(path.join(config.path, 'routes'), () => {})
     // 新建单元测试文件夹
-    fs.mkdir(path.join(config.path, 'test/routes'), { recursive: true }, () => {})
+    fs.mkdir(path.join(config.path, 'test', 'routes'), { recursive: true }, () => {})
+    if (config.mongo) {
+      deps.push('mongoose')
+      deps.push('fastify-mongoose-next')
+      fs.mkdir(path.join(config.path, 'models'), () => {})
+    }
     if (config.static) {
       // 需要处理静态资源文件, 新建 public 文件夹
       fs.mkdir(path.join(config.path, 'public'), () => {})
@@ -739,20 +759,27 @@ function initFastify(config: FastifyCreateConfig, deps: string[]) {
     if (config.view) {
       // 需要模板渲染引擎, 新建 views 文件夹
       fs.mkdir(path.join(config.path, 'views'), () => {})
-      deps.push('nunjucks point-of-view')
+      deps.push('nunjucks')
+      deps.push('point-of-view')
     }
     if (config.mysql) {
-      deps.push('mysql2 fastify-bookshelf')
+      deps.push('mysql2')
+      deps.push('fastify-knex-sql')
+    }
+    if (config.session) {
+      deps.push('fastify-cookie')
+      deps.push('fastify-auth-verify')
+      deps.push('fastify-pithy-session')
     }
 
     // 构建 config.js 和 config_demo.js
     fileUtils.write(
       path.join(config.path, 'config.js'),
-      `module.exports = {\r\n  port: 3000,\r\n  mysql: '${config.mysqlConn}',\r\n};`,
+      `module.exports = {\r\n  port: 3000,\r\n  mysql: '${config.mysqlConn}',\r\n  mongo: '${config.mongoConn}'\r\n};`,
     )
     fileUtils.write(
       path.join(config.path, 'config_demo.js'),
-      `module.exports = {\r\n  port: 3000,\r\n  mysql: '${config.demoMysqlConn}',\r\n};`,
+      `module.exports = {\r\n  port: 3000,\r\n  mysql: '${config.demoMysqlConn}',\r\n  mongo: '${config.demoMongoConn}'\r\n};`,
     )
     // 重新替换 .gitignore
     fs.readFile(path.join(config.path, '.gitignore'), 'utf-8', (err, gitignoreContent: string) => {
@@ -765,40 +792,17 @@ function initFastify(config: FastifyCreateConfig, deps: string[]) {
     fs.copyFile(path.join(TEMPLATE_PATH, 'nodemon.json'), path.join(config.path, 'nodemon.json'), () => {})
 
     // 写 server.js 内容
-    fs.readFile(path.join(TEMPLATE_PATH, 'fastify_server.txt'), 'utf-8', (err, serverContent: string) => {
-      if (err == null) {
-        serverContent = serverContent.replace(/@\{name\}/g, config.name)
-        let scs = serverContent.split('!-----!')
-        let writeContent = [scs[0]]
-        if (config.mysql) {
-          writeContent.push(scs[1])
-        }
-        if (config.static) {
-          writeContent.push(scs[2])
-        }
-        if (config.view) {
-          writeContent.push(scs[3])
-        }
-        writeContent.push(scs[4])
-        fileUtils.write(path.join(config.path, 'server.js'), writeContent.join(''))
-      }
-    })
-
-    // 修改 package.json 的 scripts
-    fileUtils.readJSON<{ scripts: object; workspaces?: object }>(path.join(config.path, 'package.json')).then((pkg) => {
-      pkg.scripts = {
-        test: 'mocha',
-        dev: 'nodemon server.js',
-      }
-      if (config.app) delete pkg.workspaces
-      fileUtils.write(path.join(config.path, 'package.json'), pkg)
-    })
-
-    if (config.app === false) {
-      // workspace 工程，删除 index.ts 和 LICENSE
-      fs.rm(path.join(config.path, 'LICENSE'), () => {})
-      fs.rm(path.join(config.path, 'index.ts'), () => {})
-    }
+    template(
+      path.join(TEMPLATE_PATH, 'fastify_server.txt'),
+      {
+        mysql: config.mysql,
+        mongo: config.mongo,
+        session: config.session,
+        static: config.static,
+        view: config.view,
+      },
+      path.join(config.path, 'server.js'),
+    )
 
     // 新建路由文件夹
     setTimeout(() => {
@@ -808,6 +812,9 @@ function initFastify(config: FastifyCreateConfig, deps: string[]) {
       fs.copyFile(path.join(TEMPLATE_PATH, '.mocharc.js'), path.join(config.path, '.mocharc.js'), () => {})
       fs.copyFile(path.join(TEMPLATE_PATH, 'helper.js'), path.join(config.path, 'test/helper.js'), () => {})
       fs.copyFile(path.join(TEMPLATE_PATH, 'api.test.js'), path.join(config.path, 'test/routes/api.test.js'), () => {})
+      if (config.mongo) {
+        fs.copyFile(path.join(TEMPLATE_PATH, 'mongo_models.js'), path.join(config.path, 'models/index.js'), () => {})
+      }
     }, 200)
 
     spinner.succeed('初始化fastify app 项目成功')
@@ -826,11 +833,13 @@ program
   .option('-d, --director <director>', '项目的目录地址，默认为：执行命令的目录')
   .action((name: string, config: FastifyConfig) => {
     let asw1: Answer1Intf
-    let asw2: Answer2Intf
+    let mysqlConfig: Answer2Intf // mysql 连接选项
+    let mongoConfig: Answer2Intf // mongo 连接选项
     let proPath = config.director || process.cwd()
-    let devs: string[] = ['mocha pino-smart nodemon']
+    let devs: string[] = ['mocha', 'pino-smart', 'nodemon']
     let deps: string[] = ['fastify']
     let isApp = true
+    let workspaceInfo: any
     enquirer
       .prompt([
         {
@@ -846,10 +855,22 @@ program
           message: '是否需要模板渲染引擎?',
         },
         {
+          name: 'mongo',
+          type: 'confirm',
+          initial: false,
+          message: '是否需要使用 mongoose 数据库？',
+        },
+        {
           name: 'mysql',
           type: 'confirm',
           initial: false,
-          message: '是否需要使用mysql数据库?',
+          message: '是否需要使用 mysql 数据库?',
+        },
+        {
+          name: 'session',
+          type: 'confirm',
+          initial: false,
+          message: '是否需要 session 并加入登录校验？',
         },
       ])
       .then((a: Answer1Intf) => {
@@ -884,16 +905,49 @@ program
       })
       .then((a2: Answer2Intf | number) => {
         if (a2 !== 0) {
-          asw2 = a2 as Answer2Intf
+          mysqlConfig = a2 as Answer2Intf
         }
-        return isWorkspace(proPath)
+        if (asw1.mongo) {
+          return enquirer.prompt([
+            {
+              header: '-----------------------',
+              name: 'host',
+              type: 'input',
+              message: '请输入mongodb数据库host:',
+            },
+            {
+              name: 'user',
+              type: 'input',
+              message: '请输入mongodb数据库user:',
+            },
+            {
+              name: 'password',
+              type: 'input',
+              message: '请输入mongodb数据库password:',
+            },
+            {
+              name: 'database',
+              type: 'input',
+              message: '请输入mongodb数据库database:',
+            },
+          ])
+        } else {
+          return Promise.resolve(0)
+        }
+      })
+      .then((a2: Answer2Intf | number) => {
+        if (a2 !== 0) {
+          mongoConfig = a2 as Answer2Intf
+        }
+        return isWorkspace(proPath) // 验证是否是 workspace 项目
       })
       .then((wsInfo: any) => {
+        workspaceInfo = wsInfo
         if (wsInfo.ws === 0) {
           console.log(colors.red('目录错误！'))
           return Promise.reject(new Error('director error'))
         } else if (wsInfo.ws === -1) {
-          // 新建独立的工程
+          // 非 workspace 项目，新建独立的工程
           proPath = path.join(proPath, name)
           fs.mkdir(proPath, () => {})
           return initProject(proPath, {
@@ -905,18 +959,12 @@ program
             tool: '',
           })
         } else {
+          // workspace 项目
           isApp = false
           // workspace
           proPath = path.join(proPath, 'packages', name)
           fs.mkdir(proPath, () => {})
-          return initWorkspace({
-            name,
-            isTs: false,
-            isNode: true,
-            path: proPath,
-            proPath: '',
-            repository: wsInfo.repository,
-          })
+          return Promise.resolve(0)
         }
       })
       .then(() =>
@@ -924,8 +972,18 @@ program
           {
             ...asw1,
             path: proPath,
-            mysqlConn: asw1.mysql ? `mysql://${asw2.user}:${asw2.password}@${asw2.host}:3306/${asw2.database}` : '',
-            demoMysqlConn: asw1.mysql ? `mysql://${asw2.user}:${asw2.password}@127.0.0.1:3306/${asw2.database}` : '',
+            mysqlConn: asw1.mysql
+              ? `mysql://${mysqlConfig.user}:${mysqlConfig.password}@${mysqlConfig.host}:3306/${mysqlConfig.database}`
+              : '',
+            demoMysqlConn: asw1.mysql
+              ? `mysql://${mysqlConfig.user}:${mysqlConfig.password}@127.0.0.1:3306/${mysqlConfig.database}`
+              : '',
+            mongoConn: asw1.mongo
+              ? ` mongodb://${mongoConfig.user}:${mongoConfig.password}@${mongoConfig.host}:27017/${mongoConfig.database}`
+              : '',
+            demoMongoConn: asw1.mongo
+              ? `mongodb://${mongoConfig.user}:${mongoConfig.password}@127.0.0.1:27017/${mongoConfig.database}`
+              : '',
             name,
             app: isApp,
           },
@@ -933,55 +991,34 @@ program
         ),
       )
       .then(() => {
-        if (isApp === true) {
-          return updateYarn(proPath)
-        } else {
-          return Promise.resolve(0)
-        }
+        spinner.start('检查依赖……')
+        return Promise.all([checkDependencies(deps), checkDependencies(devs)])
+      })
+      .then((a: any) => {
+        return template(
+          path.join(TEMPLATE_PATH, isApp ? 'project_package.mtl' : 'workspace_package.mtl'),
+          {
+            name,
+            projectRepository: workspaceInfo.repository,
+            author: workspaceInfo.author,
+            packages: a[1],
+            deps: a[0],
+            scripts: [
+              {
+                script: '"test": "mocha"',
+                start: true,
+              },
+              {
+                script: '"dev": "nodemon server.js"',
+                start: false,
+              },
+            ],
+          },
+          path.join(proPath, 'package.json'),
+        )
       })
       .then(() => {
-        spinner.start('安装开发依赖')
-        if (devs.length === 0) {
-          return Promise.resolve(0)
-        } else {
-          let cmd = isApp
-            ? `yarn add ${devs.join(' ')} --dev`
-            : `yarn workspace ${name} add ${devs.join(' ')} --dev --cached`
-          // 安装工作区依赖
-          return serverUtils.execPromise(cmd, {
-            cwd: proPath,
-            errorName: 'DevError',
-          })
-        }
-      })
-      .then(() => {
-        spinner.succeed('安装开发依赖成功')
-        spinner.start('安装工程依赖')
-        if (deps.length === 0) {
-          return Promise.resolve(0)
-        } else {
-          let cmd = isApp ? `yarn add ${deps.join(' ')}` : `yarn workspace ${name} add ${deps.join(' ')} --cached`
-          // 安装工作区依赖
-          return serverUtils.execPromise(cmd, {
-            cwd: proPath,
-            errorName: 'DepError',
-          })
-        }
-      })
-      .then(() => {
-        spinner.succeed('安装工程依赖成功')
-        spinner.start('添加开发工具支持')
-        if (isApp) {
-          return serverUtils.execPromise('yarn dlx @yarnpkg/pnpify --sdk vscode', {
-            cwd: proPath,
-            errorName: 'EditorSetupError',
-          })
-        } else {
-          return Promise.resolve(0)
-        }
-      })
-      .then(() => {
-        spinner.succeed('添加开发工具支持成功')
+        spinner.succeed('依赖检查成功')
         spinner.stop()
         console.log(colors.green('\r\n项目构建成功, 请按照以下步骤以次执行：\r\n'))
         const steps = []
@@ -992,6 +1029,7 @@ program
           )
         } else {
           steps.push(`  1. 完善 packages/${name} --> package.json 文件`)
+          steps.push(`  2. 安装项目依赖`)
         }
         console.log(colors.green(steps.join('\r\n')))
       })

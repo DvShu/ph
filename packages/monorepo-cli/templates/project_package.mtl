@@ -8,6 +8,11 @@
     "{{& name }}": "^{{ version }}"{{#start}},{{/start}}
     {{/packages}}
   },
+  "dependencies": {
+    {{#deps}}
+    "{{& name }}": "^{{ version }}"{{#start}},{{/start}}
+    {{/deps}}
+  },
   "author": "",
   "repository": {
     "type": "git",

@@ -22,12 +22,15 @@
   },
   "devDependencies": {
     "less": "^4.1.2",
+    "ph-utils": "workspace:^",
     "typescript": "^4.4.4",
     "vite": "^2.6.4"
   },
+  "peerDependencies": {
+    "ph-utils": "^0.0.12"
+  },
   "files": [
-    "index.js",
-    "index.d.ts"
+    "reset.less"
   ],
   "keywords": [
     "nodejs",

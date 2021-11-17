@@ -20,20 +20,32 @@ const app = fastify({
   logger: logger,
   pluginTimeout: 10000,
 });
-!-----!
+{{#mysql}}
+
 // mysql数据库
-app.register(require('fastify-bookshelf'), {
-  connection: config.mysql,
-  models: ['User'],
+app.register(require('fastify-knex-sql'), {
+  connection: config.mysql
 });
-!-----!
+{{/mysql}}
+{{#mongo}}
+
+// mongoose
+app.register(require('fastify-mongoose-next'), {
+  url: config.mongo,
+  models: require('./models'),
+});
+{{/mongo}}
+{{#static}}
+
 // 注册静态资源服务
 app.register(require('fastify-static'), {
   root: path.join(__dirname, '/public'),
   prefixAvoidTrailingSlash: true,
   prefix: '/',
 });
-!-----!
+{{/static}}
+{{#view}}
+
 // 注册模板渲染引引擎
 app.register(require('point-of-view'), {
   engine: {
@@ -43,12 +55,28 @@ app.register(require('point-of-view'), {
   viewExt: 'html',
   includeViewExtension: true,
 });
-!-----!
+{{/view}}
+
 // 注册路由
 app.register(
   async (Server) => {
+    {{#session}}
+    Server.register(
+      async (ChildServer) => {
+        // 加入登录验证
+        ChildServer.register(require('fastify-auth-verify'), {
+          verify(session) {
+            return session.uid;
+          },
+          ignore: ['/api/login', '/api/system_monitor'],
+        });
+        ChildServer.register(require('./routes/api'));
+      },
+      { prefix: '/api' },
+    );
+    {{/session}}
+    {{^session}}Server.register(require('./routes/api'), { prefix: '/api' });{{/session}}
     Server.register(require('./routes/root'));
-    Server.register(require('./routes/api'), { prefix: '/api' });
   },
   { prefix: '/' }
 );

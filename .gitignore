@@ -14,3 +14,4 @@ yarn.lock
 /packages/terminal-spinner/index.d.ts
 /packages/monorepo-cli/index.d.ts
 /**/*.js
+.pnp.cjs

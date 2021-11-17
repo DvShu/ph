@@ -20,8 +20,16 @@
     "{{& name }}": "^{{ version }}"{{#start}},{{/start}}
     {{/packages}}
   },
+  "dependencies": {
+    {{#deps}}
+    "{{& name }}": "^{{ version }}"{{#start}},{{/start}}
+    {{/deps}}
+  },
   "scripts": {
-    "build": "tsc"
+    {{#scripts}}
+    {{& script }}{{#start}},{{/start}}
+    {{/scripts}}
+    {{^scripts}}"build": "tsc"{{/scripts}}
   },
   "files": ["index.js", "index.d.ts"],
   "keywords": ["nodejs", "ph"]
