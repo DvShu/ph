@@ -2,7 +2,7 @@ const fastify = require('fastify');
 const path = require('path');
 const config = require('./config');
 
-let logger = { name: '@{name}' };
+let logger = { name: '{{ name }}' };
 if (process.env.NODE_ENV === 'development') {
   // eslint-disable-next-line
   const stream = new (require('pino-smart/stream'))();
@@ -11,12 +11,12 @@ if (process.env.NODE_ENV === 'development') {
   stream.pipe(process.stdout);
 } else {
   logger.level = 'info';
-  logger.file = '/www/wwwlogs/@{name}.log';
+  logger.file = '/www/wwwlogs/{{ name }}.log';
 }
 
 // Instantiate Fastify with some config
 const app = fastify({
-  // 查看日志的方式 tail -f -n 200 @{name}.log | pino-pretty -c -t SYS:standard
+  // 查看日志的方式 tail -f -n 200 {{ name }}.log | pino-pretty -c -t SYS:standard
   logger: logger,
   pluginTimeout: 10000,
 });
