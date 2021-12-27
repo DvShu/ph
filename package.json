@@ -23,5 +23,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://gitee.com/towardly/ph.git"
-  }
+  },
+  "packageManager": "yarn@3.1.1"
 }

@@ -1,3 +1,5 @@
+import exp from 'constants'
+
 /**
  * web(浏览器端) DOM 文件操作
  * 现今不推荐在使用这种方式，现在开发前端的时候，推荐使用一些成熟的框架例如：React、Preact、Vue、Angular、Svelte、Ember、Knockout等
@@ -63,4 +65,63 @@ export function transform(element: HTMLElement, value: string) {
  */
 export function on(element: HTMLElement, listener: string, event: (e?: Event) => void, once = false) {
   element.addEventListener(listener, event, { once })
+}
+
+/**
+ * 设置或获取节点的 innerHTML 属性
+ * @param element
+ * @param htmlstr 可选，如果传递该参数，则表示设置；否则表示获取
+ * @returns
+ */
+export function html(element: HTMLElement, htmlstr?: string) {
+  if (htmlstr == null) {
+    return element.innerHTML
+  } else {
+    element.innerHTML = htmlstr
+    return undefined
+  }
+}
+
+/**
+ * 设置或获取节点的 textContent 属性
+ * @param element
+ * @param textstr 可选，如果传递该参数，则表示设置；否则表示获取
+ * @returns
+ */
+export function text(element: HTMLElement, textstr?: string) {
+  if (textstr == null) {
+    return element.textContent
+  } else {
+    element.textContent = textstr
+    return undefined
+  }
+}
+
+/**
+ * 节点列表遍历
+ * @param elems
+ * @param fn 遍历到节点时的回调，回调第一个参数为遍历到的节点，第2个参数为 index；如果回调函数返回 true，则会终止遍历(break)
+ */
+export function iterate(elems: NodeList, fn: (el: HTMLElement, index: number) => any) {
+  for (let i = 0, len = elems.length; i < len; i++) {
+    let r = fn(elems[i] as HTMLElement, i)
+    if (r === true) {
+      break
+    }
+  }
+}
+
+/**
+ * 设置或获取节点 data-* 属性
+ * @param elem
+ * @param key data- 后面跟随的值
+ * @param value 如果传递该值表示获取；否则表示设置
+ * @returns
+ */
+export function attr(elem: HTMLElement, key: string, value?: string) {
+  if (value != null) {
+    elem.setAttribute('data-' + key, value)
+  } else {
+    return elem.getAttribute('data-' + key)
+  }
 }
