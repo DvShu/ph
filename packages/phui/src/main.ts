@@ -1,12 +1,15 @@
-import '../style/reset.less'
+import '../style/reset.css'
 import './style.css'
+import { elem } from 'ph-utils/lib/dom'
 
 import InfoIcon from '../lib/Icon/InfoIcon'
 import WarnIcon from '../lib/Icon/WarnIcon'
 import SuccessIcon from '../lib/Icon/SuccessIcon'
 import ErrorIcon from '../lib/Icon/ErrorIcon'
-import SingleIcon from '../lib/Icon/SingleIcon'
 import LoadingIcon from '../lib/Icon/LoadingIcon'
+
+import SingleIcon from '../lib/Icon/SingleIcon'
+
 import Icon from '../lib/Icon'
 
 class MultiLoadingIcon extends Icon {
@@ -24,8 +27,4 @@ new LoadingIcon('#loading')
 new MultiLoadingIcon('#multi')
 new MultiLoadingIcon('#multi1', { fills: ['#5FB878', '#1E9FFF', '#FFB800', '#FF5722'] })
 
-let $icons = document.getElementsByClassName('icon')
-for (let i = 0, len = $icons.length; i < len; i++) {
-  let $icon = $icons[i]
-  new SingleIcon($icon, $icon.getAttribute('data-icon') as string, 'ph-icon-')
-}
+new SingleIcon(elem('.icon'))

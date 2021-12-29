@@ -1,4 +1,6 @@
-import './index.less'
+import './index.css'
+import { elem, iterate } from 'ph-utils/lib/dom'
+import { isBlank } from 'ph-utils/lib/index_m'
 
 /**
  * Icon 图标的配置
@@ -25,20 +27,20 @@ class Icon {
    * @param selectorsOrFills css选择器或者待渲染的颜色列表
    * @param fills 待渲染的颜色列表
    */
-  public constructor(el: string | Element, config?: IconConfig) {
+  public constructor(el: string | HTMLElement | NodeList | HTMLCollection, config?: IconConfig) {
     this._config = { fills: [], class: '', ...(config || {}) }
-    if (typeof el === 'string') {
-      if (el !== '') {
-        // 选择器
-        let $el = document.querySelectorAll(el)
-        if ($el != null) {
-          for (let i = 0, len = $el.length; i < len; i++) {
-            this.setIconProp($el[i])
-          }
-        }
-      }
-    } else if (el instanceof Element) {
-      this.setIconProp(el)
+    let dom: NodeList | null = null
+    if (typeof el === 'string' && el !== '') {
+      dom = elem(el)
+    } else if (el instanceof HTMLElement) {
+      dom = [el] as any
+    } else {
+      dom = el as NodeList
+    }
+    if (dom != null) {
+      iterate(dom, (eli) => {
+        this.setIconProp(eli)
+      })
     }
   }
 
@@ -83,7 +85,7 @@ class Icon {
         } else {
           let fillColor = this._config.fills[i]
           i++
-          return fillColor === '' ? match : `fill="${fillColor}"`
+          return isBlank(fillColor) ? match : `fill="${fillColor}"`
         }
       })
     }
