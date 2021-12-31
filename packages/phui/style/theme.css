@@ -1,0 +1,8 @@
+:root {
+  /* button、input 元素高度 */
+  --form-edit-height: 40px;
+  /* 主题颜色 */
+  --primary-color: #4998f4;
+  /* 错误的颜色 */
+  --error-color: #f56c6c;
+}

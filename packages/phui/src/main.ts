@@ -7,10 +7,10 @@ import WarnIcon from '../lib/Icon/WarnIcon'
 import SuccessIcon from '../lib/Icon/SuccessIcon'
 import ErrorIcon from '../lib/Icon/ErrorIcon'
 import LoadingIcon from '../lib/Icon/LoadingIcon'
-
 import SingleIcon from '../lib/Icon/SingleIcon'
-
 import Icon from '../lib/Icon'
+
+import Input from '../lib/Input'
 
 class MultiLoadingIcon extends Icon {
   protected _template() {
@@ -28,3 +28,21 @@ new MultiLoadingIcon('#multi')
 new MultiLoadingIcon('#multi1', { fills: ['#5FB878', '#1E9FFF', '#FFB800', '#FF5722'] })
 
 new SingleIcon(elem('.icon'))
+
+/* 输入框 */
+let nameInput = new Input('#nameIpt', {
+  htmlType: 'text',
+  name: 'username',
+  placeholder: '请输入姓名',
+  value: '张三',
+  rules: [
+    { reg: 'required', errmsg: '该字段必填' },
+    { reg: 'equals', equalsElem: '#pwd', errmsg: '两次输入不一致' },
+    { reg: /\d+/, errmsg: '请输入正确的值' },
+  ],
+})
+new Input('#nameIpt1', { placeholder: '请输入姓名' })
+console.log(nameInput.value)
+nameInput.value = '李四'
+console.log(nameInput.value)
+console.log(nameInput.nameValue())

@@ -1,0 +1,38 @@
+@import (less) '../../style/theme.css';
+
+// input 输入框
+.ph-input {
+  outline: none;
+  box-sizing: border-box;
+  height: var(--form-edit-height);
+  line-height: var(--form-edit-height);
+  border: 1px solid #dedede;
+  border-radius: 3px;
+  padding: 0 5px;
+  transition: border-color 0.3s;
+
+  &:focus {
+    border-color: var(--primary-color);
+  }
+}
+
+.ph-input_wrapper {
+  display: inline-block;
+  vertical-align: top;
+  width: 180px;
+  .ph-input {
+    width: 100%;
+  }
+  .ph-input-error-tip {
+    margin: 0;
+    padding: 0;
+    font-size: 10px;
+    color: var(--error-color);
+    padding: 2px 0 0 5px;
+  }
+}
+.ph-input-error {
+  .ph-input {
+    border-color: var(--error-color);
+  }
+}
