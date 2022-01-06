@@ -1,5 +1,6 @@
 import '../style/reset.css'
-import './style.css'
+import '../style/vars.css'
+
 import { elem } from 'ph-utils/lib/dom'
 
 import InfoIcon from '../lib/Icon/InfoIcon'
@@ -11,6 +12,10 @@ import SingleIcon from '../lib/Icon/SingleIcon'
 import Icon from '../lib/Icon'
 
 import Input from '../lib/Input'
+
+import Button from '../lib/Button'
+
+import './style.less'
 
 class MultiLoadingIcon extends Icon {
   protected _template() {
@@ -42,7 +47,25 @@ let nameInput = new Input('#nameIpt', {
   ],
 })
 new Input('#nameIpt1', { placeholder: '请输入姓名' })
-console.log(nameInput.value)
 nameInput.value = '李四'
-console.log(nameInput.value)
-console.log(nameInput.nameValue())
+
+/* 按钮 */
+new Button('#btn', { round: true })
+new Button('#primaryBtn', { type: 'primary' })
+new Button('#textBtn', { type: 'text' })
+new Button('#blockBtn', { block: true })
+new Button('#iconBtn', { icon: new InfoIcon('') })
+new Button('#iconsBtn', { icon: new SingleIcon('', { prefix: 'ph-icon-', icon: 'warn' }) })
+let loadingBtn = new Button('#loadingBtn')
+loadingBtn.on('click', () => {
+  console.log('start loading……')
+  loadingBtn.setLoading(true)
+  setTimeout(() => {
+    loadingBtn.setLoading(false)
+  }, 30000)
+})
+new Button('#customeBtn', { class: 'custome-btn' })
+new Button('#customeBtn1', { class: 'custome-btn1' })
+new Button('#customeBtn2', { class: 'custome-btn2' })
+new Button('#customeBtn3', { class: 'custome-btn3' })
+new Button('#iconCircleBtn', { circle: true, icon: new InfoIcon('') })

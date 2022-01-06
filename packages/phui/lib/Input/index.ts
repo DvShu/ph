@@ -1,4 +1,4 @@
-import './index.less'
+import './index.css'
 
 import { elem } from 'ph-utils/lib/dom'
 import { isBlank } from 'ph-utils/lib/index_m'
