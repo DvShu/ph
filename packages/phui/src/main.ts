@@ -3,18 +3,24 @@ import '../style/vars.css'
 
 import { elem } from 'ph-utils/lib/dom'
 
-import InfoIcon from '../lib/Icon/InfoIcon'
-import WarnIcon from '../lib/Icon/WarnIcon'
-import SuccessIcon from '../lib/Icon/SuccessIcon'
-import ErrorIcon from '../lib/Icon/ErrorIcon'
-import LoadingIcon from '../lib/Icon/LoadingIcon'
-import SingleIcon from '../lib/Icon/SingleIcon'
+import InfoIcon from '../lib/Icon/Info'
+import WarnIcon from '../lib/Icon/Warn'
+import SuccessIcon from '../lib/Icon/Success'
+import ErrorIcon from '../lib/Icon/Error'
+import LoadingIcon from '../lib/Icon/Loading'
+import ArrowDownIcon from '../lib/Icon/ArrowDown'
+import MenuIcon from '../lib/Icon/Menu'
+import ArrowUpIcon from '../lib/Icon/ArrowUp'
+import SingleIcon from '../lib/Icon/Single'
+import SearchIcon from '../lib/Icon/Search'
+import SettingIcon from '../lib/Icon/Setting'
 import Icon from '../lib/Icon'
 
 import Input from '../lib/Input'
 
 import Button from '../lib/Button'
 
+import '../style/layout.css'
 import './style.less'
 
 class MultiLoadingIcon extends Icon {
@@ -29,6 +35,11 @@ new WarnIcon('#warn')
 new SuccessIcon('#success')
 new ErrorIcon('#error')
 new LoadingIcon('#loading')
+new MenuIcon('#menu')
+new SettingIcon('#setting')
+new ArrowDownIcon('#arrowDown')
+new SearchIcon('#search')
+new ArrowUpIcon('#arrowUp')
 new MultiLoadingIcon('#multi')
 new MultiLoadingIcon('#multi1', { fills: ['#5FB878', '#1E9FFF', '#FFB800', '#FF5722'] })
 

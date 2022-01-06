@@ -1,5 +1,3 @@
-import exp from 'constants'
-
 /**
  * web(浏览器端) DOM 文件操作
  * 现今不推荐在使用这种方式，现在开发前端的时候，推荐使用一些成熟的框架例如：React、Preact、Vue、Angular、Svelte、Ember、Knockout等

@@ -1,7 +1,7 @@
 import { elem } from 'ph-utils/lib/dom'
 import { isBlank } from 'ph-utils/lib/index_m'
 import Icon from '../Icon'
-import LoadingIcon from '../Icon/LoadingIcon'
+import LoadingIcon from '../Icon/Loading'
 
 import './index.css'
 
