@@ -59,10 +59,41 @@ export function transform(element: HTMLElement, value: string) {
  * @param {HTMLElement} element   添加事件的节点
  * @param {string}      listener  事件名称
  * @param {function}    event     事件处理函数
- * @param {boolean}     once      是否是只运行一次的处理函数
+ * @param {boolean}     onceOrConfig  是否是只运行一次的处理函数或者配置，其中 eventFlag 为 string，如果配置该项，则表明为委托事件
  */
-export function on(element: HTMLElement, listener: string, event: (e?: Event) => void, once = false) {
-  element.addEventListener(listener, event, { once })
+export function on(
+  element: HTMLElement,
+  listener: string,
+  fn: (e: Event, target?: HTMLElement, flag?: string) => void,
+  once: boolean | { once?: boolean; eventFlag?: string } = false,
+) {
+  let eventExtra: any = {}
+  if (typeof once === 'boolean') {
+    eventExtra.once = true
+  } else {
+    eventExtra = once
+  }
+  if (eventExtra.eventFlag !== null) {
+    element.addEventListener(
+      listener,
+      (e: Event) => {
+        let target = e.target as HTMLElement
+        let flag = ''
+        do {
+          flag = target.getAttribute(eventExtra.eventFlag) || ''
+          if (flag === '') {
+            target = target.parentNode as HTMLElement
+          }
+        } while (flag === '')
+        if (flag !== '__stop__') {
+          fn(e, target, flag)
+        }
+      },
+      eventExtra,
+    )
+  } else {
+    element.addEventListener(listener, fn, eventExtra)
+  }
 }
 
 /**

@@ -5,7 +5,7 @@
   "module": "lib/index_m.js",
   "types": "lib/index.d.ts",
   "browser": "lib/index_m.js",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "repository": {
     "type": "git",
     "url": "git+https//gitee.com/towardly/ph.git",

@@ -15,10 +15,9 @@ import SingleIcon from '../lib/Icon/Single'
 import SearchIcon from '../lib/Icon/Search'
 import SettingIcon from '../lib/Icon/Setting'
 import Icon from '../lib/Icon'
-
 import Input from '../lib/Input'
-
 import Button from '../lib/Button'
+import Table from '../lib/Table'
 
 import '../style/layout.css'
 import './style.less'
@@ -80,3 +79,62 @@ new Button('#customeBtn1', { class: 'custome-btn1' })
 new Button('#customeBtn2', { class: 'custome-btn2' })
 new Button('#customeBtn3', { class: 'custome-btn3' })
 new Button('#iconCircleBtn', { circle: true, icon: new InfoIcon('') })
+
+/* 表格 */
+let table = new Table('#table', {
+  stripe: true,
+  cols: [
+    { title: '#', key: 'id', format: 'int' },
+    { title: '用户名', key: 'name' },
+    { title: '性别', key: 'sex' },
+    {
+      title: '年龄',
+      sort: true,
+      key: 'age',
+      format: (d, key) => {
+        let style = undefined
+        if ((d[key] as any) >= 30) {
+          style = 'color:red'
+        }
+        return {
+          style,
+          text: d[key],
+        }
+      },
+    },
+    { title: '城市', key: 'city' },
+    { title: '注册日期', key: 'time', format: 'datetime_yyyy-mm-dd' },
+    {
+      key: '-',
+      format: (d) => {
+        let id = d.id
+        return `<a phtable-event-flag="operate" data-operate="update" data-id="${id}">修改</a><a phtable-event-flag="operate" data-operate="del" data-id="${id}" style="margin-left:5px;">删除</a>`
+      },
+      title: '操作',
+    },
+  ],
+  defaultSort: { key: 'age', order: 'asc' },
+  sort: (key, order) => {
+    console.log(key + ' _ ' + order)
+  },
+  click: (_e: Event, target: HTMLElement, flag: string) => {
+    if (flag === 'operate') {
+      let operate = target.getAttribute('data-operate') || ''
+      let id = target.getAttribute('data-id') || ''
+      if (operate === 'update') {
+        // 点击了修改按钮
+        console.log('修改用户信息: ' + id)
+      } else if (operate === 'del') {
+        // 点击了删除按钮
+        console.log('删除用户数据: ' + id)
+      }
+    }
+  },
+})
+
+table.changeData([
+  { id: 1, name: '张三', sex: '男', age: 28, city: '中国', time: Date.now() },
+  { id: 1, name: '张三', sex: '男', age: 28, city: '中国', time: Date.now() },
+  { id: 1, name: '张三', sex: '男', age: 30, city: '中国', time: Date.now() },
+  { id: 1, name: '张三', sex: '男', age: 30, city: '中国', time: Date.now() },
+])

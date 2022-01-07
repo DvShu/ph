@@ -1,0 +1,65 @@
+/* table 表格 */
+.ph-table {
+  width: 100%;
+  background-color: #fff;
+  color: #666;
+  font-size: 14px;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+.ph-table td,
+.ph-table th {
+  padding: 10px 5px;
+  border-bottom: 1px solid #e6e6e6;
+}
+.ph-table .caret-wrapper {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  vertical-align: middle;
+  height: 14px;
+  width: 20px;
+  position: relative;
+}
+.ph-table .caret-wrapper .ascending {
+  border-bottom-color: #c0c4cc;
+  top: -5px;
+}
+.ph-table .caret-wrapper .descending {
+  border-top-color: #c0c4cc;
+  bottom: -3px;
+}
+.ph-table .sort-caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+  position: absolute;
+}
+.ph-table .sort-column {
+  cursor: pointer;
+}
+.ph-table .sort-asc .ascending {
+  border-bottom-color: #4998f4;
+}
+.ph-table .sort-desc .descending {
+  border-top-color: #4998f4;
+}
+.ph-table th {
+  text-align: left;
+}
+.ph-table thead tr {
+  background-color: #f2f2f2;
+}
+.ph-table tbody tr {
+  transition: all 0.25s ease-out;
+}
+.ph-table tbody tr:hover {
+  background-color: #f2f2f2;
+}
+.ph-table-stripe tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+.ph-table-stripe tbody tr:nth-child(even):hover {
+  background-color: #f2f2f2;
+}
