@@ -81,6 +81,13 @@ new Button('#customeBtn3', { class: 'custome-btn3' })
 new Button('#iconCircleBtn', { circle: true, icon: new InfoIcon('') })
 
 /* 表格 */
+let tableData = [
+  { id: 1, name: '张三', sex: '男', age: 28, city: '中国', time: Date.now(), score: 12.12 },
+  { id: 2, name: '张三', sex: '男', age: 29, city: '中国', time: Date.now(), score: 12.12 },
+  { id: 3, name: '张三', sex: '男', age: 30, city: '中国', time: 1641804765, score: 12.12 },
+  { id: 4, name: '张三', sex: '男', age: 31, city: '中国', time: Date.now(), score: 12.12 },
+]
+// 创建数据表格
 let table = new Table('#table', {
   stripe: true,
   cols: [
@@ -132,9 +139,5 @@ let table = new Table('#table', {
   },
 })
 
-table.changeData([
-  { id: 1, name: '张三', sex: '男', age: 28, city: '中国', time: Date.now() },
-  { id: 1, name: '张三', sex: '男', age: 28, city: '中国', time: Date.now() },
-  { id: 1, name: '张三', sex: '男', age: 30, city: '中国', time: Date.now() },
-  { id: 1, name: '张三', sex: '男', age: 30, city: '中国', time: Date.now() },
-])
+// 更改数据表格数据，一般用于在翻页改变查询出数据后调用该参数
+table.changeData(tableData)

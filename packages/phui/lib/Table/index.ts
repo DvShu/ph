@@ -83,9 +83,18 @@ class Table {
             if (this.sortKey === sortKey) {
               sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc'
             }
+            // 原来的排序的节点移除排序设置
+            let sortElem = elem(`th[phtable-col-key="${this.sortKey}"]`, this._el.tHead as HTMLHeadElement)[0]
+            sortElem.classList.remove('sort-asc', 'sort-desc')
             this.sortKey = sortKey
             this.sortOrder = sortOrder
-            this._config.sort(sortKey, sortOrder)
+            // 新的排序的节点
+            sortElem = elem(`th[phtable-col-key="${this.sortKey}"]`, this._el.tHead as HTMLHeadElement)[0]
+            sortElem.classList.add(sortOrder === 'asc' ? 'sort-asc' : 'sort-desc')
+            let sortData = this._config.sort(sortKey, sortOrder)
+            if (sortData != null) {
+              this.changeData(sortData)
+            }
           } else {
             if (this._config.click != null && typeof this._config.click === 'function') {
               this._config.click(e, target, flag || '')
@@ -153,6 +162,7 @@ class Table {
     this._el.className = [...clazz].join(' ').trim()
     this._el.setAttribute('phtable-event-flag', '__stop__')
     if (this._config.createHead != null && typeof this._config.createHead === 'function') {
+      this._el.innerHTML = '<thead></thead><tbody></tbody>'
       this._config.createHead(this._el)
     } else if (this._config.cols != null && this._config.cols.length > 0) {
       let $thead = ['<thead><tr>']

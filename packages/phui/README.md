@@ -11,6 +11,8 @@
 3. [input 输入框](https://gitee.com/towardly/ph/wikis/phui/input%20%E8%BE%93%E5%85%A5%E6%A1%86?sort_id=5046728)
 4. [css 全局变量](https://gitee.com/towardly/ph/wikis/phui/css%20%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F)
 5. [button 按钮](https://gitee.com/towardly/ph/wikis/phui/button%20%E6%8C%89%E9%92%AE)
+6. [container 容器布局](https://gitee.com/towardly/ph/wikis/phui/container%20%E5%AE%B9%E5%99%A8%E5%B8%83%E5%B1%80)
+7. [table 表格](https://gitee.com/towardly/ph/wikis/phui/table%20%E8%A1%A8%E6%A0%BC?sort_id=5079507)
 
 ## 使用
 
