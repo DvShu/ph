@@ -18,6 +18,7 @@ import Icon from '../lib/Icon'
 import Input from '../lib/Input'
 import Button from '../lib/Button'
 import Table from '../lib/Table'
+import Tabbar from '../lib/Tabbar'
 
 import '../style/layout.css'
 import './style.less'
@@ -37,9 +38,9 @@ new LoadingIcon('#loading')
 new MenuIcon('#menu')
 new SettingIcon('#setting')
 new ArrowDownIcon('#arrowDown')
-new SearchIcon('#search')
+let searchIcon = new SearchIcon('#search')
 new ArrowUpIcon('#arrowUp')
-new MultiLoadingIcon('#multi')
+let multiIcon = new MultiLoadingIcon('#multi')
 new MultiLoadingIcon('#multi1', { fills: ['#5FB878', '#1E9FFF', '#FFB800', '#FF5722'] })
 
 new SingleIcon(elem('.icon'))
@@ -141,3 +142,29 @@ let table = new Table('#table', {
 
 // 更改数据表格数据，一般用于在翻页改变查询出数据后调用该参数
 table.changeData(tableData)
+
+/* 选项卡 */
+let tabbar = new Tabbar('#tabbar', {
+  tabs: [
+    { name: 'Home', text: '首页', icon: searchIcon },
+    { name: 'ShoppingCart', text: '购物车', icon: multiIcon },
+    { name: 'Order', text: '订单', icon: new SingleIcon('', { prefix: 'ph-icon-', icon: 'warn' }) },
+    { name: 'Personal', text: '个人中心', icon: { prefix: 'ph-icon-', name: 'success' } },
+  ],
+})
+tabbar.change((name) => {
+  console.log(name)
+})
+
+let tabbar2 = new Tabbar('#tabbar2', {
+  type: 'buttons',
+  tabs: [
+    { name: 'Home', text: '首页' },
+    { name: 'ShoppingCart', text: '购物车' },
+    { name: 'Order', text: '订单' },
+    { name: 'Personal', text: '个人中心' },
+  ],
+})
+tabbar2.change((name) => {
+  console.log(name)
+})

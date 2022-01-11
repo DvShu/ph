@@ -74,6 +74,7 @@ export function on(
     eventExtra = once
   }
   if (eventExtra.eventFlag !== null) {
+    element.setAttribute(eventExtra.eventFlag, '__stop__')
     element.addEventListener(
       listener,
       (e: Event) => {
