@@ -19,6 +19,7 @@ import Input from '../lib/Input'
 import Button from '../lib/Button'
 import Table from '../lib/Table'
 import Tabbar from '../lib/Tabbar'
+import Switch from '../lib/Switch'
 
 import '../style/layout.css'
 import './style.less'
@@ -168,3 +169,6 @@ let tabbar2 = new Tabbar('#tabbar2', {
 tabbar2.change((name) => {
   console.log(name)
 })
+
+/* 开关 */
+let swt = new Switch('#switch')

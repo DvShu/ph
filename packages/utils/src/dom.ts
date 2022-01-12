@@ -69,11 +69,11 @@ export function on(
 ) {
   let eventExtra: any = {}
   if (typeof once === 'boolean') {
-    eventExtra.once = true
+    eventExtra.once = once
   } else {
     eventExtra = once
   }
-  if (eventExtra.eventFlag !== null) {
+  if (eventExtra.eventFlag != null) {
     element.setAttribute(eventExtra.eventFlag, '__stop__')
     element.addEventListener(
       listener,

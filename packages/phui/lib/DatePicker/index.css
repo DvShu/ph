@@ -1,0 +1,14 @@
+.ph-date-picker {
+  outline: none;
+  width: 130px;
+  border: 1px solid #dedede;
+  background-color: transparent;
+  padding: 5px;
+  border-radius: 3px;
+  color: #666666;
+  font-size: 14px;
+  transition: border-color 0.25s;
+}
+.ph-date-picker:focus {
+  border-color: var(--ph-primary-color);
+}
