@@ -1,5 +1,6 @@
 import './index.css'
 import { elem, on } from 'ph-utils/lib/dom'
+import { queryElem } from '../utils'
 
 interface SwitchConfig {
   /** 开关尺寸，默认：30 */
@@ -14,16 +15,7 @@ class Switch {
   private _val: boolean
 
   public constructor(el: string | HTMLElement, config?: SwitchConfig) {
-    if (typeof el === 'string') {
-      let els = elem(el)
-      if (els.length > 0) {
-        this._el = els[0]
-      } else {
-        this._el = document.createElement('div')
-      }
-    } else {
-      this._el = el
-    }
+    this._el = queryElem(el)
     this._config = { ...(config || {}) }
     this._val = false
     this._render()

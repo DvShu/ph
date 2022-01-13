@@ -4,29 +4,35 @@ import { elem, on } from 'ph-utils/lib/dom'
 class DatePicker {
   private _el: HTMLInputElement
   private _value: string
-  private _min: string
-  private _max: string
+  private _defaultValue: string
   private _change: (value: string) => void
-  public constructor(el: string | HTMLInputElement, value?: string, min?: string, max?: string) {
+  public constructor(el: string | HTMLInputElement, defaultValue?: string, min?: string, max?: string) {
     this._el = (typeof el === 'string' ? elem(el)[0] : el) as HTMLInputElement
-    if (value != null) {
-      this._value = value
-      this._el.value = value
+    this._value = ''
+    this._defaultValue = ''
+    if (defaultValue != null) {
+      this._value = defaultValue
+      this._defaultValue = defaultValue
+      this._el.value = defaultValue
     }
     if (min != null) {
-      this._min = min
       this._el.setAttribute('min', min)
     }
     if (max != null) {
-      this._max = max
       this._el.setAttribute('max', max)
     }
     this._change = () => {}
     this._render()
     on(this._el, 'change', (e) => {
       let $target: HTMLInputElement = e.target as any
-      this._value = $target.value
-      this._change($target.value)
+      let value = $target.value
+      if (value === '' && this._defaultValue !== '') {
+        this._value = this._defaultValue
+        this._el.value = this._value
+      } else {
+        this._value = $target.value
+      }
+      this._change(this._value)
     })
   }
 

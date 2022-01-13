@@ -20,9 +20,12 @@ import Button from '../lib/Button'
 import Table from '../lib/Table'
 import Tabbar from '../lib/Tabbar'
 import Switch from '../lib/Switch'
+import DatePicker from '../lib/DatePicker'
+import Modal from '../lib/Modal'
 
 import '../style/layout.css'
 import './style.less'
+import '../style/layer.css'
 
 class MultiLoadingIcon extends Icon {
   protected _template() {
@@ -172,3 +175,15 @@ tabbar2.change((name) => {
 
 /* 开关 */
 let swt = new Switch('#switch')
+
+/** 日期选择 */
+let datepicker = new DatePicker('#datePicker', '2022-01-13', '2022-01-12', '2022-01-13')
+datepicker.change((v) => {
+  console.log(v)
+})
+
+/** 模态框 */
+new Modal({
+  title: '标题',
+  content: '提示内容',
+})

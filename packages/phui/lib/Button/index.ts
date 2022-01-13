@@ -1,7 +1,7 @@
-import { elem } from 'ph-utils/lib/dom'
 import { isBlank } from 'ph-utils/lib/index_m'
 import Icon from '../Icon'
 import LoadingIcon from '../Icon/Loading'
+import { queryElem } from '../utils'
 
 import './index.css'
 
@@ -23,6 +23,7 @@ interface ButtonConfig {
   text?: string
   /** 添加按钮样式 */
   class?: string
+  attrs?: { [index: string]: string }
 }
 
 /**
@@ -40,11 +41,7 @@ class Button {
    * @param config 按钮配置项
    */
   public constructor(el: HTMLButtonElement | string, config?: ButtonConfig) {
-    let sel = el as HTMLButtonElement
-    if (typeof el === 'string') {
-      sel = elem(el)[0] as HTMLButtonElement
-    }
-    this._el = sel
+    this._el = queryElem(el, 'button') as HTMLButtonElement
     this._config = { round: false, circle: false, block: false, ...(config || {}) }
     let _text = this._config.text == null ? this._el.innerHTML : this._config.text
     this._config.text = isBlank(_text) ? '' : `<span>${_text}</span>`
@@ -82,6 +79,14 @@ class Button {
     })
   }
 
+  public html() {
+    return this._el.outerHTML
+  }
+
+  public toString() {
+    return this._el.outerHTML
+  }
+
   private _initText() {
     let _text = this._config.text || ''
     if (this._config.icon != null) {
@@ -110,6 +115,12 @@ class Button {
     clazz.push(this._el.className)
     this._el.className = clazz.join(' ').trim()
     this._initText()
+    if (this._config.attrs != null) {
+      // eslint-disable-next-line
+      for (let key in this._config.attrs) {
+        this._el.setAttribute(key, this._config.attrs[key])
+      }
+    }
   }
 }
 

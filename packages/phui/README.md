@@ -13,6 +13,8 @@
 5. [button 按钮](https://gitee.com/towardly/ph/wikis/phui/button%20%E6%8C%89%E9%92%AE)
 6. [container 容器布局](https://gitee.com/towardly/ph/wikis/phui/container%20%E5%AE%B9%E5%99%A8%E5%B8%83%E5%B1%80)
 7. [table 表格](https://gitee.com/towardly/ph/wikis/phui/table%20%E8%A1%A8%E6%A0%BC?sort_id=5079507)
+8. [Switch 开关按钮](https://gitee.com/towardly/ph/wikis/phui/switch%20%E5%BC%80%E5%85%B3)
+9. [DatePicker 日期选择](https://gitee.com/towardly/ph/wikis/phui/DatePicker%20%E6%97%A5%E6%9C%9F%E9%80%89%E6%8B%A9%E5%99%A8)
 
 ## 使用
 
