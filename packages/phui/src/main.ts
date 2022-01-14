@@ -183,7 +183,15 @@ datepicker.change((v) => {
 })
 
 /** 模态框 */
-new Modal({
-  title: '标题',
-  content: '提示内容',
+let openModalBtn = new Button('#openModalBtn')
+openModalBtn.on('click', () => {
+  let modal = new Modal({
+    title: '提示',
+    content: '确认要退出系统吗？',
+    closeBtn: 1,
+  })
+  modal.event((key: string) => {})
+  modal.beforeClose(() => {
+    return false
+  })
 })

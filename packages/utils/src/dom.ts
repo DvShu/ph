@@ -65,9 +65,9 @@ export function on(
   element: HTMLElement,
   listener: string,
   fn: (e: Event, target?: HTMLElement, flag?: string) => void,
-  once: boolean | { once?: boolean; eventFlag?: string } = false,
+  once: boolean | { once?: boolean; eventFlag?: string; eventStop?: boolean } = false,
 ) {
-  let eventExtra: any = {}
+  let eventExtra: any = { eventStop: false }
   if (typeof once === 'boolean') {
     eventExtra.once = once
   } else {
@@ -86,7 +86,7 @@ export function on(
             target = target.parentNode as HTMLElement
           }
         } while (flag === '')
-        if (flag !== '__stop__') {
+        if (flag !== '__stop__' || eventExtra.eventStop) {
           fn(e, target, flag)
         }
       },

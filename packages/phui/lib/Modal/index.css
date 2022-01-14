@@ -1,4 +1,4 @@
-.ph-overhidden {
+.ph-lock-scroll {
   overflow: hidden;
 }
 .ph-shade,
@@ -22,6 +22,22 @@
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
   -webkit-animation-duration: 0.2s;
   animation-duration: 0.2s;
+  position: relative;
+}
+.ph-modal .modal-close-btn1 {
+  position: absolute;
+  right: 5px;
+  width: auto;
+  height: auto;
+  top: 6px;
+  padding: 5px;
+  border: none;
+}
+.ph-modal .modal-close-btn2 {
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  top: -12px;
 }
 .ph-modal .ph-modal-header {
   padding: 10px;
@@ -44,18 +60,10 @@
 }
 .ph-modal .modal-close-btn {
   font-size: 16px;
-  transition: color 0.3s ease-in-out;
-  cursor: pointer;
-  color: #666;
-}
-.ph-modal .modal-close-btn:hover {
-  color: #4998f4;
-}
-.ph-modal .modal-close-btn:active {
-  color: #197df1;
+  position: absolute;
 }
 .ph-modal .ph-modal-container {
-  padding: 10px;
+  padding: 15px 10px;
   font-size: 14px;
 }
 /* 弹出动画 */
@@ -93,4 +101,56 @@
   .ph-modal .ph-modal-main {
     width: 80%;
   }
+}
+
+@keyframes loading {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes loading-text {
+  from {
+    background-size: 0 0;
+  }
+  to {
+    background-size: 100% 100%;
+  }
+}
+
+/* 加载层 */
+.ph-modal1 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.ph-modal1 .modal-loading-icon {
+  font-size: 50px;
+  animation: loading 2s linear infinite;
+}
+.ph-modal1 .ph-modal-main {
+  width: auto;
+  display: inline-block;
+  margin: auto;
+  animation-fill-mode: none;
+  background-color: transparent;
+  box-shadow: none;
+}
+.ph-modal1 .modal-loading-container {
+  text-align: center;
+  color: #4998f4;
+  background-color: transparent;
+}
+.ph-modal1 .modal-loading-text {
+  margin: 0;
+  font-size: 16px;
+  background-clip: text;
+  -webkit-background-clip: text;
+  background-image: linear-gradient(90deg, #4998f4, #578aef);
+  -webkit-text-fill-color: transparent;
+  color: #578aef;
+  animation: loading-text 5s linear infinite;
+  margin-top: 10px;
 }
