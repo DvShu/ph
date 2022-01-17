@@ -22,6 +22,7 @@ import Tabbar from '../lib/Tabbar'
 import Switch from '../lib/Switch'
 import DatePicker from '../lib/DatePicker'
 import Modal from '../lib/Modal'
+import '../lib/Message'
 
 import '../style/layout.css'
 import './style.less'
@@ -174,7 +175,7 @@ tabbar2.change((name) => {
 })
 
 /* 开关 */
-let swt = new Switch('#switch')
+new Switch('#switch')
 
 /** 日期选择 */
 let datepicker = new DatePicker('#datePicker', '2022-01-13', '2022-01-12', '2022-01-13')
@@ -190,8 +191,18 @@ openModalBtn.on('click', () => {
     content: '确认要退出系统吗？',
     closeBtn: 1,
   })
-  modal.event((key: string) => {})
+  modal.event((_key: string) => {})
   modal.beforeClose(() => {
     return false
+  })
+})
+
+/** Message 消息提示 */
+let OpenMessageBtn = new Button('#openMessage')
+OpenMessageBtn.on('click', () => {
+  $message({
+    message: '提示信息',
+    type: 'success',
+    duration: 5000,
   })
 })

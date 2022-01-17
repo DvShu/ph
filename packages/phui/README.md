@@ -16,6 +16,7 @@
 8. [Switch 开关按钮](https://gitee.com/towardly/ph/wikis/phui/switch%20%E5%BC%80%E5%85%B3)
 9. [DatePicker 日期选择](https://gitee.com/towardly/ph/wikis/phui/DatePicker%20%E6%97%A5%E6%9C%9F%E9%80%89%E6%8B%A9%E5%99%A8)
 10. [Modal 模态框](https://gitee.com/towardly/ph/wikis/phui/Modal%20%E6%A8%A1%E6%80%81%E6%A1%86)
+11. [Message 消息提示](https://gitee.com/towardly/ph/wikis/phui/Message%20%E6%B6%88%E6%81%AF%E6%8F%90%E7%A4%BA)
 
 ## 使用
 
