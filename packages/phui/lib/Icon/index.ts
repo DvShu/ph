@@ -23,6 +23,7 @@ type InnerConfig = Required<IconConfig>
  */
 class Icon {
   protected config: InnerConfig
+  protected dom: NodeList
 
   /**
    * 如果 第一个 参数为 string 类型，则表示 css 选择器，这个时候第二个参数就是待替换的颜色列表
@@ -33,14 +34,22 @@ class Icon {
    */
   public constructor(el: string | HTMLElement | NodeList | HTMLCollection, config?: IconConfig) {
     this.config = { fills: [], class: '', prefix: '', icon: '', ...(config || {}) }
-    let dom: NodeList | null = null
-    if (typeof el === 'string' && el !== '') {
-      dom = elem(el)
+    let dom: NodeList | null
+    if (typeof el === 'string') {
+      if (!isBlank(el)) {
+        dom = elem(el)
+      } else {
+        dom = null
+      }
+      if (dom == null) {
+        dom = [document.createElement('svg')] as any
+      }
     } else if (el instanceof HTMLElement) {
       dom = [el] as any
     } else {
       dom = el as NodeList
     }
+    this.dom = dom as NodeList
     if (dom != null) {
       iterate(dom, (iel) => {
         let nicon = this.config.icon || iel.getAttribute('ph-icon-icon') || ''
@@ -51,15 +60,11 @@ class Icon {
   }
 
   public toString() {
-    if (isBlank(this.config.icon)) {
-      return (
-        `<svg class="ph-icon ${this.config.class}" viewBox="0 0 1024 1024" aria-hidden="true">` +
-        this.render() +
-        '</svg>'
-      )
-    } else {
-      return `<svg aria-hidden="true" class="ph-icon ${this.config.class}">${this.render()}</svg>`
-    }
+    return (this.dom[0] as HTMLElement).outerHTML
+  }
+
+  public node() {
+    return this.dom[0] as HTMLElement
   }
 
   /**

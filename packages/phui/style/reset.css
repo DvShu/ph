@@ -33,7 +33,6 @@ a {
 }
 a:hover {
   color: #2d68dd; /* less tint(#1657d9, 10%) */
-  text-decoration: underline;
 }
 a:active {
   color: #3970df; /* less tint(#1657d9, 15%) */

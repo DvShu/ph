@@ -23,6 +23,8 @@ interface ButtonConfig {
   text?: string
   /** 添加按钮样式 */
   class?: string
+  /** 如果节点不存在，渲染的节点名称, button, a */
+  tag?: string
   attrs?: { [index: string]: string }
 }
 
@@ -41,8 +43,8 @@ class Button {
    * @param config 按钮配置项
    */
   public constructor(el: HTMLButtonElement | string, config?: ButtonConfig) {
-    this._el = queryElem(el, 'button') as HTMLButtonElement
-    this._config = { round: false, circle: false, block: false, ...(config || {}) }
+    this._config = { round: false, circle: false, block: false, tag: 'button', ...(config || {}) }
+    this._el = queryElem(el, this._config.tag) as HTMLButtonElement
     let _text = this._config.text == null ? this._el.innerHTML : this._config.text
     this._config.text = isBlank(_text) ? '' : `<span>${_text}</span>`
     this._loading = false
@@ -83,8 +85,24 @@ class Button {
     return this._el.outerHTML
   }
 
+  public addInnerHTML(htmlstr: string) {
+    this._el.innerHTML += htmlstr
+  }
+
   public toString() {
     return this._el.outerHTML
+  }
+
+  public node() {
+    return this._el
+  }
+
+  public get disabled() {
+    return this._el.disabled
+  }
+
+  public set disabled(disabeld: boolean) {
+    this._el.disabled = disabeld
   }
 
   private _initText() {
@@ -118,6 +136,15 @@ class Button {
     if (this._config.attrs != null) {
       // eslint-disable-next-line
       for (let key in this._config.attrs) {
+        let keyValue = this._config.attrs[key]
+        if (key === 'disabled') {
+          // 设置按钮的禁用/启用状态
+          if (isBlank(keyValue) || keyValue === '0' || keyValue === 'false' || keyValue === 'none') {
+            this._el.disabled = false
+          } else {
+            this._el.disabled = true
+          }
+        }
         this._el.setAttribute(key, this._config.attrs[key])
       }
     }

@@ -14,6 +14,11 @@ import ArrowUpIcon from '../lib/Icon/ArrowUp'
 import SingleIcon from '../lib/Icon/Single'
 import SearchIcon from '../lib/Icon/Search'
 import SettingIcon from '../lib/Icon/Setting'
+import ArrowLeftIcon from '../lib/Icon/ArrowLeft'
+import ArrowRightIcon from '../lib/Icon/ArrowRight'
+import DoubleArrowLeftIcon from '../lib/Icon/DoubleArrowLeft'
+import DoubleArrowRightIcon from '../lib/Icon/DoubleArrowRight'
+import MoreFilledIcon from '../lib/Icon/MoreFilled'
 import Icon from '../lib/Icon'
 import Input from '../lib/Input'
 import Button from '../lib/Button'
@@ -23,6 +28,7 @@ import Switch from '../lib/Switch'
 import DatePicker from '../lib/DatePicker'
 import Modal from '../lib/Modal'
 import '../lib/Message'
+import Pagination from '../lib/Pagination'
 
 import '../style/layout.css'
 import './style.less'
@@ -43,6 +49,11 @@ new LoadingIcon('#loading')
 new MenuIcon('#menu')
 new SettingIcon('#setting')
 new ArrowDownIcon('#arrowDown')
+new ArrowLeftIcon('#arrowLeft')
+new ArrowRightIcon('#arrowRight')
+new DoubleArrowLeftIcon('#arrowDoubleLeft')
+new DoubleArrowRightIcon('#arrowDoubleRight')
+new MoreFilledIcon('#moreFilled')
 let searchIcon = new SearchIcon('#search')
 new ArrowUpIcon('#arrowUp')
 let multiIcon = new MultiLoadingIcon('#multi')
@@ -192,9 +203,6 @@ openModalBtn.on('click', () => {
     closeBtn: 1,
   })
   modal.event((_key: string) => {})
-  modal.beforeClose(() => {
-    return false
-  })
 })
 
 /** Message 消息提示 */
@@ -205,4 +213,18 @@ OpenMessageBtn.on('click', () => {
     type: 'success',
     duration: 5000,
   })
+})
+
+/** 分页 */
+let page = new Pagination('#pagination', { total: 100, current: 7, simple: true })
+page.currentChange((current) => {
+  // 异步请求数据，请求成功后设置当前页码
+  setTimeout(() => {
+    page.current = current
+  }, 500)
+})
+page.sizeChange((_size) => {
+  setTimeout(() => {
+    page.current = 1
+  }, 500)
 })

@@ -1,0 +1,39 @@
+.ph-pagination .ph-btn {
+  padding: 0 11px;
+  vertical-align: middle;
+}
+.ph-pagination .ph-pagination-icon,
+.ph-pagination .ph-pagination-more-area {
+  padding: 0 8px;
+}
+.ph-pagination .ph-pagination-more-area:hover .ph-pagination-more {
+  display: none;
+}
+.ph-pagination .ph-pagination-more-area:hover .ph-pagination-more-arrow {
+  display: inline-block;
+}
+/** 初始的时候隐藏, 并且不占位置 */
+.ph-pagination .ph-pagination-more-arrow {
+  display: none;
+}
+.ph-pagination .ph-btn:not(:first-child) {
+  margin-left: 5px;
+}
+.ph-pagination .ph-pagination-curr {
+  border-color: #4998f4;
+  color: #4998f4;
+}
+.ph-pagination .ph-pagination-sizes {
+  margin-left: 5px;
+}
+.ph-pagination .ph-pagination-simple-pager {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 15px;
+  margin-right: 10px;
+  align-items: center;
+  font-size: 14px;
+}
+.ph-pagination .ph-pagination-curr-edit {
+  width: 50px;
+}
