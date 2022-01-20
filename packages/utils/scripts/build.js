@@ -66,7 +66,7 @@ const mjsOption = {
 }
 
 // 进行过修改的文件，只编译修改过的文件
-const updatedFiles = ['dom'] // ['date', 'dom', 'file', 'index', 'server', 'web']
+const updatedFiles = ['validator'] // ['date', 'dom', 'file', 'index', 'server', 'web', 'validator']
 
 const nodes = []
 const web = []
@@ -77,7 +77,7 @@ updatedFiles.forEach((f) => {
   if (f === 'server' || f === 'file') {
     // 编译 node 端
     nodes.push(name)
-  } else if (f === 'index' || f === 'date') {
+  } else if (f === 'index' || f === 'date' || f === 'validator') {
     // 编译 cjs 和 mjs
     mjs.push(name)
     nodes.push(name)
