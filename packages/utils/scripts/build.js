@@ -77,11 +77,11 @@ updatedFiles.forEach((f) => {
   if (f === 'server' || f === 'file') {
     // 编译 node 端
     nodes.push(name)
-  } else if (f === 'index' || f === 'date' || f === 'validator') {
+  } else if (f === 'index' || f === 'date') {
     // 编译 cjs 和 mjs
     mjs.push(name)
     nodes.push(name)
-  } else if (f === 'dom' || f === 'web') {
+  } else if (f === 'dom' || f === 'web' || f === 'validator') {
     // 编译 web 端
     web.push(name)
   }
