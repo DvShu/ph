@@ -1,4 +1,4 @@
-export function queryElem(el: string | HTMLElement, tagName?: string) {
+export function queryElem(el: string | HTMLElement, tagName = 'div') {
   let qel: HTMLElement
   if (typeof el === 'string') {
     if (el.trim() === '') {

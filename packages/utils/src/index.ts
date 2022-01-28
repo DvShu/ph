@@ -7,7 +7,7 @@
  * @param str               待验证的字符串
  * @param ignoreWhitespace  是否忽略空格(包括空白字符串以及[\r\t\n]之类的制表符)，默认为true
  */
-export function isBlank(str?: string, ignoreWhitespace = true) {
+export function isBlank(str?: string | null, ignoreWhitespace = true) {
   if (str == null) {
     return true
   }

@@ -1,0 +1,29 @@
+.ph-badge {
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+}
+.ph-badge-content {
+  display: inline-block;
+  font-size: 12px;
+  height: 20px;
+  line-height: 20px;
+  padding: 0 6px;
+  color: white;
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 10px;
+  vertical-align: middle;
+}
+.ph-badge-content.ph-badge-dot {
+  padding: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.ph-badge .ph-badge-content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(50%, -50%);
+}

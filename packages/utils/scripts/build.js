@@ -4,7 +4,7 @@ const fs = require('fs')
 
 // 构建支持 web 端的源文件
 function createMFile(name) {
-  return fs.promises.readFile(`./src/${name}.ts`, 'utf-8').then(content => {
+  return fs.promises.readFile(`./src/${name}.ts`, 'utf-8').then((content) => {
     if (name === 'validator') {
       content = content.replace('export =', 'export default')
     }
@@ -18,7 +18,8 @@ function openDir() {
     fs.opendir('./lib', (err) => {
       if (err == null) {
         resolve(0)
-      } else { // 目录不存在
+      } else {
+        // 目录不存在
         fs.mkdir('./lib', () => {
           resolve(0)
         })
@@ -33,7 +34,7 @@ function done() {
     process.nextTick(() => {
       setTimeout(() => {
         resolve(0)
-      }, 0);
+      }, 0)
     })
   })
 }
@@ -66,7 +67,7 @@ const webOption = {
 console.log('正在开始构建文件……')
 
 // 进行过修改的文件，只编译修改过的文件
-const updatedFiles = ['date', 'dom', 'file', 'index', 'server', 'web', 'validator'] // ['date', 'dom', 'file', 'index', 'server', 'web', 'validator']
+const updatedFiles = ['dom'] // ['date', 'dom', 'file', 'index', 'server', 'web', 'validator']
 const nodes = []
 const web = []
 const createMFiles = []
@@ -85,28 +86,31 @@ updatedFiles.forEach((f) => {
   }
 })
 
-
 let queues = []
-openDir().then(() => {
-  // 创建带 _m 的文件，用于构建 web 端
-  for (let f of createMFiles) {
-    queues.push(createMFile(f))
-  }
-  return Promise.all(queues);
-}).then(() => {
-  if (web.length) {
-    compile(web, webOption);
-  }
-  if (nodes.length > 0) {
-    compile(nodes, nodeOption)
-  }
-  return done();
-}).then(() => {
-  queues = [];
-  for (let f of createMFiles) {
-    queues.push(fs.promises.unlink(`./src/${f}_m.ts`))
-  }
-  return Promise.all(queues);
-}).then(() => {
-  console.log('文件构建完!');
-})
+openDir()
+  .then(() => {
+    // 创建带 _m 的文件，用于构建 web 端
+    for (let f of createMFiles) {
+      queues.push(createMFile(f))
+    }
+    return Promise.all(queues)
+  })
+  .then(() => {
+    if (web.length) {
+      compile(web, webOption)
+    }
+    if (nodes.length > 0) {
+      compile(nodes, nodeOption)
+    }
+    return done()
+  })
+  .then(() => {
+    queues = []
+    for (let f of createMFiles) {
+      queues.push(fs.promises.unlink(`./src/${f}_m.ts`))
+    }
+    return Promise.all(queues)
+  })
+  .then(() => {
+    console.log('文件构建完!')
+  })

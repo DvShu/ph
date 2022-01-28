@@ -29,6 +29,8 @@ import DatePicker from '../lib/DatePicker'
 import Modal from '../lib/Modal'
 import '../lib/Message'
 import Pagination from '../lib/Pagination'
+import Menu from '../lib/Menu'
+import Badge from '../lib/Badge'
 
 import '../style/layout.css'
 import './style.less'
@@ -59,7 +61,7 @@ new ArrowUpIcon('#arrowUp')
 let multiIcon = new MultiLoadingIcon('#multi')
 new MultiLoadingIcon('#multi1', { fills: ['#5FB878', '#1E9FFF', '#FFB800', '#FF5722'] })
 
-new SingleIcon(elem('.icon'))
+new SingleIcon(elem('.icon') as any)
 
 /* 输入框 */
 let nameInput = new Input('#nameIpt', {
@@ -229,3 +231,38 @@ page.sizeChange((_size) => {
   }, 500)
 })
 
+let menus = [
+  { icon: { prefix: 'ph-icon-', icon: 'info' }, text: '菜单项一', index: 'Menu1' },
+  { icon: new MultiLoadingIcon(''), text: '菜单项二', index: 'Menu2' },
+  {
+    icon: new SearchIcon(''),
+    text: '菜单项三',
+    index: 'Menu3',
+    childrens: [
+      { text: '子菜单项一', index: 'Menu3-1' },
+      { text: '子菜单项二', index: 'Menu3-2' },
+    ],
+  },
+  {
+    icon: new InfoIcon(''),
+    text: '菜单项四',
+    index: 'Menu4',
+    childrens: [
+      { text: '子菜单项一', index: 'Menu4-1' },
+      { text: '子菜单项二', index: 'Menu4-2' },
+    ],
+  },
+]
+/* Menu 菜单 */
+// 水平菜单 - 亮色模式
+let menu = new Menu('#menuMH', menus, { orientation: 'horizontal', defaultActive: 'Menu3-1' })
+menu.setTheme('dark')
+menu.foldAllSubMenus()
+let menud = new Menu('#menuMV', menus, { orientation: 'vertical', defaultActive: 'Menu3-1' })
+menud.setTheme('dark')
+/** 徽标小提示 */
+let badge = new Badge('#badge', { max: 10 })
+badge.value = 1
+
+let badge2 = new Badge('#badge2')
+badge2.value = '100'

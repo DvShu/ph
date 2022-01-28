@@ -8,8 +8,12 @@ const vendorPrefix = ['', '-webkit', '-moz-']
  * 根据选择器获取节点
  * @param {string} selector 选择器
  */
-export function elem(selector: string, dom?: HTMLElement) {
-  return (dom || document).querySelectorAll<HTMLElement>(selector)
+export function elem(selector: string | HTMLElement, dom?: HTMLElement) {
+  if (typeof selector === 'string') {
+    return (dom || document).querySelectorAll<HTMLElement>(selector)
+  } else {
+    return [selector]
+  }
 }
 
 /**
@@ -28,6 +32,16 @@ export function addClass(elem: HTMLElement, clazz: string) {
  */
 export function removeClass(elem: HTMLElement, clazz: string) {
   elem.classList.remove(clazz)
+}
+
+/**
+ * 判断节点是否包含某个 class
+ * @param elem  待判断 class 的节点
+ * @param clazz 待判断的 class
+ * @returns
+ */
+export function hasClass(elem: HTMLElement, clazz: string) {
+  return elem.classList.contains(clazz)
 }
 
 /**
@@ -132,7 +146,7 @@ export function text(element: HTMLElement, textstr?: string) {
  * @param elems
  * @param fn 遍历到节点时的回调，回调第一个参数为遍历到的节点，第2个参数为 index；如果回调函数返回 true，则会终止遍历(break)
  */
-export function iterate(elems: NodeList, fn: (el: HTMLElement, index: number) => any) {
+export function iterate(elems: NodeList | HTMLElement[], fn: (el: HTMLElement, index: number) => any) {
   for (let i = 0, len = elems.length; i < len; i++) {
     let r = fn(elems[i] as HTMLElement, i)
     if (r === true) {
@@ -154,4 +168,13 @@ export function attr(elem: HTMLElement, key: string, value?: string) {
   } else {
     return elem.getAttribute('data-' + key)
   }
+}
+
+/**
+ * 获取指定节点的父节点
+ * @param el
+ * @returns
+ */
+export function parent(el: HTMLElement) {
+  return el.parentNode as HTMLElement
 }

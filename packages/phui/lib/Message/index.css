@@ -11,7 +11,7 @@
   border-radius: 5px;
   font-size: 14px;
   background: #f0faff;
-  color: #2e8bf0;
+  color: var(--ph-primary-color);
   border: 1px solid #d4eeff;
 }
 .ph-message .ph-message-icon {
@@ -19,17 +19,17 @@
 }
 .ph-message.ph-message-success {
   background: #edfff3;
-  color: #19bf6c;
+  color: var(--ph-success-color);
   border: 1px solid #bbf2cf;
 }
 .ph-message.ph-message-error {
   background: #ffefe6;
-  color: #ed3f13;
+  color: var(--ph-error-color);
   border: 1px solid #ffcfb8;
 }
 .ph-message.ph-message-warning {
   background: #fff9e6;
-  color: #f90;
+  color: var(--ph-warn-color);
   border: 1px solid #ffe7a3;
 }
 .ph-message-fade-anim {
