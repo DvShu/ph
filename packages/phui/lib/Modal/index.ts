@@ -55,13 +55,10 @@ class Modal {
 
   public close() {
     if (this._beforeCloseFn() !== false) {
-      let $shade = elem('#ph-shade' + this.id)[0]
-      $shade.innerHTML = ''
-      document.body.removeChild($shade)
       let $box = elem('#ph-modal' + this.id)[0]
       $box.innerHTML = ''
       document.body.removeChild($box)
-      document.body.classList.add('ph-lock-scroll')
+      document.body.classList.remove('ph-lock-scroll')
     }
   }
 
@@ -75,18 +72,16 @@ class Modal {
 
   private _render() {
     let fragment = document.createDocumentFragment()
+    let classes = ['ph-modal']
     // 添加遮罩层
     if (this._config.shade) {
-      let $shade = document.createElement('div')
-      $shade.className = 'ph-shade'
-      $shade.style.zIndex = String(500 + this.id)
-      $shade.id = 'ph-shade' + this.id
-      fragment.appendChild($shade)
+      classes.push('ph-shadow')
     }
+    classes.push(`ph-modal${this._config.type}`)
     let box = document.createElement('div')
-    box.className = `ph-modal ph-modal${this._config.type}`
+    box.className = classes.join(' ')
     box.id = 'ph-modal' + this.id
-    box.style.zIndex = String(501 + this.id)
+    box.style.zIndex = String(500 + this.id)
 
     let htmlstr = []
     htmlstr.push(
