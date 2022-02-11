@@ -31,6 +31,7 @@ import '../lib/Message'
 import Pagination from '../lib/Pagination'
 import Menu from '../lib/Menu'
 import Badge from '../lib/Badge'
+import DropDown from '../lib/Dropdown'
 
 import '../style/layout.css'
 import './style.less'
@@ -266,3 +267,6 @@ badge.value = 1
 
 let badge2 = new Badge('#badge2')
 badge2.value = '100'
+
+/** 下拉菜单 */
+new DropDown('#dropdown', { menus: ['个人中心', '密码重置', '退出登录'] })

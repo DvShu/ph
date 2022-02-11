@@ -233,14 +233,19 @@ class Menu extends Component<HTMLUListElement> {
           let $sub = elem('.ph-menu', target)[0]
           // 激活菜单
           if ($sub == null) {
-            let parentIndex = (target.parentNode as HTMLElement).getAttribute('ph-menu-index')
             this._clearActiveSubmenus() // 清楚之前激活的子菜单
+            let parentIndex = (target.parentNode as HTMLElement).getAttribute('ph-menu-index')
             // 激活的是直接菜单项，则折叠所有已经展开的子菜单项
             if (parentIndex === '__stop__') {
               // 折叠展开的菜单
               this._foldMenus(elem('.ph-menu-opened', this.el) as HTMLElement[])
             } else {
               this._activeSubmenus(target) // 激活子菜单
+            }
+            // 水平菜单，激活菜单项时，则折叠子菜单
+            if (this._config.orientation === 'horizontal') {
+              // 折叠展开的菜单
+              this._foldMenus(elem('.ph-menu-opened', this.el) as HTMLElement[])
             }
             // 清楚之前的激活项
             removeClass(elem('.ph-menu-active', this.el)[0], 'ph-menu-active')
