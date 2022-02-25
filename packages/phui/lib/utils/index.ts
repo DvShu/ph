@@ -23,3 +23,27 @@ export function queryElem(el: string | HTMLElement, tagName = 'div') {
   }
   return qel
 }
+
+/**
+ * 获取节点的宽高大小信息
+ * @param {string | HTMLElement} hideNode - The node to hide.
+ * @param parent - 添加临时节点的父节点，默认为: body.
+ * @returns The DOMRect of the element.
+ */
+export function queryHideNodeRect(hideNode: string | HTMLElement, parent = document.body) {
+  // 计算折叠菜单的高度
+  let $tmp = document.createElement('div')
+  $tmp.style.cssText = 'position:fixed;left:-1000px;top:-1000px;opacity:0;'
+  let $tmpInner = document.createElement('div')
+  $tmpInner.style.cssText = 'position:relative;'
+  if (typeof hideNode === 'string') {
+    $tmpInner.innerHTML = hideNode
+  } else {
+    $tmpInner.appendChild(hideNode)
+  }
+  $tmp.appendChild($tmpInner)
+  parent.appendChild($tmp)
+  let rect = $tmpInner.children[0].getBoundingClientRect()
+  parent.removeChild($tmp)
+  return rect
+}

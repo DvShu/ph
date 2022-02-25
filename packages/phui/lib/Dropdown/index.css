@@ -15,9 +15,6 @@
 .ph-dropdown-active .ph-dropdown-arrow-icon {
   transform: rotate(180deg);
 }
-.ph-dropdown-active .ph-dropdown-menu {
-  display: block;
-}
 .ph-dropdown-menu {
   display: none;
   position: absolute;
@@ -28,6 +25,9 @@
   border-bottom: none;
   z-index: 25;
   min-width: 80px;
+  height: auto;
+  transition: height 0.25s ease-in-out;
+  overflow: hidden;
 }
 .ph-dropdown-menu--left {
   left: 0;

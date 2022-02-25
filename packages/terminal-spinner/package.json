@@ -39,6 +39,6 @@
     "wait"
   ],
   "devDependencies": {
-    "@types/node": "^15.12.2"
+    "@types/node": "^17.0.21"
   }
 }

@@ -1,7 +1,9 @@
 import Component from '../utils/Component'
 import ArrowDown from '../Icon/ArrowDown'
 import './index.css'
-import { on, addClass, removeClass } from 'ph-utils/lib/dom'
+import { on, addClass, removeClass, elem, attr, hasClass } from 'ph-utils/lib/dom'
+import { isBlank } from 'ph-utils/lib/index_m'
+import { queryHideNodeRect } from '../utils'
 
 interface DropdownConfig {
   menus: (string | { name?: string; text: string })[]
@@ -10,11 +12,9 @@ interface DropdownConfig {
 
 class Dropdown extends Component<HTMLDivElement> {
   private _config: Required<DropdownConfig>
-  private _t: number
   private _fn: (i: number, name: string) => void
   public constructor(el: string | HTMLDivElement, config: DropdownConfig) {
     super(el)
-    this._t = -1
     this._fn = () => {}
     this._config = { position: 'right', ...config }
     this._render()
@@ -23,6 +23,34 @@ class Dropdown extends Component<HTMLDivElement> {
 
   public click(fn: (i: number, name: string) => void) {
     this._fn = fn
+  }
+
+  /**
+   * 展开菜单
+   */
+  public spreadMenu() {
+    let $menu = elem('.ph-dropdown-menu', this.el)[0]
+    let height: string | number = attr($menu, 'node-height')
+    if (isBlank(height)) {
+      let $tmpMenu = $menu.cloneNode(true) as HTMLElement
+      $tmpMenu.style.display = 'block'
+      height = queryHideNodeRect($tmpMenu).height
+      attr($menu, 'node-height', String(height))
+    }
+    $menu.style.cssText = 'height:0px;display:block'
+    requestAnimationFrame(() => {
+      addClass(this.el, 'ph-dropdown-active')
+      $menu.style.height = `${height}px`
+    })
+  }
+
+  /**
+   * 折叠菜单
+   */
+  public foldMenu() {
+    let $menu = elem('.ph-dropdown-menu', this.el)[0]
+    removeClass(this.el, 'ph-dropdown-active')
+    $menu.style.height = `0px`
   }
 
   private _render() {
@@ -47,13 +75,15 @@ class Dropdown extends Component<HTMLDivElement> {
 
   private _event() {
     on(this.el, 'mouseenter', () => {
-      clearTimeout(this._t)
-      addClass(this.el, 'ph-dropdown-active')
+      this.spreadMenu()
     })
     on(this.el, 'mouseleave', () => {
-      this._t = setTimeout(() => {
-        removeClass(this.el, 'ph-dropdown-active')
-      }, 150)
+      this.foldMenu()
+    })
+    on(this.el, 'transitionend', () => {
+      if (!hasClass(this.el, 'ph-dropdown-active')) {
+        elem('.ph-dropdown-menu', this.el)[0].style.display = 'none'
+      }
     })
     on(
       this.el,

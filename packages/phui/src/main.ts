@@ -270,3 +270,10 @@ badge2.value = '100'
 
 /** 下拉菜单 */
 new DropDown('#dropdown', { menus: ['个人中心', '密码重置', '退出登录'] })
+
+let dialog = document.querySelector('dialog')
+dialog.showModal()
+dialog?.addEventListener('click', (e) => {
+  console.log(e.target)
+  console.log('click')
+})

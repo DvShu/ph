@@ -31,6 +31,7 @@
 /* 按钮组 */
 .ph-tabbar-buttons {
   height: var(--ph-form-edit-height);
+  white-space: nowrap;
 }
 .ph-tabbar-buttons .ph-tabbar-item--active {
   color: #ffffff;

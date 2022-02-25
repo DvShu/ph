@@ -5,3 +5,4 @@
 /packages/terminal-spinner/index.js
 /packages/terminal-spinner/index.d.ts
 /packages/monorepo-cli/*.js
+/packages/**/*.js

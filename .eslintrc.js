@@ -21,6 +21,7 @@ module.exports = {
     eqeqeq: ['error', 'always', { null: 'ignore' }],
     'no-param-reassign': 'off',
     'max-params': ['error', 5],
-    '@typescript-eslint/no-require-imports': 'off'
+    '@typescript-eslint/no-require-imports': 'off',
+    complexity: ["error", 30]
   },
 }

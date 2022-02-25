@@ -37,7 +37,7 @@ class Icon {
     let dom: NodeList | null
     if (typeof el === 'string') {
       if (!isBlank(el)) {
-        dom = elem(el)
+        dom = elem(el) as NodeList
       } else {
         dom = null
       }

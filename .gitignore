@@ -16,3 +16,4 @@ yarn.lock
 /**/*.js
 .pnp.cjs
 .pnp.loader.mjs
+tsconfig.tsbuildinfo
