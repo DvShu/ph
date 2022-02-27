@@ -25,6 +25,7 @@
         <svg id="menu"></svg>
         <svg id="setting"></svg>
         <svg id="search"></svg>
+        <svg id="close"></svg>
         <svg id="multi"></svg>
         <svg id="multi1"></svg>
         <svg class="icon" ph-icon-icon="info" ph-icon-prefix="ph-icon-"></svg>
@@ -107,7 +108,17 @@
       </div>
     </div>
 
-    <dialog id="dialog" data-flag="shadow"><div data-flag="main">这是弹出框</div></dialog>
+    <dialog id="dialog" class="dialog-component" data-flag="shadow">
+      <div data-flag="main" class="dialog-main">
+        <div class="dialog-header"><span class="dialog-title">这是对话框标题</span></div>
+        <button id="dialogCloseBtn" class="dialog-close-btn"></button>
+        <div class="dialog-container">这是对话框的内容部分</div>
+        <div class="dialog-footer">
+          <button id="dialogCancelBtn">取消</button>
+          <button id="dialogSureBtn">确认</button>
+        </div>
+      </div>
+    </dialog>
 
     <script src="//at.alicdn.com/t/font_2230566_k8eo70ks1v.js"></script>
     <script type="module" src="/src/main.ts"></script>

@@ -10,10 +10,10 @@
 2. [Icon 图标](https://gitee.com/towardly/ph/wikis/phui/Icon%20%E5%9B%BE%E6%A0%87)
 3. [Input 输入框](https://gitee.com/towardly/ph/wikis/phui/Input%20%E8%BE%93%E5%85%A5%E6%A1%86?sort_id=5046728)
 4. [css 全局变量](https://gitee.com/towardly/ph/wikis/phui/css%20%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F)
-5. [button 按钮](https://gitee.com/towardly/ph/wikis/phui/button%20%E6%8C%89%E9%92%AE)
+5. [Button 按钮](https://gitee.com/towardly/ph/wikis/phui/Button%20%E6%8C%89%E9%92%AE)
 6. [container 容器布局](https://gitee.com/towardly/ph/wikis/phui/container%20%E5%AE%B9%E5%99%A8%E5%B8%83%E5%B1%80)
-7. [table 表格](https://gitee.com/towardly/ph/wikis/phui/table%20%E8%A1%A8%E6%A0%BC?sort_id=5079507)
-8. [Switch 开关按钮](https://gitee.com/towardly/ph/wikis/phui/switch%20%E5%BC%80%E5%85%B3)
+7. [Table 表格](https://gitee.com/towardly/ph/wikis/phui/Table%20%E8%A1%A8%E6%A0%BC?sort_id=5079507)
+8. [Switch 开关按钮](https://gitee.com/towardly/ph/wikis/phui/Switch%20%E5%BC%80%E5%85%B3)
 9. [DatePicker 日期选择](https://gitee.com/towardly/ph/wikis/phui/DatePicker%20%E6%97%A5%E6%9C%9F%E9%80%89%E6%8B%A9%E5%99%A8)
 10. [Modal 模态框](https://gitee.com/towardly/ph/wikis/phui/Modal%20%E6%A8%A1%E6%80%81%E6%A1%86)
 11. [Message 消息提示](https://gitee.com/towardly/ph/wikis/phui/Message%20%E6%B6%88%E6%81%AF%E6%8F%90%E7%A4%BA)
@@ -21,10 +21,12 @@
 13. [Tabbar 选项卡](<https://gitee.com/towardly/ph/wikis/phui/Tabbar%20%E9%80%89%E9%A1%B9%E5%8D%A1(%E6%A0%87%E7%AD%BE%E6%A0%8F)>)
 14. [Badge 徽标提示](https://gitee.com/towardly/ph/wikis/phui/Badge%20%E5%BE%BD%E6%A0%87%E6%8F%90%E7%A4%BA)
 15. [Menu 菜单](https://gitee.com/towardly/ph/wikis/phui/Menu%20%E8%8F%9C%E5%8D%95)
+16. [Dropdown 下拉菜单](https://gitee.com/towardly/ph/wikis/phui/Dropdown%20%E4%B8%8B%E6%8B%89%E8%8F%9C%E5%8D%95)
+
 
 ## 使用
 
-该模块依赖于 [phui](https://gitee.com/towardly/ph/wikis/Home?sort_id=4035190)，所以安装本模块之前需要先安装 `ph-utils`、`js` 是使用 [typescript](https://www.typescriptlang.org/) 编写。
+该模块依赖于 [phui](https://gitee.com/towardly/ph/wikis/Home?sort_id=4035190)，所以安装本模块之前需要先安装 [ph-utils](https://www.npmjs.com/package/ph-utils)、`js` 是使用 [typescript](https://www.typescriptlang.org/) 编写。
 
 ### 安装
 

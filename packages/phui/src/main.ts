@@ -19,6 +19,7 @@ import ArrowRightIcon from '../lib/Icon/ArrowRight'
 import DoubleArrowLeftIcon from '../lib/Icon/DoubleArrowLeft'
 import DoubleArrowRightIcon from '../lib/Icon/DoubleArrowRight'
 import MoreFilledIcon from '../lib/Icon/MoreFilled'
+import CloseIcon from '../lib/Icon/Close'
 import Icon from '../lib/Icon'
 import Input from '../lib/Input'
 import Button from '../lib/Button'
@@ -57,6 +58,7 @@ new ArrowRightIcon('#arrowRight')
 new DoubleArrowLeftIcon('#arrowDoubleLeft')
 new DoubleArrowRightIcon('#arrowDoubleRight')
 new MoreFilledIcon('#moreFilled')
+new CloseIcon('#close')
 let searchIcon = new SearchIcon('#search')
 new ArrowUpIcon('#arrowUp')
 let multiIcon = new MultiLoadingIcon('#multi')
@@ -271,6 +273,9 @@ badge2.value = '100'
 /** 下拉菜单 */
 new DropDown('#dropdown', { menus: ['个人中心', '密码重置', '退出登录'] })
 
+let dialogCloseBtn = new Button('#dialogCloseBtn', { icon: new CloseIcon(''), circle: true })
+let dialogCancelBtn = new Button('#dialogCancelBtn')
+let dialogSureBtn = new Button('#dialogSureBtn', { type: 'primary' })
 let dialog = document.querySelector('dialog')
 dialog.showModal()
 dialog?.addEventListener('click', (e) => {
