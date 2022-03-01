@@ -71,6 +71,14 @@ class Input {
     this.input.value = v
   }
 
+  public get name() {
+    return this.input.name
+  }
+
+  public set name(n: string) {
+    this.input.name = n
+  }
+
   /**
    * 获取 input 的 name 和 value
    * @returns 0 - input name 属性, 1 - input value 属性

@@ -1,7 +1,9 @@
 import '../style/reset.css'
 import '../style/vars.css'
 
-import { elem } from 'ph-utils/lib/dom'
+import { elem, on, iterate } from 'ph-utils/lib/dom'
+import { formJson } from 'ph-utils/lib/web'
+import Validator from 'ph-utils/lib/validator_m'
 
 import InfoIcon from '../lib/Icon/Info'
 import WarnIcon from '../lib/Icon/Warn'
@@ -273,12 +275,105 @@ badge2.value = '100'
 /** 下拉菜单 */
 new DropDown('#dropdown', { menus: ['个人中心', '密码重置', '退出登录'] })
 
+// 获取模态框
+let dialog = document.querySelector('dialog') as HTMLDialogElement
+
 let dialogCloseBtn = new Button('#dialogCloseBtn', { icon: new CloseIcon(''), circle: true })
 let dialogCancelBtn = new Button('#dialogCancelBtn')
 let dialogSureBtn = new Button('#dialogSureBtn', { type: 'primary' })
-let dialog = document.querySelector('dialog')
-dialog.showModal()
-dialog?.addEventListener('click', (e) => {
-  console.log(e.target)
-  console.log('click')
+let $dialogInputs = elem('.dialog-input')
+
+let dialogInputs = new Set<Input>()
+iterate($dialogInputs, (el) => {
+  let dialogInput = new Input(el, { rules: [{ reg: 'required', errmsg: '请输入用户名' }], class: 'dialog-form-input' })
+  dialogInputs.add(dialogInput)
 })
+
+let validator = new Validator([
+  {
+    key: 'name',
+    rules: [{ rule: 'required', message: '请输入用户名' }],
+  },
+  { key: 'password', rules: [{ rule: 'required', message: '请输入密码' }] },
+])
+
+let openDialogBtn = new Button('#openDialogBtn')
+openDialogBtn.on('click', () => {
+  // 显示对话框
+  dialog?.showModal()
+  document.body.classList.add('dialog-body-lock') // 禁止 body 滚动
+  dialog?.classList.add('dialog-component-show') // 显示对话框时，添加相应的过渡效果
+})
+
+function closeDialog() {
+  for (let dialogInput of dialogInputs.values()) {
+    dialogInput.setError()
+  }
+  let $form = dialog.querySelector('form')
+  $form?.reset()
+  // 这里不直接关闭对话框，而是先添加过渡效果, 在过渡效果结束后在关闭对话框
+  dialog?.classList.remove('dialog-component-show')
+}
+
+dialogCloseBtn.on('click', () => {
+  closeDialog()
+})
+
+// 点击曲线按钮，重置表单，同时关闭对话框
+dialogCancelBtn.on('click', () => {
+  closeDialog()
+})
+
+dialogSureBtn.on('click', () => {
+  let $form = dialog.querySelector('form') as HTMLFormElement
+  let formData = formJson<{ name: string; password: string }>($form)
+  validator
+    .validate(formData)
+    .then(() => {
+      console.log(formData)
+      // 异步提交数据
+      setTimeout(() => {
+        // 数据提交成功后，重置表单并关闭对话框
+        closeDialog()
+      }, 3000)
+    })
+    .catch((err) => {
+      if (err.name === 'ValidateError') {
+        for (let dialogInput of dialogInputs.values()) {
+          if (dialogInput.name === err.key) {
+            dialogInput.setError(err.message)
+            break
+          }
+        }
+      }
+    })
+})
+
+// 为对话框添加 transitionend 事件，动画结束后关闭对话框
+dialog?.addEventListener('transitionend', () => {
+  if (!dialog?.classList.contains('dialog-component-show')) {
+    // 动画结束后，关闭对话框
+    dialog?.close()
+    document.body.classList.remove('dialog-body-lock')
+  }
+})
+
+// 重新监听键盘事件，如果是 Esc 则禁止默认处理方式并手动关闭对话框
+on(dialog, 'keydown', (e: KeyboardEvent) => {
+  if (e.code === 'Escape') {
+    e.preventDefault()
+    closeDialog()
+  }
+})
+
+on(
+  dialog,
+  'click',
+  (_e, _target, flag) => {
+    if (flag === '__stop__') {
+      // 点击的是对话框的遮罩层
+      dialog?.classList.remove('dialog-component-show')
+    }
+  },
+  { eventFlag: 'data-flag', eventStop: true },
+)

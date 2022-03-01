@@ -108,11 +108,26 @@
       </div>
     </div>
 
+    <div>
+      <button id="openDialogBtn">打开 dialog 对话框</button>
+    </div>
+
     <dialog id="dialog" class="dialog-component" data-flag="shadow">
       <div data-flag="main" class="dialog-main">
-        <div class="dialog-header"><span class="dialog-title">这是对话框标题</span></div>
+        <div class="dialog-header"><span class="dialog-title">添加登录用户</span></div>
         <button id="dialogCloseBtn" class="dialog-close-btn"></button>
-        <div class="dialog-container">这是对话框的内容部分</div>
+        <div class="dialog-container">
+          <form class="dialog-form">
+            <div class="dialog-form-row">
+              <label class="dialog-form-label">用户名:</label>
+              <input type="text" class="dialog-input" placeholder="用户名" name="name" />
+            </div>
+            <div class="dialog-form-row">
+              <label class="dialog-form-label">密&emsp;码:</label>
+              <input type="password" class="dialog-input" placeholder="密码" name="password" />
+            </div>
+          </form>
+        </div>
         <div class="dialog-footer">
           <button id="dialogCancelBtn">取消</button>
           <button id="dialogSureBtn">确认</button>

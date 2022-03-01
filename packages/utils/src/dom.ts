@@ -75,10 +75,10 @@ export function transform(element: HTMLElement, value: string) {
  * @param {function}    event     事件处理函数
  * @param {boolean}     onceOrConfig  是否是只运行一次的处理函数或者配置，其中 eventFlag 为 string，如果配置该项，则表明为委托事件
  */
-export function on(
+export function on<T extends Event>(
   element: HTMLElement,
   listener: string,
-  fn: (e: Event, target?: HTMLElement, flag?: string) => void,
+  fn: (e: T, target?: HTMLElement, flag?: string) => void,
   once: boolean | { once?: boolean; eventFlag?: string; eventStop?: boolean } = false,
 ) {
   let eventExtra: any = { eventStop: false }

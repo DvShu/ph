@@ -28,3 +28,10 @@ interface Window {
   /** 显示 Message 提示信息 */
   $message: MessageInstance
 }
+
+interface HTMLDialogElement {
+  /** 显示模态框 */
+  showModal: () => void
+  /** 关闭对话框 */
+  close: () => void
+}

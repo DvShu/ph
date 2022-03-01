@@ -12,6 +12,16 @@ function createMFile(name) {
   })
 }
 
+// 构建完成后，执行一些逻辑替换
+function afterBuild() {
+  return fs.promises.readFile(`./lib/web.js`, 'utf-8').then((content) => {
+    if (name === 'validator') {
+      content = content.replace("from './index'", "from './index_m'")
+    }
+    return fs.promises.writeFile(`./lib/web.js`, content)
+  })
+}
+
 // 打开编译后的文件目录，如果不存在则创建
 function openDir() {
   return new Promise((resolve) => {
@@ -67,7 +77,7 @@ const webOption = {
 console.log('正在开始构建文件……')
 
 // 进行过修改的文件，只编译修改过的文件
-const updatedFiles = ['dom'] // ['date', 'dom', 'file', 'index', 'server', 'web', 'validator']
+const updatedFiles = ['validator'] // ['date', 'dom', 'file', 'index', 'server', 'web', 'validator']
 const nodes = []
 const web = []
 const createMFiles = []
@@ -108,6 +118,9 @@ openDir()
     queues = []
     for (let f of createMFiles) {
       queues.push(fs.promises.unlink(`./src/${f}_m.ts`))
+    }
+    if (web.includes('./src/web.ts')) {
+      queues.push(afterBuild())
     }
     return Promise.all(queues)
   })

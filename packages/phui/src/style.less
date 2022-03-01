@@ -41,12 +41,22 @@
   border: none;
   padding: 0;
   border-radius: 5px;
+  transform: scale(0);
+  transition: transform 0.25s ease-in-out;
 }
 .dialog-component::backdrop {
   background-color: rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  transition: opacity 0.25s ease-in-out;
+}
+.dialog-component-show {
+  transform: scale(1);
+}
+.dialog-component-show::backdrop {
+  opacity: 1;
 }
 .dialog-main {
-  width: 320px;
+  width: 300px;
   position: relative;
 }
 .dialog-header {
@@ -72,11 +82,29 @@
   border: none;
 }
 .dialog-container {
-  padding: 15px 10px;
+  padding: 15px 20px;
   font-size: 14px;
 }
 .dialog-footer {
   padding: 10px;
   text-align: right;
   border-top: 1px solid #dedede;
+}
+.dialog-body-lock {
+  overflow: hidden;
+}
+
+.dialog-form {
+  width: 100%;
+  margin-top: 10px;
+}
+.dialog-form-row {
+  height: 50px;
+}
+.dialog-form-label {
+  line-height: 30px;
+  margin-right: 10px;
+}
+.dialog-form-input {
+  width: calc(100% - 60px);
 }

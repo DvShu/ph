@@ -63,9 +63,11 @@ interface RuleItem {
 
 class ValidateError extends Error {
   public name: string
-  public constructor(msg: string) {
+  public key: string
+  public constructor(key: string, msg: string) {
     super(msg)
     this.name = 'ValidateError'
+    this.key = key
   }
 }
 
@@ -117,7 +119,7 @@ class Validator {
             rules.push({ rule: ruleItem, message: defaultMsg })
           } else {
             if (typeof ruleItem.rule === 'string') {
-              rules = rules.concat(this._parseStringRule(ruleItem.rule))
+              rules = rules.concat(this._parseStringRule(ruleItem.rule, ruleItem.message))
             } else {
               rules.push({ rule: ruleItem.rule, message: ruleItem.message || defaultMsg })
             }
@@ -140,6 +142,7 @@ class Validator {
   public validate<T>(data: any) {
     return new Promise((resolve, reject) => {
       let errMsg = ''
+      let errKey = ''
       let resData: any = {}
       for (let key in this.rules) {
         if ({}.hasOwnProperty.call(this.rules, key)) {
@@ -147,6 +150,7 @@ class Validator {
           if (errMsg === '') {
             resData[key] = this._conversionType(this.types[key], data[key])
           } else {
+            errKey = key
             errMsg = errMsg.replace('%s', key)
             break
           }
@@ -155,7 +159,7 @@ class Validator {
       if (errMsg === '') {
         resolve(resData as T)
       } else {
-        reject(new ValidateError(errMsg))
+        reject(new ValidateError(errKey, errMsg))
       }
     })
   }
@@ -173,7 +177,7 @@ class Validator {
         resolve(this._conversionType(this.types[key], value))
       } else {
         errMsg = errMsg.replace('%s', key)
-        reject(new ValidateError(errMsg))
+        reject(new ValidateError(key, errMsg))
       }
     })
   }
@@ -211,7 +215,7 @@ class Validator {
     return errMsg
   }
 
-  private _parseStringRule(rule: string) {
+  private _parseStringRule(rule: string, ruleErrMsg?: string) {
     let rules = []
     let trule = rule.split('|')
     for (let r of trule) {
@@ -229,6 +233,7 @@ class Validator {
         rrule = ruleRegexs[r]
         message = defaultMsgs[r] || defaultMsg
       }
+      message = ruleErrMsg || message
       rules.push({ rule: rrule, message: message, sameKey })
     }
     return rules

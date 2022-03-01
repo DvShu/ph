@@ -3,7 +3,7 @@
   "description": "Componentization of commonly used front-end modules.",
   "main": "index.js",
   "types": "index.d.ts",
-  "version": "2.0.11",
+  "version": "2.0.12",
   "repository": {
     "type": "git",
     "url": "git+https://gitee.com/towardly/ph.git",
