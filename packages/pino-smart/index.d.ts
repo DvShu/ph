@@ -1,4 +1,12 @@
 /// <reference types="node" />
 import { Transform } from 'stream';
-declare function build(options: any): Promise<Transform & import("pino-abstract-transport").OnUnknown>;
+interface PrettyOption {
+    destination?: number | {
+        write: () => void;
+    };
+    append?: boolean;
+    mkdir?: boolean;
+    sync?: boolean;
+}
+declare function build(options: PrettyOption): Transform & import("pino-abstract-transport").OnUnknown;
 export default build;

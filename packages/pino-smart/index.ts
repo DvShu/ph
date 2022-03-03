@@ -74,7 +74,14 @@ function prettyFactory() {
   }
 }
 
-async function build(options: any) {
+interface PrettyOption {
+  destination?: number | { write: () => void }
+  append?: boolean
+  mkdir?: boolean
+  sync?: boolean
+}
+
+function build(options: PrettyOption) {
   const pretty = prettyFactory()
   return abstractTransport((source) => {
     const transportStream = new Transform({
@@ -89,9 +96,11 @@ async function build(options: any) {
 
     if (typeof options.destination === 'object' && typeof options.destination.write === 'function') {
       destination = options.destination
+    } else if (options.destination === 1) {
+      destination = process.stdout
     } else {
       destination = new SonicBoom({
-        dest: options.destination || 1,
+        dest: (options.destination || 1) as number,
         append: options.append,
         mkdir: options.mkdir,
         sync: options.sync, // by default sonic will be async

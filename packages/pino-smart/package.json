@@ -3,7 +3,7 @@
   "description": "Pino 日志行美化工具",
   "main": "index.js",
   "types": "index.d.ts",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "repository": {
     "type": "git",
     "url": "git+https//gitee.com/towardly/ph.git",
