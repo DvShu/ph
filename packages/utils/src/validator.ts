@@ -1,6 +1,7 @@
 /**
  * 数据验证器
  */
+
 // 默认的错误提示信息
 const defaultMsgs = {
   mobile: '请输入正确的手机号',
@@ -71,6 +72,18 @@ class ValidateError extends Error {
   }
 }
 
+export type RuleType =
+  | string
+  | RegExp
+  | ((v: any) => boolean)
+  | (RegExp | string | ((v: any) => boolean) | { rule: string | RegExp | ((v: any) => boolean); message?: string })
+
+export interface SchemaType {
+  key: string
+  type?: string | ((v: any) => void)
+  rules: RuleType[]
+}
+
 /**
  * 数据验证器，除了进行数据验证外，还可以同时进行数据转化
  */
@@ -81,22 +94,7 @@ class Validator {
    * 构造数据验证转换器
    * @param schemas 配置验证转换规则
    */
-  public constructor(
-    schemas: {
-      key: string
-      type?: string | ((v: any) => void)
-      rules:
-        | string
-        | RegExp
-        | ((v: any) => boolean)
-        | (
-            | RegExp
-            | string
-            | ((v: any) => boolean)
-            | { rule: string | RegExp | ((v: any) => boolean); message?: string }
-          )[]
-    }[],
-  ) {
+  public constructor(schemas: SchemaType[]) {
     let parsedRules = {}
     let types = {}
     for (let schema of schemas) {
@@ -240,4 +238,5 @@ class Validator {
   }
 }
 
+// @ts-ignore
 export = Validator
