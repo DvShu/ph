@@ -15,9 +15,7 @@ function createMFile(name) {
 // 构建完成后，执行一些逻辑替换
 function afterBuild() {
   return fs.promises.readFile(`./lib/web.js`, 'utf-8').then((content) => {
-    if (name === 'validator') {
-      content = content.replace("from './index'", "from './index_m'")
-    }
+    content = content.replace("from './index'", "from './index_m'")
     return fs.promises.writeFile(`./lib/web.js`, content)
   })
 }
@@ -77,7 +75,7 @@ const webOption = {
 console.log('正在开始构建文件……')
 
 // 进行过修改的文件，只编译修改过的文件
-const updatedFiles = ['validator'] // ['date', 'dom', 'file', 'index', 'server', 'web', 'validator']
+const updatedFiles = ['web'] // ['date', 'dom', 'file', 'index', 'server', 'web', 'validator']
 const nodes = []
 const web = []
 const createMFiles = []
