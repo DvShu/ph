@@ -1,5 +1,4 @@
 const ts = require('typescript')
-const path = require('path')
 const fs = require('fs')
 
 // 构建支持 web 端的源文件
@@ -20,28 +19,12 @@ function afterBuild() {
   })
 }
 
-// 打开编译后的文件目录，如果不存在则创建
-function openDir() {
-  return new Promise((resolve) => {
-    fs.opendir('./lib', (err) => {
-      if (err == null) {
-        resolve(0)
-      } else {
-        // 目录不存在
-        fs.mkdir('./lib', () => {
-          resolve(0)
-        })
-      }
-    })
-  })
-}
-
 // 任务完成
-function done() {
+function done(extra) {
   return new Promise((resolve) => {
     process.nextTick(() => {
       setTimeout(() => {
-        resolve(0)
+        resolve(extra)
       }, 0)
     })
   })
@@ -72,56 +55,127 @@ const webOption = {
   declaration: true,
 }
 
-console.log('正在开始构建文件……')
+// 检测源文件的更改
+function checkFile() {
+  return new Promise((resolve, reject) => {
+    fs.readdir('./src', 'utf-8', (err, files) => {
+      if (!err) {
+        let len = files.length
+        let stated = 0
+        let fl = {}
+        for (let fileName of files) {
+          fs.stat(`./src/${fileName}`, (err, stat) => {
+            stated++
+            if (!err) {
+              fl[fileName.substring(0, fileName.length - 3)] = parseInt(stat.mtimeMs, 10)
+              if (len === stated) {
+                resolve(fl)
+              }
+            }
+          })
+        }
+      } else {
+        reject(err)
+      }
+    })
+  })
+}
 
-// 进行过修改的文件，只编译修改过的文件
-const updatedFiles = ['web'] // ['date', 'dom', 'file', 'index', 'server', 'web', 'validator']
-const nodes = []
-const web = []
-const createMFiles = []
-updatedFiles.forEach((f) => {
+// 读取构建信息
+function readBuildInfo() {
+  return new Promise((resolve, reject) => {
+    fs.readFile('./buildinfo.json', 'utf-8', (err, content) => {
+      if (err) {
+        // 文件不存在
+        if (err.errno === -4058) {
+          resolve({})
+        } else {
+          reject(err)
+        }
+      } else {
+        resolve(JSON.parse(content))
+      }
+    })
+  })
+}
+
+// 构建编译的文件类型，web node
+function waitFiles(f, n, w, m) {
   if (f === 'server' || f === 'file') {
     // 编译 node 端
-    nodes.push(`./src/${f}.ts`)
+    n.push(`./src/${f}.ts`)
   } else if (f === 'index' || f === 'date' || f === 'validator') {
     // 编译 cjs 和 mjs
-    web.push(`./src/${f}_m.ts`)
-    nodes.push(`./src/${f}.ts`)
-    createMFiles.push(f)
+    w.push(`./src/${f}_m.ts`)
+    n.push(`./src/${f}.ts`)
+    m.push(f)
   } else if (f === 'dom' || f === 'web') {
     // 编译 web 端
-    web.push(`./src/${f}.ts`)
+    w.push(`./src/${f}.ts`)
   }
-})
+}
 
-let queues = []
-openDir()
-  .then(() => {
+// 构建目标文件夹
+function mkToDir() {
+  return new Promise((resolve) => {
+    fs.mkdir('./lib', () => {
+      resolve(0)
+    })
+  })
+}
+
+console.log('项目编译……')
+console.log('检测变动文件……')
+Promise.all([readBuildInfo(), checkFile(), mkToDir()])
+  .then((as) => {
+    let nb = {}
+    const nodes = []
+    const web = []
+    const createMFiles = []
+    const n = []
+
+    for (let fileName in as[1]) {
+      nb[fileName] = as[1][fileName]
+      if (as[0].hasOwnProperty(fileName)) {
+        if (as[0][fileName !== as[1][fileName]]) {
+          waitFiles(fileName, nodes, web, createMFiles)
+          n.push(fileName)
+        }
+      } else {
+        waitFiles(fileName, nodes, web, createMFiles)
+        n.push(fileName)
+      }
+    }
+    const queues = [Promise.resolve(nodes), Promise.resolve(web), Promise.resolve(createMFiles)]
     // 创建带 _m 的文件，用于构建 web 端
     for (let f of createMFiles) {
       queues.push(createMFile(f))
     }
+    queues.push(fs.promises.writeFile('./buildinfo.json', JSON.stringify(nb, null, 2)))
+    // 进行过修改的文件，只编译修改过的文件
     return Promise.all(queues)
   })
-  .then(() => {
-    if (web.length) {
-      compile(web, webOption)
+  .then((a) => {
+    if (a[0].length > 0) {
+      console.log(`构建 node 端文件：${a[0].toString()}`)
+      compile(a[0], nodeOption)
     }
-    if (nodes.length > 0) {
-      compile(nodes, nodeOption)
+    if (a[1].length > 0) {
+      console.log('构建 web 端文件：' + a[1].toString())
+      compile(a[1], webOption)
     }
-    return done()
+    return done([a[2], a[1]])
   })
-  .then(() => {
+  .then((mf) => {
     queues = []
-    for (let f of createMFiles) {
+    for (let f of mf[0]) {
       queues.push(fs.promises.unlink(`./src/${f}_m.ts`))
     }
-    if (web.includes('./src/web.ts')) {
+    if (mf[1].includes('./src/web.ts')) {
       queues.push(afterBuild())
     }
     return Promise.all(queues)
   })
   .then(() => {
-    console.log('文件构建完!')
+    console.log('文件构建完成!')
   })
