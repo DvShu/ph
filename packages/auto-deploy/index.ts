@@ -179,16 +179,29 @@ program
       }
       let file = await fromFile(zipPath)
       formdata.set('file', file)
-      let res = await undici
+      undici
         .fetch(config.url, {
           body: formdata,
           method: 'post',
         })
         .then((res) => {
-          return res.json()
+          if (res.ok) {
+            return res.json()
+          } else {
+            return Promise.reject(new Error(`${res.status} -- ${res.statusText}`))
+          }
         })
-      console.log(res)
-      spinner.succeed('部署成功！')
+        .then((res: any) => {
+          if (res.code === 10000) {
+            spinner.succeed('部署成功！')
+          } else {
+            spinner.fail(`部署失败：${res.message}`)
+          }
+        })
+        .catch((err) => {
+          spinner.fail(`部署失败`)
+          console.error(err)
+        })
     } else {
       spinner.warn('没有文件改变，不需要进行打包部署！')
     }
