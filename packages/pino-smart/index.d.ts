@@ -1,5 +1,3 @@
-/// <reference types="node" />
-import { Transform } from 'stream';
 interface PrettyOption {
     destination?: number | {
         write: () => void;
@@ -8,5 +6,5 @@ interface PrettyOption {
     mkdir?: boolean;
     sync?: boolean;
 }
-declare function build(options: PrettyOption): Transform & import("pino-abstract-transport").OnUnknown;
+declare function build(options: PrettyOption): any;
 export default build;

@@ -67,7 +67,9 @@ export = {
               clearTimeout(t)
               t = setTimeout(() => {
                 setImmediate(() => {
-                  done()
+                  if (typeof done === 'function') {
+                    done()
+                  }
                 })
               }, 10)
             } else {
@@ -79,5 +81,15 @@ export = {
       })
     }
     list(dir, callback, done)
+  },
+
+  /**
+   * 根据文件的 stat 获取文件的 etag
+   * @param filePath 文件地址
+   * @returns file stat etag
+   */
+  async statTag(filePath: string) {
+    let stat = await fs.promises.stat(filePath)
+    return `${stat.size.toString(16)}-${stat.mtimeMs.toString(16)}`
   },
 }

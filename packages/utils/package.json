@@ -5,7 +5,7 @@
   "module": "lib/index_m.js",
   "types": "lib/index.d.ts",
   "browser": "lib/index_m.js",
-  "version": "0.2.7",
+  "version": "0.2.9",
   "repository": {
     "type": "git",
     "url": "git+https//gitee.com/towardly/ph.git",
@@ -19,7 +19,7 @@
   "homepage": "https://gitee.com/towardly/ph/tree/master/packages/utils",
   "devDependencies": {
     "@types/node": "^17.0.21",
-    "typescript": "^4.5.5"
+    "typescript": "4.5.5"
   },
   "scripts": {
     "build": "node scripts/build.js"

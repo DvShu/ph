@@ -3,11 +3,11 @@ export declare function isObject(log: any): boolean;
  * 格式化日志时间
  * @param log
  */
-export declare function prettifyTime(log: any): string;
+export declare function prettifyTime(log: any): any;
 export declare function prettifyString(msg: string | null, color?: string): any;
 export declare function prettifyHttp(log: any): any;
-export declare function prettifyLevelMsg(msg: string, level?: string): string;
-export declare function prettifyMessage(log: any): string;
+export declare function prettifyLevelMsg(msg: string, level?: string): any;
+export declare function prettifyMessage(log: any): any;
 /**
  * Prettifies an error string into a multi-line format.
  * @param {object} input
