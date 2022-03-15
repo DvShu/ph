@@ -12,9 +12,10 @@ import mm = require('micromatch')
 import undici = require('undici')
 import fs = require('fs')
 
-const sourcePath = process.cwd() // path.normalize('E:\\workspace1\\vue-app\\packages\\yz-hjfs')
+const sourcePath = process.cwd()
+// const sourcePath = path.normalize('E:\\workspace1\\vue-app\\packages\\yz-hjfs')
 
-async function readJson(jsonPath: string) {
+async function readJson(jsonPath: string): Promise<any> {
   let jsonData = {}
   try {
     jsonData = await fileUtils.readJSON(jsonPath)
@@ -77,7 +78,16 @@ program
         name: 'type',
         message: '请选择项目类型',
         initial: 0,
-        choices: [{ name: 'normal', message: '普通项目' }],
+        choices: [
+          { name: 'front', message: '前端项目' },
+          { name: 'node', message: 'node后端项目' },
+        ],
+      },
+      {
+        type: 'confirm',
+        name: 'devDependencies',
+        message: 'node工程中的package.json中的devDependencies是否需要包含进去？',
+        initial: false,
       },
       {
         type: 'input',
@@ -109,17 +119,10 @@ program
       },
       {
         type: 'input',
-        name: 'assetsPath',
-        message: '其它资源文件在服务器的地址',
+        name: 'mainPath',
+        message: '工程主要文件在服务器的地址',
       },
     ])
-    response.urlParam = {
-      name: response.name,
-      htmlPath: response.htmlPath,
-      assetsPath: response.assetsPath,
-    }
-    delete response.htmlPath
-    delete response.assetsPath
     await fileUtils.write(path.join(sourcePath, 'deploy.json'), response)
     let spinner = new Spinner()
     spinner.succeed(
@@ -152,18 +155,27 @@ program
     for (let mf of matchFiles) {
       let dirPath = path.dirname(mf)
       let absPath = path.join(targetPath, mf)
-      // 配置了按修改时间按需打包
-      if (config.packByUpdate) {
-        // 验证文件是否修改
-        let currEtag = await fileUtils.statTag(absPath)
-        if ((r[1][mf] || '') !== currEtag) {
-          r[1][mf] = currEtag
+      if (mf.endsWith('package.json') && config.type === 'node') {
+        let tp = await readJson(mf)
+        delete tp.packageManager
+        if (config.devDependencies === false) {
+          delete tp.devDependencies
+        }
+        zip.addFile('package.json', Buffer.from(JSON.stringify(tp, null, 2), 'utf8'))
+      } else {
+        // 配置了按修改时间按需打包
+        if (config.packByUpdate) {
+          // 验证文件是否修改
+          let currEtag = await fileUtils.statTag(absPath)
+          if ((r[1][mf] || '') !== currEtag) {
+            r[1][mf] = currEtag
+            zip.addLocalFile(absPath, dirPath === '.' ? '' : dirPath)
+            uc++
+          }
+        } else {
           zip.addLocalFile(absPath, dirPath === '.' ? '' : dirPath)
           uc++
         }
-      } else {
-        zip.addLocalFile(absPath, dirPath === '.' ? '' : dirPath)
-        uc++
       }
     }
     fileUtils.write(deployinfoPath, r[1]).then(() => {})
@@ -173,9 +185,11 @@ program
       spinner.succeed('项目打包完成！')
       spinner.start('正在上传压缩包到服务器进行部署……')
       const formdata = new undici.FormData()
-      // eslint-disable-next-line
-      for (let key in config.urlParam) {
-        formdata.set(key, config.urlParam[key])
+      formdata.set('name', config.name)
+      formdata.set('mainPath', config.mainPath)
+      formdata.set('type', config.type)
+      if (config.type === 'front') {
+        formdata.set('htmlPath', config.htmlPath)
       }
       let file = await fromFile(zipPath)
       formdata.set('file', file)
