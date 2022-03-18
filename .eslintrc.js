@@ -1,5 +1,6 @@
 module.exports = {
-  extends: ['alloy', 'alloy/typescript'],
+  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
+  root: true,
   env: {
     // 你的环境变量（包含多个预定义的全局变量）
     //
@@ -19,9 +20,6 @@ module.exports = {
     // 自定义你的规则
     'no-eq-null': 'off',
     eqeqeq: ['error', 'always', { null: 'ignore' }],
-    'no-param-reassign': 'off',
-    'max-params': ['error', 5],
-    '@typescript-eslint/no-require-imports': 'off',
-    complexity: ["error", 30]
+    '@typescript-eslint/no-explicit-any': 'off'
   },
 }

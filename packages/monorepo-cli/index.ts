@@ -57,10 +57,10 @@ const gitignore = ['node_modules', '*.log', '.idea', '.vscode', '/packages/**/LI
  * @param cb  下载完成后的回调，参数表示是否失败
  */
 function downloadBerry(yarnPath: string, rc: number, cb: (isError: boolean) => void) {
-  let req = https.get('https://codechina.csdn.net/u011113654/yarn2-berry/-/raw/master/yarn-berry.cjs', (res) => {
+  const req = https.get('https://codechina.csdn.net/u011113654/yarn2-berry/-/raw/master/yarn-berry.cjs', (res) => {
     res.setEncoding('utf-8')
-    let savePath = path.join(yarnPath, 'yarn-berry.cjs')
-    let saveStream = fs.createWriteStream(savePath)
+    const savePath = path.join(yarnPath, 'yarn-berry.cjs')
+    const saveStream = fs.createWriteStream(savePath)
     saveStream.on('close', () => {
       cb(false)
     })
@@ -81,12 +81,12 @@ function downloadBerry(yarnPath: string, rc: number, cb: (isError: boolean) => v
  * https GET 请求
  * @param {String} url 请求 url 地址
  */
-let get = function (url: string) {
+const get = function (url: string) {
   return new Promise((resolve, reject) => {
     https
       .get(url, (res) => {
         let resData = ''
-        let statusCode = res.statusCode as number
+        const statusCode = res.statusCode as number
         res.setEncoding('utf8')
         res.on('data', (chunk) => {
           resData += chunk
@@ -128,12 +128,12 @@ function checkDependencies(pkgs: string[]): Promise<PackageVersion[]> {
   return new Promise((resolve) => {
     let dev1: any[] = []
     let dev2: any[] = []
-    let len = pkgs.length
+    const len = pkgs.length
     if (len === 0) {
       resolve([])
     }
     for (let i = 0; i < len; i++) {
-      let name = pkgs[i] as string
+      const name = pkgs[i] as string
       queryPackage(name)
         .then((pka: any) => {
           pka.start = true
@@ -154,7 +154,7 @@ function checkDependencies(pkgs: string[]): Promise<PackageVersion[]> {
           if (dev1.length + dev2.length === len) {
             dev1 = dev1.sort((a, b) => a.name.localeCompare(b.name))
             dev2 = dev2.sort((a, b) => a.name.localeCompare(b.name))
-            let dev = dev1.concat(dev2)
+            const dev = dev1.concat(dev2)
             dev[dev.length - 1].start = false
             resolve(dev)
           }
@@ -181,7 +181,7 @@ interface WorkspaceConfig {
  */
 function initWorkspace(workspaceConfig: WorkspaceConfig) {
   return new Promise((resolve) => {
-    let wsDevs: string[] = []
+    const wsDevs: string[] = []
     // 复制 LICENSE 文件
     fs.copyFile(path.join(workspaceConfig.proPath, 'LICENSE'), path.join(workspaceConfig.path, 'LICENSE'), () => {})
 
@@ -190,7 +190,7 @@ function initWorkspace(workspaceConfig: WorkspaceConfig) {
     // README.md
     fileUtils.write(path.join(workspaceConfig.path, 'README.md'), `#${workspaceConfig.name}\r\n---`)
     if (workspaceConfig.isTs) {
-      let tsConfig: any = {
+      const tsConfig: any = {
         extends: '../../tsconfig_base.json',
         compilerOptions: {
           module: 'CommonJS',
@@ -226,7 +226,7 @@ function updateYarn(proPath: string) {
     const yarnPath = path.join(proPath, '.yarn', 'releases')
     fs.mkdir(yarnPath, { recursive: true }, () => {})
     fileUtils.write(path.join(proPath, '.yarnrc.yml'), 'yarnPath: ".yarn/releases/yarn-berry.cjs"')
-    let rc = 0 // 重试次数
+    const rc = 0 // 重试次数
     // 下载更新 yarn 版本到 berry
     downloadBerry(yarnPath, rc, (isError) => {
       if (isError === true) {
@@ -249,7 +249,7 @@ function updateYarn(proPath: string) {
  */
 function initProject(proPath: string, config: CreateConfig): Promise<string[]> {
   return new Promise((resolve) => {
-    let proDevs: string[] = []
+    const proDevs: string[] = []
     if (config.license === true) {
       fs.copyFile(path.join(TEMPLATE_PATH, 'LICENSE'), path.join(proPath, 'LICENSE'), () => {})
     }
@@ -836,8 +836,8 @@ program
     let mysqlConfig: Answer2Intf // mysql 连接选项
     let mongoConfig: Answer2Intf // mongo 连接选项
     let proPath = config.director || process.cwd()
-    let devs: string[] = ['mocha', 'pino-smart', 'nodemon']
-    let deps: string[] = ['fastify']
+    const devs: string[] = ['mocha', 'pino-smart', 'nodemon']
+    const deps: string[] = ['fastify']
     let isApp = true
     let workspaceInfo: any
     enquirer

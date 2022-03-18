@@ -1,0 +1,49 @@
+{
+  "name": "@fly_dream/monorepo",
+  "description": "创建 monorepo 项目",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https//gitee.com/towardly/ph.git",
+    "directory": "packages/monorepo"
+  },
+  "license": "MIT",
+  "author": "DvShu <1456207945@qq.com>",
+  "bugs": {
+    "url": "https://gitee.com/towardly/ph/issues"
+  },
+  "homepage": "https://gitee.com/towardly/ph/tree/master/packages/monorepo",
+  "devDependencies": {
+    "@types/node": "^17.0.21",
+    "commander": "^9.0.0",
+    "ts-node": "^10.0.0",
+    "typescript": "4.5.5"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "dev": "ts-node index.ts"
+  },
+  "bin": "index.js",
+  "files": [
+    "index.js",
+    "templates/"
+  ],
+  "keywords": [
+    "nodejs",
+    "ph",
+    "cli",
+    "monorepo",
+    "workspace",
+    "packages",
+    "yarn",
+    "lerna",
+    "init",
+    "generate",
+    "create"
+  ],
+  "dependencies": {
+    "ph-utils": "workspace:^"
+  }
+}

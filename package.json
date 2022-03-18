@@ -19,7 +19,7 @@
     "init": "node createPackages.js",
     "build:spinner": "cd packages/terminal-spinner && yarn build"
   },
-  "author": "DvShu <1456207945@qq.com>",
+  "author": "DvShu <tenny.shu@foxmail.com>",
   "repository": {
     "type": "git",
     "url": "git+https://gitee.com/towardly/ph.git"

@@ -27,13 +27,13 @@ async function readJson(jsonPath: string): Promise<any> {
 
 function fromFile(filePath: string) {
   return new Promise((resolve, reject) => {
-    let s = fs.createReadStream(filePath)
-    let chunks: Buffer[] = []
+    const s = fs.createReadStream(filePath)
+    const chunks: Buffer[] = []
     s.on('data', (chunk: Buffer) => {
       chunks.push(chunk)
     })
     s.on('end', () => {
-      let buf = Buffer.concat(chunks)
+      const buf = Buffer.concat(chunks)
       resolve(new undici.File([buf], 'deploy.zip'))
     })
     s.on('error', (err) => {
@@ -65,7 +65,7 @@ program
   .command('init')
   .description('初始化自动化部署配置')
   .action(async () => {
-    let projectPkg: any = await readJson(path.join(sourcePath, 'package.json'))
+    const projectPkg: any = await readJson(path.join(sourcePath, 'package.json'))
     const response = await enquirer.prompt<any>([
       {
         type: 'input',
@@ -124,7 +124,7 @@ program
       },
     ])
     await fileUtils.write(path.join(sourcePath, 'deploy.json'), response)
-    let spinner = new Spinner()
+    const spinner = new Spinner()
     spinner.succeed(
       '初始化自动化部署成功！请将 "deploy":"deploy d" 或者 "deploy": "vite build & deploy d" 添加到 package.json 的 scripts 命令下',
     )
@@ -134,11 +134,11 @@ program
   .command('d')
   .description('部署项目')
   .action(async () => {
-    let spinner = new Spinner()
+    const spinner = new Spinner()
     spinner.start('正在进行项目打包……')
     const deployinfoPath = path.join(sourcePath, 'deployinfo.json')
-    let r: any = await Promise.all([readJson(path.join(sourcePath, 'deploy.json')), readJson(deployinfoPath)])
-    let config: any = {
+    const r: any = await Promise.all([readJson(path.join(sourcePath, 'deploy.json')), readJson(deployinfoPath)])
+    const config: any = {
       name: '',
       type: 'normal',
       buildedPath: 'dist',
@@ -146,17 +146,17 @@ program
       packByUpdate: true,
       ...r[0],
     }
-    let zip = new AdmZip()
+    const zip = new AdmZip()
     // 遍历目标文件夹
     const targetPath = path.join(sourcePath, config.buildedPath)
     let matchFiles = await traverseDir(targetPath)
     matchFiles = mm(matchFiles, config.files)
     let uc = 0
-    for (let mf of matchFiles) {
-      let dirPath = path.dirname(mf)
-      let absPath = path.join(targetPath, mf)
+    for (const mf of matchFiles) {
+      const dirPath = path.dirname(mf)
+      const absPath = path.join(targetPath, mf)
       if (mf.endsWith('package.json') && config.type === 'node') {
-        let tp = await readJson(mf)
+        const tp = await readJson(mf)
         delete tp.packageManager
         if (config.devDependencies === false) {
           delete tp.devDependencies
@@ -166,7 +166,7 @@ program
         // 配置了按修改时间按需打包
         if (config.packByUpdate) {
           // 验证文件是否修改
-          let currEtag = await fileUtils.statTag(absPath)
+          const currEtag = await fileUtils.statTag(absPath)
           if ((r[1][mf] || '') !== currEtag) {
             r[1][mf] = currEtag
             zip.addLocalFile(absPath, dirPath === '.' ? '' : dirPath)
@@ -180,7 +180,7 @@ program
     }
     fileUtils.write(deployinfoPath, r[1]).then(() => {})
     if (uc > 0) {
-      let zipPath = path.join(sourcePath, config.buildedPath, 'deploy.zip')
+      const zipPath = path.join(sourcePath, config.buildedPath, 'deploy.zip')
       zip.writeZip(zipPath)
       spinner.succeed('项目打包完成！')
       spinner.start('正在上传压缩包到服务器进行部署……')
@@ -191,7 +191,7 @@ program
       if (config.type === 'front') {
         formdata.set('htmlPath', config.htmlPath)
       }
-      let file = await fromFile(zipPath)
+      const file = await fromFile(zipPath)
       formdata.set('file', file)
       undici
         .fetch(config.url, {

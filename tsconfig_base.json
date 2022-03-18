@@ -1,12 +1,12 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "lib": ["ESNext", "DOM"],
+    "lib": ["esnext", "dom"],
     "strict": true,
-    "target": "ES2017",
-    "module": "es6",
+    "target": "esnext",
+    "module": "esnext",
     "pretty": true,
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
     "sourceMap": false,
     "resolveJsonModule": true,
     "esModuleInterop": true,
