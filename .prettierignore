@@ -1,8 +1,9 @@
-.prettierrc.js
-.eslintrc.js
-.pnp.js
-packages/utils/lib/*
-/packages/terminal-spinner/index.js
-/packages/terminal-spinner/index.d.ts
-/packages/monorepo-cli/*.js
-/packages/**/*.js
+.prettierignore
+.pnp.cjs
+.pnp.loader.mjs
+.yarnrc.yml
+yarn.lock
+pnpm-lock.yaml
+pnpm-workspace.yaml
+LICENSE
+.gitignore

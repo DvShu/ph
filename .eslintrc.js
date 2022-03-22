@@ -1,25 +1,18 @@
 module.exports = {
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    ecmaFeatures: {
+      jsx: true,
+    },
+    ecmaVersion: 'latest',
+    
+  },
   root: true,
-  env: {
-    // 你的环境变量（包含多个预定义的全局变量）
-    //
-    // browser: true,
-    node: true,
-    // mocha: true,
-    // jest: true,
-    // jquery: true
-  },
-  globals: {
-    // 你的全局变量（设置为 false 表示它不允许被重新赋值）
-    //
-    // myGlobal: false
-    $message: false
-  },
   rules: {
-    // 自定义你的规则
     'no-eq-null': 'off',
     eqeqeq: ['error', 'always', { null: 'ignore' }],
-    '@typescript-eslint/no-explicit-any': 'off'
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
   },
 }
