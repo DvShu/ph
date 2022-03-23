@@ -1,7 +1,7 @@
 {
   "name": "@fly_dream/monorepo",
   "description": "创建 monorepo 项目",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "repository": {
     "type": "git",
     "url": "git+https//gitee.com/towardly/ph.git",
@@ -15,7 +15,6 @@
   "homepage": "https://gitee.com/towardly/ph/tree/master/packages/monorepo",
   "devDependencies": {
     "@types/node": "^17.0.21",
-    "commander": "^9.0.0",
     "ts-node": "^10.0.0",
     "typescript": "4.5.5"
   },
@@ -23,9 +22,7 @@
     "build": "tsc",
     "dev": "ts-node index.ts"
   },
-  "bin": {
-    "monorepo": "index.js"
-  },
+  "bin": "index.js",
   "files": [
     "index.js",
     "utils.js",
@@ -40,6 +37,7 @@
     "packages"
   ],
   "dependencies": {
+    "commander": "^9.1.0",
     "ph-terminal-spinner": "workspace:^",
     "ph-utils": "workspace:^"
   }

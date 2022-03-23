@@ -43,3 +43,7 @@ monorepo --help
 ### 3. `monorepo lint`
 
 初始化 `eslint + prettier`
+
+### 4. `rm [dir]`
+
+强制删除目录，默认为：node_modules

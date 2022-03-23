@@ -18,7 +18,7 @@ import {
 // 名称-版本-描述
 program.name('monorepo').description(pkg.description).version(pkg.version)
 
-// let targetPath = path.resolve('/www/wwwlogs/a')
+// let targetPath = path.resolve('E:\\workspace1\\a')
 let targetPath = process.cwd()
 
 // 全局变量，用于模板引擎替换
@@ -169,6 +169,25 @@ program
     spinner.start('正在开始初始化 eslint + prettier')
     await lint()
     spinner.succeed('eslint + prettier 初始化成功')
+  })
+
+program
+  .command('rm')
+  .argument('[dir]', '待删除的文件夹名称，默认为：node_modules')
+  .description('强制删除文件夹')
+  .action(async (dir?: string) => {
+    const deleteDir = dir || 'node_modules'
+    const startTime = Date.now()
+    const spinner = new Spinner()
+    spinner.start('正在开始初始化 eslint + prettier')
+    await fs.rm(path.join(targetPath, deleteDir), {
+      force: true,
+      recursive: true,
+    })
+    const endTime = Date.now()
+    spinner.succeed(
+      `删除文件夹 ${deleteDir} 成功，耗时：${endTime - startTime}ms`
+    )
   })
 
 program.parse(process.argv)

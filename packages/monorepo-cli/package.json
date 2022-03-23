@@ -17,7 +17,7 @@
   "homepage": "https://gitee.com/towardly/ph/tree/master/packages/monorepo-cli",
   "dependencies": {
     "ansi-colors": "^4.1.1",
-    "commander": "^9.0.0",
+    "commander": "^9.1.0",
     "enquirer": "^2.3.6",
     "mustache": "^4.2.0",
     "ph-terminal-spinner": "workspace:packages/terminal-spinner",
