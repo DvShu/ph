@@ -53,7 +53,7 @@ function traverseDir(dirPath: string): Promise<string[]> {
       },
       () => {
         resolve(l)
-      },
+      }
     )
   })
 }
@@ -65,7 +65,9 @@ program
   .command('init')
   .description('初始化自动化部署配置')
   .action(async () => {
-    const projectPkg: any = await readJson(path.join(sourcePath, 'package.json'))
+    const projectPkg: any = await readJson(
+      path.join(sourcePath, 'package.json')
+    )
     const response = await enquirer.prompt<any>([
       {
         type: 'input',
@@ -86,7 +88,8 @@ program
       {
         type: 'confirm',
         name: 'devDependencies',
-        message: 'node工程中的package.json中的devDependencies是否需要包含进去？',
+        message:
+          'node工程中的package.json中的devDependencies是否需要包含进去？',
         initial: false,
       },
       {
@@ -98,19 +101,28 @@ program
       {
         type: 'list',
         name: 'files',
-        message: '包含的文件或目录列表,跟 .gitignore 规则类似(多个规则以 , 分隔)',
+        message:
+          '包含的文件或目录列表,跟 .gitignore 规则类似(多个规则以 , 分隔)',
         initial: '**,!*.zip',
       },
       {
         type: 'confirm',
         name: 'packByUpdate',
-        message: '是否根据修改时间进行增量打包部署(只部署已经修改过的文件[修改时间发生变化])',
+        message:
+          '是否根据修改时间进行增量打包部署(只部署已经修改过的文件[修改时间发生变化])',
         initial: true,
+      },
+      {
+        type: 'confirm',
+        name: 'hashPath',
+        message: '文件名称是否是带 hash 值的名称',
+        initial: false,
       },
       {
         type: 'input',
         name: 'url',
-        message: '部署地址，填写部署了 auto-deploy 后端项目的服务器的部署的地址',
+        message:
+          '部署地址，填写部署了 auto-deploy 后端项目的服务器的部署的地址',
       },
       {
         type: 'input',
@@ -126,7 +138,7 @@ program
     await fileUtils.write(path.join(sourcePath, 'deploy.json'), response)
     const spinner = new Spinner()
     spinner.succeed(
-      '初始化自动化部署成功！请将 "deploy":"deploy d" 或者 "deploy": "vite build & deploy d" 添加到 package.json 的 scripts 命令下',
+      '初始化自动化部署成功！请将 "deploy":"deploy d" 或者 "deploy": "vite build && deploy d" 添加到 package.json 的 scripts 命令下'
     )
   })
 
@@ -137,13 +149,17 @@ program
     const spinner = new Spinner()
     spinner.start('正在进行项目打包……')
     const deployinfoPath = path.join(sourcePath, 'deployinfo.json')
-    const r: any = await Promise.all([readJson(path.join(sourcePath, 'deploy.json')), readJson(deployinfoPath)])
+    const r: any = await Promise.all([
+      readJson(path.join(sourcePath, 'deploy.json')),
+      readJson(deployinfoPath),
+    ])
     const config: any = {
       name: '',
       type: 'normal',
       buildedPath: 'dist',
       files: [],
       packByUpdate: true,
+      hashPath: false,
       ...r[0],
     }
     const zip = new AdmZip()
@@ -152,6 +168,7 @@ program
     let matchFiles = await traverseDir(targetPath)
     matchFiles = mm(matchFiles, config.files)
     let uc = 0
+    const nc: { [index: string]: string } = {}
     for (const mf of matchFiles) {
       const dirPath = path.dirname(mf)
       const absPath = path.join(targetPath, mf)
@@ -161,25 +178,37 @@ program
         if (config.devDependencies === false) {
           delete tp.devDependencies
         }
-        zip.addFile('package.json', Buffer.from(JSON.stringify(tp, null, 2), 'utf8'))
+        zip.addFile(
+          'package.json',
+          Buffer.from(JSON.stringify(tp, null, 2), 'utf8')
+        )
       } else {
-        // 配置了按修改时间按需打包
-        if (config.packByUpdate) {
-          // 验证文件是否修改
-          const currEtag = await fileUtils.statTag(absPath)
-          if ((r[1][mf] || '') !== currEtag) {
-            r[1][mf] = currEtag
+        // 配置了按 hash path 文件
+        if (/.+\.[a-zA-Z0-9]{8,16}\..+$/.test(mf) && config.hashPath) {
+          if (r[1][mf] == null) {
             zip.addLocalFile(absPath, dirPath === '.' ? '' : dirPath)
             uc++
           }
+          nc[mf] = `${Date.now()}`
         } else {
-          zip.addLocalFile(absPath, dirPath === '.' ? '' : dirPath)
-          uc++
+          // 配置了按修改时间按需打包
+          if (config.packByUpdate) {
+            // 验证文件是否修改
+            const currEtag = await fileUtils.statTag(absPath)
+            if ((r[1][mf] || '') !== currEtag) {
+              nc[mf] = currEtag
+              zip.addLocalFile(absPath, dirPath === '.' ? '' : dirPath)
+              uc++
+            }
+          } else {
+            zip.addLocalFile(absPath, dirPath === '.' ? '' : dirPath)
+            uc++
+          }
         }
       }
     }
-    fileUtils.write(deployinfoPath, r[1]).then(() => {})
-    if (uc > 0) {
+    fileUtils.write(deployinfoPath, nc).then(() => {})
+    if (uc > 100) {
       const zipPath = path.join(sourcePath, config.buildedPath, 'deploy.zip')
       zip.writeZip(zipPath)
       spinner.succeed('项目打包完成！')
@@ -202,7 +231,9 @@ program
           if (res.ok) {
             return res.json()
           } else {
-            return Promise.reject(new Error(`${res.status} -- ${res.statusText}`))
+            return Promise.reject(
+              new Error(`${res.status} -- ${res.statusText}`)
+            )
           }
         })
         .then((res: any) => {
