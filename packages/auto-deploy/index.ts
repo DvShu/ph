@@ -208,7 +208,7 @@ program
       }
     }
     fileUtils.write(deployinfoPath, nc).then(() => {})
-    if (uc > 100) {
+    if (uc > 0) {
       const zipPath = path.join(sourcePath, config.buildedPath, 'deploy.zip')
       zip.writeZip(zipPath)
       spinner.succeed('项目打包完成！')

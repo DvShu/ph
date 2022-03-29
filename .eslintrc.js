@@ -18,5 +18,7 @@ module.exports = {
       'error',
       { allow: ['arrowFunctions'] },
     ],
+    'prefer-const': 'off',
+    'prefer-rest-params': 'off',
   },
 }

@@ -30,6 +30,7 @@ a {
   text-decoration: none;
   color: #1657d9;
   cursor: pointer;
+  transition: color 0.3s;
 }
 a:hover {
   color: #2d68dd; /* less tint(#1657d9, 10%) */

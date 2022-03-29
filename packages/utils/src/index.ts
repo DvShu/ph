@@ -38,7 +38,10 @@ export function shieldMobile(mobile: string) {
  * @param numericParam.isFloat 是否是小数
  * @returns true 是数字, false 不是数字
  */
-export function isNumeric(str: string, numericParam?: { isPositive?: boolean; isFloat?: boolean }): boolean {
+export function isNumeric(
+  str: string,
+  numericParam?: { isPositive?: boolean; isFloat?: boolean }
+): boolean {
   numericParam = { isPositive: false, isFloat: true, ...(numericParam || {}) }
   let symbol = numericParam.isPositive ? '[+]?' : '[+-]?'
   let main = numericParam.isFloat ? '([0-9]*[.])?[0-9]+' : '[0-9]+'
@@ -73,7 +76,7 @@ export class BaseError extends Error {
    * @param name 错误名称
    * @param message 错误描述
    */
-  public constructor(name: String, message: string)
+  public constructor(name: string, message: string)
   public constructor() {
     if (arguments.length === 1) {
       super(arguments[0])
@@ -82,5 +85,21 @@ export class BaseError extends Error {
       super(arguments[1])
       this.name = arguments[0]
     }
+  }
+}
+
+/**
+ * 创建一个节流函数，在 wait 秒内最多执行 func 一次的函数。
+ * @param func 要节流的函数
+ * @param wait 需要节流的毫秒
+ * @returns
+ */
+export function throttle<T extends (...args: any) => any>(func: T, wait = 300) {
+  let t = -1
+  return function (...args: any[]) {
+    clearTimeout(t)
+    t = setTimeout(() => {
+      func(...args)
+    }, wait) as any
   }
 }

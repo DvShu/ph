@@ -133,11 +133,10 @@ Promise.all([readBuildInfo(), checkFile(), mkToDir()])
     const web = []
     const createMFiles = []
     const n = []
-
     for (let fileName in as[1]) {
       nb[fileName] = as[1][fileName]
       if (as[0].hasOwnProperty(fileName)) {
-        if (as[0][fileName !== as[1][fileName]]) {
+        if (as[0][fileName] !== as[1][fileName]) {
           waitFiles(fileName, nodes, web, createMFiles)
           n.push(fileName)
         }
