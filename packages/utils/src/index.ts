@@ -97,9 +97,10 @@ export class BaseError extends Error {
 export function throttle<T extends (...args: any) => any>(func: T, wait = 300) {
   let t = -1
   return function (...args: any[]) {
+    const self = this
     clearTimeout(t)
     t = setTimeout(() => {
-      func(...args)
+      func.apply(self, args)
     }, wait) as any
   }
 }

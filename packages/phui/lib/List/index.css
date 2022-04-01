@@ -25,16 +25,25 @@
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   height: 100%;
-}
-.ph-list .ph-list-wrapper {
   position: relative;
 }
-.ph-list .ph-list-footer {
+/* .ph-list .ph-list-wrapper {
+  position: relative;
+} */
+.ph-list .ph-list-inner {
+  width: 100%;
+}
+.ph-list .ph-list-loader-wrapper {
   height: 50px;
   display: flex;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
+}
+.ph-list .ph-list-header {
+  border-bottom: 1px solid #dedede;
+}
+.ph-list .ph-list-footer {
   border-top: 1px solid #dedede;
 }
 .ph-list .ph-loading-bounce {

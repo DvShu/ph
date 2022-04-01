@@ -3,7 +3,8 @@
   "compilerOptions": {
     "module": "es6",
     "resolveJsonModule": false,
-    "outDir": "./"
+    "outDir": "./",
+    "noImplicitThis": false
   },
   "files": ["src/index.ts"]
 }

@@ -9,7 +9,7 @@ for (let i = 0; i < 100; i++) {
 
 let list = new List('#list', {
   mode: 1,
-  template: (d: number) => {
+  renderItem: (d: number) => {
     let $item = document.createElement('div')
     $item.className = 'ph-list-item'
     $item.textContent = String(d)

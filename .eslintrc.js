@@ -20,5 +20,12 @@ module.exports = {
     ],
     'prefer-const': 'off',
     'prefer-rest-params': 'off',
+    '@typescript-eslint/no-this-alias': [
+      'error',
+      {
+        allowDestructuring: false, // Disallow `const { props, state } = this`; true by default
+        allowedNames: ['self'], // Allow `const self = this`; `[]` by default
+      },
+    ],
   },
 }
