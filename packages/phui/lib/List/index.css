@@ -27,9 +27,9 @@
   height: 100%;
   position: relative;
 }
-/* .ph-list .ph-list-wrapper {
+.ph-list .ph-list-wrapper {
   position: relative;
-} */
+}
 .ph-list .ph-list-inner {
   width: 100%;
 }
@@ -40,11 +40,13 @@
   align-items: center;
   box-sizing: border-box;
 }
-.ph-list .ph-list-header {
-  border-bottom: 1px solid #dedede;
-}
 .ph-list .ph-list-footer {
   border-top: 1px solid #dedede;
+}
+.ph-virtual-footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
 }
 .ph-list .ph-loading-bounce {
   width: 16px;

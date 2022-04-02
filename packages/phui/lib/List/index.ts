@@ -9,15 +9,18 @@ interface ListOption {
   renderItem: (data: any, i: number, list: any[]) => HTMLElement
   /** 滚动容器的高度 */
   height?: number | string
+  /** 每一页条数, 填0则自动计算 */
+  pageSize?: number
+  /** 列表每项高度, 当 mode: 1 时此字段必填 */
+  itemHeight?: number
 }
 
 export default class List extends Component<HTMLDivElement> {
   private _wrapper: HTMLDivElement
   private _inner: HTMLDivElement
-  private _main: HTMLDivElement
   private _footer: HTMLDivElement
   /// 加载数据的事件
-  private _loadEvent: (page: number) => void
+  private _loadEvent: (page: number, pageSize: number) => void
   private _config: Required<ListOption>
   /** 页码 */
   public page: number
@@ -25,12 +28,17 @@ export default class List extends Component<HTMLDivElement> {
   public height: number
   /** 0 - 初始装, 1 - 正在加载数据, 2 - 加载错误, 3 - 加载完成 */
   private _loadStatus: number
+  /** 所有已经加载过的数据 */
+  public datas: any[]
+  /** 每一页显示条数 */
+  public pageSize: number
   public constructor(el: string | HTMLDivElement, config: ListOption) {
     super(el)
-    this._config = { mode: 0, ...config, height: 0 }
+    this._config = { mode: 0, height: 0, pageSize: 0, itemHeight: 0, ...config }
     this.page = 0
     this.height = 0
     this._loadStatus = 0
+    this.datas = []
 
     /* 初始化列表基本结构 */
     this.el.classList.add('ph-list')
@@ -38,17 +46,24 @@ export default class List extends Component<HTMLDivElement> {
     this._wrapper.className = 'ph-list-wrapper'
     this._inner = document.createElement('div')
     this._inner.className = 'ph-list-inner'
-    this._main = document.createElement('div')
-    this._inner.appendChild(this._main)
+    this._wrapper.appendChild(this._inner)
     this._footer = document.createElement('div')
     this._footer.className = 'ph-list-loader-wrapper ph-list-footer'
+    if (this._config.mode === 1) {
+      this._footer.classList.add('ph-virtual-footer')
+    }
     this._renderLoading(this._footer)
-    this._inner.appendChild(this._footer)
-    this._wrapper.appendChild(this._inner)
+    this._wrapper.appendChild(this._footer)
     this.el.appendChild(this._wrapper)
 
     this._initHeight() // 初始化高度
     this._loadEvent = () => {}
+    // 计算每一页显示的数量
+    if (this._config.pageSize === 0 && this._config.itemHeight !== 0) {
+      this.pageSize = Math.ceil(this.height / this._config.itemHeight) + 1
+    } else {
+      this.pageSize = this._config.pageSize
+    }
     // 监听滚动事件
     this.el.addEventListener('scroll', throttle(this._scroll.bind(this), 100))
   }
@@ -68,7 +83,7 @@ export default class List extends Component<HTMLDivElement> {
   private _loadData() {
     this._loadStatus = 1
     this.page++
-    this._loadEvent(this.page)
+    this._loadEvent(this.page, this.pageSize)
   }
 
   private _scroll() {
@@ -78,7 +93,11 @@ export default class List extends Component<HTMLDivElement> {
       // 加载下一页
       if (this._loadStatus === 0) {
         this._loadData()
+      } else if (this._loadStatus === 3) {
+        this.render([], 3)
       }
+    } else {
+      this.render([], 0)
     }
   }
 
@@ -105,7 +124,7 @@ export default class List extends Component<HTMLDivElement> {
       'click',
       () => {
         this.setStatus(1)
-        this._loadEvent(this.page)
+        this._loadEvent(this.page, this.pageSize)
       },
       { once: true }
     )
@@ -115,7 +134,7 @@ export default class List extends Component<HTMLDivElement> {
   }
 
   /** 配置加载事件 */
-  public load(fn: (page: number) => void) {
+  public load(fn: (page: number, pageSize: number) => void) {
     this._loadEvent = fn
     this._loadData()
   }
@@ -139,42 +158,41 @@ export default class List extends Component<HTMLDivElement> {
    * @param data  待渲染的数据列表
    * @param status 本次数据加载状态， 0 - 本次数据加载成功 , 2 - 数据加载失败, 3 - 全部数据加载完成
    */
-  public render(data: any, status?: number) {
+  public render(data: any[], status?: number) {
     let s = status || 0
     if (this._loadStatus === 1) {
       this.setStatus(s)
     }
     if (s === 0 || s === 3) {
-      // let children = this._main.childNodes
-      // let clone = this._main.cloneNode(true) as HTMLDivElement
-      // let cloneChildren = clone.childNodes
-      // let lastTop = 0
-      // for (let i = 0, len = children.length; i < len; i++) {
-      //   let $listItem = children[i] as HTMLElement
-      //   let itemRect = $listItem.getBoundingClientRect()
-      //   if (itemRect.height + itemRect.top > 0) {
-      //     break
-      //   }
-      //   lastTop = itemRect.height + itemRect.top
-      //   clone.removeChild(cloneChildren[0])
-      // }
-      // lastTop = this.el.scrollTop + lastTop
-      // this._inner.style.transform = `translate3d(0, ${lastTop}px, 0)`
+      let d = []
+      if (this._config.mode === 1) {
+        this.datas = this.datas.concat(data)
+        // 当前滚动位置
+        let scrollTop = this.el.scrollTop
+        // 开始索引
+        let start = Math.floor(scrollTop / this._config.itemHeight)
+        let end = start + this.pageSize
+        let startOffset = scrollTop - (scrollTop % this._config.itemHeight)
+        d = this.datas.slice(start, Math.min(end, this.datas.length))
+        this._inner.style.transform = `translate3d(0, ${startOffset}px, 0)`
+        if (data.length > 0) {
+          let h = this.datas.length * this._config.itemHeight + 50
+          this._wrapper.style.height = `${h}px`
+        }
+      } else {
+        d = data
+      }
+
       let fragment = document.createDocumentFragment()
-      for (let i = 0, len = data.length; i < len; i++) {
-        fragment.appendChild(this._config.renderItem(data[i], i, data))
+      for (let i = 0, len = d.length; i < len; i++) {
+        fragment.appendChild(this._config.renderItem(d[i], i, d))
       }
       if (this._config.mode === 0) {
-        this._main.appendChild(fragment)
+        this._inner.appendChild(fragment)
+      } else {
+        this._inner.innerHTML = ''
+        this._inner.appendChild(fragment)
       }
-      // let oldHeight = this._wrapper.getBoundingClientRect()
-      // this._wrapper.style.height = `${oldHeight.height + 500}px`
-      // clone.appendChild(fragment)
-      // this._main.innerHTML = clone.innerHTML
-      // requestAnimationFrame(() => {
-      //   let newHeight = this._inner.getBoundingClientRect().height
-      //   this._wrapper.style.height = `${newHeight}px`
-      // })
     }
   }
 

@@ -9,6 +9,7 @@ for (let i = 0; i < 100; i++) {
 
 let list = new List('#list', {
   mode: 1,
+  itemHeight: 50,
   renderItem: (d: number) => {
     let $item = document.createElement('div')
     $item.className = 'ph-list-item'
@@ -16,11 +17,11 @@ let list = new List('#list', {
     return $item
   },
 })
-list.load((page) => {
+list.load((page: number, pageSize: number) => {
   setTimeout(() => {
-    let start = (page - 1) * 20
-    let end = start + 20
-    let status = page === 5 ? 3 : 0
+    let start = (page - 1) * pageSize
+    let end = start + pageSize
+    let status = end >= datas.length ? 3 : 0
     list.render(datas.slice(start, end), status)
   }, 500)
 })
