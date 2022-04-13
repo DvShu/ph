@@ -1,14 +1,25 @@
-# auto-deploy-cli
+# phui-vue-resolver
 
-自动化部署本地项目到远程服务器，远程服务器需要先部署 `auto-deploy` 的后台服务。
+在使用 `vite` 构建 `vue` 的项目中，自动引入 [phui-v](https://www.npmjs.com/package/phui-v)
 
 ### 安装
 
 ```
-npm install @tenny/auto-deploy -g
+npm install unplugin-vue-components phui-vue-resolver -D
 ```
 
-### 命令
+### 使用
 
-1. 初始化配置：`deploy init`
-2. 上传部署：`deploy d`
+在 `vite.config.ts` 的 `plugins` 添加如下代码：
+
+```javascript
+import Components from 'unplugin-vue-components/vite'
+import PhuiResolver from 'phui-vue-resolver'
+
+plugins: [
+  ...Components({
+    dts: 'src/components.d.ts',
+    resolvers: [PhuiResolver()],
+  }),
+]
+```

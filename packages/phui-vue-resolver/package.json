@@ -1,6 +1,6 @@
 {
   "name": "phui-vue-resolver",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "针对于phui的 unplugin-vue-components 的自动导入",
   "main": "index.js",
   "types": "index.d.ts",
