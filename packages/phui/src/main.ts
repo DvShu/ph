@@ -10,11 +10,9 @@ for (let i = 0; i < 100; i++) {
 let list = new List('#list', {
   mode: 1,
   itemHeight: 50,
-  renderItem: (d: number) => {
-    let $item = document.createElement('div')
-    $item.className = 'ph-list-item'
-    $item.textContent = String(d)
-    return $item
+  pageSize: 20,
+  renderItem: (el, d: number) => {
+    el.textContent = String(d)
   },
 })
 list.load((page: number, pageSize: number) => {

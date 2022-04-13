@@ -6,7 +6,7 @@ interface ListOption {
   /** 默认：0 - 加载更多, 1 - (分页模式)上一页，下一页 */
   mode?: 0 | 1
   /** 渲染列表项的模板 */
-  renderItem: (data: any, i: number, list: any[]) => HTMLElement
+  renderItem: (el: HTMLDivElement, data: any, i: number, list: any[]) => void
   /** 滚动容器的高度 */
   height?: number | string
   /** 每一页条数, 填0则自动计算 */
@@ -32,6 +32,12 @@ export default class List extends Component<HTMLDivElement> {
   public datas: any[]
   /** 每一页显示条数 */
   public pageSize: number
+  private _positions: {
+    index: number
+    height: number
+    top: number
+    bottom: number
+  }[]
   public constructor(el: string | HTMLDivElement, config: ListOption) {
     super(el)
     this._config = { mode: 0, height: 0, pageSize: 0, itemHeight: 0, ...config }
@@ -39,6 +45,7 @@ export default class List extends Component<HTMLDivElement> {
     this.height = 0
     this._loadStatus = 0
     this.datas = []
+    this._positions = []
 
     /* 初始化列表基本结构 */
     this.el.classList.add('ph-list')
@@ -152,6 +159,11 @@ export default class List extends Component<HTMLDivElement> {
     }
   }
 
+  private getStartIndex(scrollTop: number) {
+    let item = this._positions.find((i) => i && i.bottom >= scrollTop)
+    return item ? item.index : 0
+  }
+
   /** 渲染数据 */
   /**
    * 渲染数据
@@ -165,33 +177,74 @@ export default class List extends Component<HTMLDivElement> {
     }
     if (s === 0 || s === 3) {
       let d = []
+      let start = 0
+      let end = 0
       if (this._config.mode === 1) {
         this.datas = this.datas.concat(data)
         // 当前滚动位置
         let scrollTop = this.el.scrollTop
         // 开始索引
-        let start = Math.floor(scrollTop / this._config.itemHeight)
-        let end = start + this.pageSize
-        let startOffset = scrollTop - (scrollTop % this._config.itemHeight)
-        d = this.datas.slice(start, Math.min(end, this.datas.length))
+        if (this._config.itemHeight !== 0) {
+          start = Math.floor(scrollTop / this._config.itemHeight)
+        } else {
+          start = this.getStartIndex(scrollTop)
+        }
+        end = Math.min(start + this.pageSize, this.datas.length)
+        let startOffset = 0
+        if (this._config.itemHeight !== 0) {
+          startOffset = scrollTop - (scrollTop % this._config.itemHeight)
+        } else {
+          let item = this._positions[start]
+          if (item != null) {
+            startOffset = scrollTop - (scrollTop % item.height)
+          }
+        }
+        d = this.datas.slice(start, end)
         this._inner.style.transform = `translate3d(0, ${startOffset}px, 0)`
-        if (data.length > 0) {
+        if (data.length > 0 && this._config.itemHeight !== 0) {
           let h = this.datas.length * this._config.itemHeight + 50
           this._wrapper.style.height = `${h}px`
         }
       } else {
         d = data
       }
-
       let fragment = document.createDocumentFragment()
       for (let i = 0, len = d.length; i < len; i++) {
-        fragment.appendChild(this._config.renderItem(d[i], i, d))
+        let $item = document.createElement('div')
+        $item.className = 'ph-list-item'
+        if (this._config.mode === 1 && this._config.itemHeight === 0) {
+          $item.id = `item${start + i}`
+        }
+        this._config.renderItem($item, d[i], i, d)
+        fragment.appendChild($item)
       }
       if (this._config.mode === 0) {
         this._inner.appendChild(fragment)
       } else {
         this._inner.innerHTML = ''
         this._inner.appendChild(fragment)
+        if (this._config.itemHeight === 0) {
+          requestAnimationFrame(() => {
+            let $items = this._inner.childNodes
+            // 缓存每一个节点的位置信息
+            for (let i = 0, len = $items.length; i < len; i++) {
+              let $item = $items[i] as HTMLDivElement
+              let rect = $item.getBoundingClientRect()
+              let index = Number($item.id.slice(4))
+              if (this._positions[index] == null) {
+                this._positions[index] = {
+                  index,
+                  height: rect.height,
+                  top: rect.height,
+                  bottom: rect.bottom,
+                }
+              }
+            }
+            let len = this._positions.length
+            let h = this._positions[len - 1].bottom + 50
+            this._wrapper.style.height = `${h}px`
+          })
+        }
       }
     }
   }

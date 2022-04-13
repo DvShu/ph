@@ -10,11 +10,11 @@ yarn.lock
 .yarn
 /packages/**/LICENSE
 /packages/utils/lib/*
-/packages/terminal-spinner/index.js
-/packages/terminal-spinner/index.d.ts
-/packages/monorepo-cli/index.d.ts
 /**/*.js
+/**/*.d.ts
+/**/*.mjs
 .pnp.cjs
 .pnp.loader.mjs
 tsconfig.tsbuildinfo
 buildinfo.json
+!/packages/phui-vue-resolver/scripts/build.js
