@@ -15,10 +15,14 @@ function PhuiResolver(): ComponentResolver {
         if (partialName.endsWith('Icon')) {
           kebabCaseName = 'icon'
         }
+        let sideEffects: string | undefined = `phui-v/style/${kebabCaseName}.js`
+        if (partialName === 'Form') {
+          sideEffects = undefined
+        }
         return {
           name: partialName,
           from: 'phui-v',
-          sideEffects: `phui-v/style/${kebabCaseName}.js`,
+          sideEffects,
         }
       }
       return

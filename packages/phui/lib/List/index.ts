@@ -19,6 +19,7 @@ export default class List extends Component<HTMLDivElement> {
   private _wrapper: HTMLDivElement
   private _inner: HTMLDivElement
   private _footer: HTMLDivElement
+  private _main: HTMLDivElement
   /// 加载数据的事件
   private _loadEvent: (page: number, pageSize: number) => void
   private _config: Required<ListOption>
@@ -53,14 +54,13 @@ export default class List extends Component<HTMLDivElement> {
     this._wrapper.className = 'ph-list-wrapper'
     this._inner = document.createElement('div')
     this._inner.className = 'ph-list-inner'
-    this._wrapper.appendChild(this._inner)
+    this._main = document.createElement('div')
+    this._inner.appendChild(this._main)
     this._footer = document.createElement('div')
     this._footer.className = 'ph-list-loader-wrapper ph-list-footer'
-    if (this._config.mode === 1) {
-      this._footer.classList.add('ph-virtual-footer')
-    }
     this._renderLoading(this._footer)
-    this._wrapper.appendChild(this._footer)
+    this._inner.appendChild(this._footer)
+    this._wrapper.appendChild(this._inner)
     this.el.appendChild(this._wrapper)
 
     this._initHeight() // 初始化高度
@@ -202,7 +202,9 @@ export default class List extends Component<HTMLDivElement> {
         d = this.datas.slice(start, end)
         this._inner.style.transform = `translate3d(0, ${startOffset}px, 0)`
         if (data.length > 0 && this._config.itemHeight !== 0) {
+          console.log(this.datas)
           let h = this.datas.length * this._config.itemHeight + 50
+          console.log(h)
           this._wrapper.style.height = `${h}px`
         }
       } else {
@@ -219,13 +221,13 @@ export default class List extends Component<HTMLDivElement> {
         fragment.appendChild($item)
       }
       if (this._config.mode === 0) {
-        this._inner.appendChild(fragment)
+        this._main.appendChild(fragment)
       } else {
-        this._inner.innerHTML = ''
-        this._inner.appendChild(fragment)
+        this._main.innerHTML = ''
+        this._main.appendChild(fragment)
         if (this._config.itemHeight === 0) {
           requestAnimationFrame(() => {
-            let $items = this._inner.childNodes
+            let $items = this._main.childNodes
             // 缓存每一个节点的位置信息
             for (let i = 0, len = $items.length; i < len; i++) {
               let $item = $items[i] as HTMLDivElement

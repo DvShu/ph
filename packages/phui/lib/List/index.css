@@ -27,28 +27,15 @@
   height: 100%;
   position: relative;
 }
-.ph-list .ph-list-wrapper {
-  position: relative;
-}
-.ph-list .ph-list-inner {
-  width: 100%;
-  position: absolute;
-  bottom: 50px;
-}
 .ph-list .ph-list-loader-wrapper {
   height: 50px;
   display: flex;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
-  position: absolute;
-  bottom: 0;
 }
 .ph-list .ph-list-footer {
   border-top: 1px solid #dedede;
-}
-.ph-virtual-footer {
-  width: 100%;
 }
 .ph-list .ph-loading-bounce {
   width: 16px;

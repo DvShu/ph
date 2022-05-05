@@ -79,7 +79,9 @@ export function on<T extends Event>(
   element: HTMLElement,
   listener: string,
   fn: (e: T, target?: HTMLElement, flag?: string) => void,
-  once: boolean | { once?: boolean; eventFlag?: string; eventStop?: boolean } = false,
+  once:
+    | boolean
+    | { once?: boolean; eventFlag?: string; eventStop?: boolean } = false
 ) {
   let eventExtra: any = { eventStop: false }
   if (typeof once === 'boolean') {
@@ -104,7 +106,7 @@ export function on<T extends Event>(
           fn(e, target, flag)
         }
       },
-      eventExtra,
+      eventExtra
     )
   } else {
     element.addEventListener(listener, fn, eventExtra)
@@ -146,7 +148,10 @@ export function text(element: HTMLElement, textstr?: string) {
  * @param elems
  * @param fn 遍历到节点时的回调，回调第一个参数为遍历到的节点，第2个参数为 index；如果回调函数返回 true，则会终止遍历(break)
  */
-export function iterate(elems: NodeList | HTMLElement[], fn: (el: HTMLElement, index: number) => any) {
+export function iterate(
+  elems: NodeList | HTMLElement[],
+  fn: (el: HTMLElement, index: number) => any
+) {
   for (let i = 0, len = elems.length; i < len; i++) {
     let r = fn(elems[i] as HTMLElement, i)
     if (r === true) {
@@ -177,4 +182,31 @@ export function attr(elem: HTMLElement, key: string, value?: string) {
  */
 export function parent(el: HTMLElement) {
   return el.parentNode as HTMLElement
+}
+
+/**
+ * 获取隐藏节点的尺寸
+ * @param {string | HTMLElement} hideNode - The node to hide.
+ * @param parent - 添加临时节点的父节点，默认为: body.
+ * @returns The DOMRect of the element.
+ */
+export function queryHideNodeSize(
+  hideNode: string | HTMLElement,
+  parent = document.body
+) {
+  // 计算折叠菜单的高度
+  let $tmp = document.createElement('div')
+  $tmp.style.cssText = 'position:fixed;left:-1000px;top:-1000px;opacity:0;'
+  let $tmpInner = document.createElement('div')
+  $tmpInner.style.cssText = 'position:relative;'
+  if (typeof hideNode === 'string') {
+    $tmpInner.innerHTML = hideNode
+  } else {
+    $tmpInner.appendChild(hideNode.cloneNode(true))
+  }
+  $tmp.appendChild($tmpInner)
+  parent.appendChild($tmp)
+  let rect = $tmpInner.children[0].getBoundingClientRect()
+  parent.removeChild($tmp)
+  return { width: rect.width, height: rect.height }
 }
