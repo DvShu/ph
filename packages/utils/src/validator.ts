@@ -84,16 +84,13 @@ class Validator {
     for (let schema of schemas) {
       // 解析规则
       let rules = []
-      if (schema.required === true) {
-        rules.push(this._parseStringRule('required'))
-      }
       let rule = schema.rules
       if (typeof rule === 'string') {
         rules = rules.concat(this._parseStringRule(rule))
       } else if (rule instanceof Array) {
         for (let ruleItem of rule) {
           if (typeof ruleItem === 'string') {
-            rules = rules.concat(this._parseStringRule(ruleItem))
+            rules.push(...this._parseStringRule(ruleItem))
           } else if (
             ruleItem instanceof RegExp ||
             typeof ruleItem === 'function'
@@ -101,8 +98,8 @@ class Validator {
             rules.push({ rule: ruleItem, message: defaultMsg })
           } else {
             if (typeof ruleItem.rule === 'string') {
-              rules = rules.concat(
-                this._parseStringRule(ruleItem.rule, ruleItem.message)
+              rules.push(
+                ...this._parseStringRule(ruleItem.rule, ruleItem.message)
               )
             } else {
               rules.push({
@@ -114,6 +111,12 @@ class Validator {
         }
       } else {
         rules.push({ rule, message: defaultMsg })
+      }
+      if (
+        schema.required === true &&
+        rules.findIndex((r) => r.rule === 'required') === -1
+      ) {
+        rules.push(this._parseStringRule('required'))
       }
       parsedRules[schema.key] = rules
     }
@@ -218,7 +221,7 @@ class Validator {
         }
       } else if (rule === 'required') {
         rrule = 'required'
-        message = defaultMsgs.required
+        message = ruleErrMsg || defaultMsgs.required
       } else if (Object.prototype.hasOwnProperty.call(ruleRegexs, r)) {
         rrule = ruleRegexs[r]
         message = defaultMsgs[r] || defaultMsg
