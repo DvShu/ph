@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /**
  * 数据验证器
  */
@@ -57,7 +58,7 @@ const typeFns = {
 }
 
 interface RuleItem {
-  rule: RegExp | ((v: any) => boolean)
+  rule: RegExp | ((v: any) => boolean) | 'required'
   message: string
   sameKey?: string
 }
@@ -76,10 +77,16 @@ export type RuleType =
   | string
   | RegExp
   | ((v: any) => boolean)
-  | (RegExp | string | ((v: any) => boolean) | { rule: string | RegExp | ((v: any) => boolean); message?: string })
+  | (
+      | RegExp
+      | string
+      | ((v: any) => boolean)
+      | { rule: string | RegExp | ((v: any) => boolean); message?: string }
+    )
 
 export interface SchemaType {
   key: string
+  required?: boolean
   type?: string | ((v: any) => void)
   rules: RuleType[]
 }
@@ -102,10 +109,15 @@ class Validator {
       if (typeof schema.type === 'function') {
         types[schema.key] = schema.type
       } else {
-        types[schema.key] = validTypes.has(schema.type || '') ? schema.type : 'string'
+        types[schema.key] = validTypes.has(schema.type || '')
+          ? schema.type
+          : 'string'
       }
       // 解析规则
       let rules = []
+      if (schema.required === true) {
+        rules.push(this._parseStringRule('required'))
+      }
       let rule = schema.rules
       if (typeof rule === 'string') {
         rules = rules.concat(this._parseStringRule(rule))
@@ -113,13 +125,21 @@ class Validator {
         for (let ruleItem of rule) {
           if (typeof ruleItem === 'string') {
             rules = rules.concat(this._parseStringRule(ruleItem))
-          } else if (ruleItem instanceof RegExp || typeof ruleItem === 'function') {
+          } else if (
+            ruleItem instanceof RegExp ||
+            typeof ruleItem === 'function'
+          ) {
             rules.push({ rule: ruleItem, message: defaultMsg })
           } else {
             if (typeof ruleItem.rule === 'string') {
-              rules = rules.concat(this._parseStringRule(ruleItem.rule, ruleItem.message))
+              rules = rules.concat(
+                this._parseStringRule(ruleItem.rule, ruleItem.message)
+              )
             } else {
-              rules.push({ rule: ruleItem.rule, message: ruleItem.message || defaultMsg })
+              rules.push({
+                rule: ruleItem.rule,
+                message: ruleItem.message || defaultMsg,
+              })
             }
           }
         }
@@ -191,21 +211,33 @@ class Validator {
   private _validateRule(rules: RuleItem[], value: any, data?: any) {
     let errMsg = ''
     for (let rule of rules) {
-      if (typeof rule.rule === 'function') {
-        if (!rule.rule(value)) {
+      // 如果数据为空，则判断是否是必填
+      if (value == null || !ruleFns.pattern(ruleRegexs.required, value)) {
+        if (rule.rule === 'required') {
           errMsg = rule.message
         }
-      } else if (rule.sameKey != null) {
-        if (data != null) {
-          if (!ruleFns.same(value, data[rule.sameKey])) {
+      } else {
+        if (typeof rule.rule === 'function') {
+          if (!rule.rule(value)) {
+            errMsg = rule.message
+          }
+        } else if (rule.sameKey != null) {
+          if (data != null) {
+            if (!ruleFns.same(value, data[rule.sameKey])) {
+              errMsg = rule.message
+            }
+          }
+        } else if (rule.rule === 'required') {
+          if (!ruleFns.pattern(ruleRegexs.required, value)) {
+            errMsg = rule.message
+          }
+        } else {
+          if (!ruleFns.pattern(rule.rule, value)) {
             errMsg = rule.message
           }
         }
-      } else {
-        if (!ruleFns.pattern(rule.rule, value)) {
-          errMsg = rule.message
-        }
       }
+
       if (errMsg !== '') {
         break
       }
@@ -218,7 +250,7 @@ class Validator {
     let trule = rule.split('|')
     for (let r of trule) {
       let message = defaultMsg
-      let rrule: RegExp
+      let rrule: RegExp | 'required'
       let sameKey: string | undefined
       if (ruleRegexs.same.test(r)) {
         let m = r.match(ruleRegexs.same)
@@ -227,7 +259,10 @@ class Validator {
           sameKey = r.match(ruleRegexs.same)[1]
           message = defaultMsgs['same']
         }
-      } else if (ruleRegexs.hasOwnProperty(r)) {
+      } else if (rule === 'required') {
+        rrule = 'required'
+        message = defaultMsgs.required
+      } else if (Object.prototype.hasOwnProperty.call(ruleRegexs, r)) {
         rrule = ruleRegexs[r]
         message = defaultMsgs[r] || defaultMsg
       }
@@ -238,5 +273,5 @@ class Validator {
   }
 }
 
-// @ts-ignore
+// @ts-ignore: Unreachable code error
 export = Validator
