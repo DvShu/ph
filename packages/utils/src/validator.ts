@@ -11,9 +11,6 @@ const defaultMsgs = {
 }
 const defaultMsg = '请输入正确的数据'
 
-// 允许的内置 type
-const validTypes = new Set(['string', 'boolean', 'number', 'float', 'int'])
-
 // 一些常用的验证正则
 const ruleRegexs = {
   /** 验证跟其余数据相等的正则，一般用于验证再次输入密码 */
@@ -36,24 +33,6 @@ const ruleFns = {
       return false
     }
     return regex.test(String(val))
-  },
-}
-
-const typeFns = {
-  string(v: any) {
-    return String(v)
-  },
-  boolean(v: any) {
-    return Boolean(v)
-  },
-  number(v: any) {
-    return Number(v)
-  },
-  int(v: any) {
-    return parseInt(v, 10)
-  },
-  floag(v: any) {
-    return parseFloat(v)
   },
 }
 
@@ -96,23 +75,13 @@ export interface SchemaType {
  */
 class Validator {
   public rules: { [index: string]: RuleItem[] }
-  public types: { [index: string]: string | ((v: any) => void) }
   /**
    * 构造数据验证转换器
    * @param schemas 配置验证转换规则
    */
   public constructor(schemas: SchemaType[]) {
     let parsedRules = {}
-    let types = {}
     for (let schema of schemas) {
-      // 解析 types 用于进行数据类型转换
-      if (typeof schema.type === 'function') {
-        types[schema.key] = schema.type
-      } else {
-        types[schema.key] = validTypes.has(schema.type || '')
-          ? schema.type
-          : 'string'
-      }
       // 解析规则
       let rules = []
       if (schema.required === true) {
@@ -148,7 +117,6 @@ class Validator {
       }
       parsedRules[schema.key] = rules
     }
-    this.types = types
     this.rules = parsedRules
   }
 
@@ -157,17 +125,14 @@ class Validator {
    * @param data 待验证的数据
    * @returns
    */
-  public validate<T>(data: any) {
+  public validate(data: any): Promise<boolean> {
     return new Promise((resolve, reject) => {
       let errMsg = ''
       let errKey = ''
-      let resData: any = {}
       for (let key in this.rules) {
         if ({}.hasOwnProperty.call(this.rules, key)) {
           errMsg = this._validateRule(this.rules[key], data[key], data)
-          if (errMsg === '') {
-            resData[key] = this._conversionType(this.types[key], data[key])
-          } else {
+          if (errMsg !== '') {
             errKey = key
             errMsg = errMsg.replace('%s', key)
             break
@@ -175,7 +140,7 @@ class Validator {
         }
       }
       if (errMsg === '') {
-        resolve(resData as T)
+        resolve(true)
       } else {
         reject(new ValidateError(errKey, errMsg))
       }
@@ -187,28 +152,20 @@ class Validator {
    * @param key   指定待验证的 key
    * @param value 待验证的数据
    */
-  public validateKey(key: string, value: any) {
+  public validateKey(key: string, value: any): Promise<boolean> {
     return new Promise((resolve, reject) => {
       let keyRules = this.rules[key]
       let errMsg = this._validateRule(keyRules, value, null)
-      if (errMsg === '') {
-        resolve(this._conversionType(this.types[key], value))
-      } else {
+      if (errMsg !== '') {
         errMsg = errMsg.replace('%s', key)
         reject(new ValidateError(key, errMsg))
+      } else {
+        resolve(true)
       }
     })
   }
 
-  private _conversionType(type: string | ((v: any) => any), v: any) {
-    if (typeof type === 'function') {
-      return type(v)
-    } else {
-      return typeFns[type](v)
-    }
-  }
-
-  private _validateRule(rules: RuleItem[], value: any, data?: any) {
+  private _validateRule(rules: RuleItem[], value: string, data?: any) {
     let errMsg = ''
     for (let rule of rules) {
       // 如果数据为空，则判断是否是必填
@@ -228,11 +185,11 @@ class Validator {
             }
           }
         } else if (rule.rule === 'required') {
-          if (!ruleFns.pattern(ruleRegexs.required, value)) {
+          if (!ruleFns.pattern(ruleRegexs.required, String(value))) {
             errMsg = rule.message
           }
         } else {
-          if (!ruleFns.pattern(rule.rule, value)) {
+          if (!ruleFns.pattern(rule.rule, String(value))) {
             errMsg = rule.message
           }
         }
