@@ -1,6 +1,6 @@
 {
   "name": "@fly_dream/auto-deploy",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "自动化部署的命令行工具",
   "main": "index.js",
   "devDependencies": {
@@ -10,7 +10,8 @@
     "typescript": "4.5.5"
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "node index.js d -w a"
   },
   "bin": {
     "deploy": "index.js"

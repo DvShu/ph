@@ -145,10 +145,20 @@ program
 program
   .command('d')
   .description('部署项目')
-  .action(async () => {
+  .option('-w, --workspace <name>', 'workspace name')
+  .action(async (option) => {
     const spinner = new Spinner()
     spinner.start('正在进行项目打包……')
-    const deployinfoPath = path.join(sourcePath, 'deployinfo.json')
+    let deployinfoPath = path.join(sourcePath, 'deployinfo.json')
+    let wsName = option.workspace
+    if (wsName != null) {
+      deployinfoPath = path.join(
+        sourcePath,
+        'packages',
+        wsName,
+        'deployinfo.json'
+      )
+    }
     const r: any = await Promise.all([
       readJson(path.join(sourcePath, 'deploy.json')),
       readJson(deployinfoPath),

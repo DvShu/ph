@@ -124,7 +124,7 @@ class Validator {
   }
 
   /**
-   * 进行数据验证，同时根据 type 进行数据类型转换
+   * 进行数据验证
    * @param data 待验证的数据
    * @returns
    */
@@ -155,10 +155,10 @@ class Validator {
    * @param key   指定待验证的 key
    * @param value 待验证的数据
    */
-  public validateKey(key: string, value: any): Promise<boolean> {
+  public validateKey(key: string, value: any, data?: any): Promise<boolean> {
     return new Promise((resolve, reject) => {
       let keyRules = this.rules[key]
-      let errMsg = this._validateRule(keyRules, value, null)
+      let errMsg = this._validateRule(keyRules, value, data)
       if (errMsg !== '') {
         errMsg = errMsg.replace('%s', key)
         reject(new ValidateError(key, errMsg))

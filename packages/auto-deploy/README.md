@@ -11,4 +11,8 @@ npm install @tenny/auto-deploy -g
 ### 命令
 
 1. 初始化配置：`deploy init`
-2. 上传部署：`deploy d`
+2. 上传部署：`deploy d [option]`
+
+   `option` 参数列表：
+
+   1. `-w, --workspace <name>`: 工程为 `workspace` 工程
