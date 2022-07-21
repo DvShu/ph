@@ -20,14 +20,16 @@ export function isBlank(str?: string | null, ignoreWhitespace = true) {
  * @returns 屏蔽后的手机号，例如：123 **** 1234
  */
 export function shieldMobile(mobile: string) {
-  let x1 = Math.round(mobile.length / 2)
-  let x2 = Math.round(x1 / 2)
+  let x1 = Math.floor(mobile.length / 2)
+  let x2 = Math.ceil(x1 / 2)
   let shields = [' ']
-  for (let i = 0; i < x1; i++) {
+  for (let i = 0; i < x1 - 1; i++) {
     shields.push('*')
   }
   shields.push(' ')
-  return mobile.substring(0, x2) + shields.join('') + mobile.substring(x2 + x1)
+  return (
+    mobile.substring(0, x2) + shields.join('') + mobile.substring(x2 + x1 - 1)
+  )
 }
 
 /**
