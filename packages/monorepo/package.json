@@ -1,7 +1,7 @@
 {
   "name": "@fly_dream/monorepo",
   "description": "创建 monorepo 项目",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "repository": {
     "type": "git",
     "url": "git+https//gitee.com/towardly/ph.git",
