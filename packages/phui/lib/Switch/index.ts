@@ -1,5 +1,5 @@
 import './index.css'
-import { elem, on } from 'ph-utils/lib/dom'
+import { on } from 'ph-utils/lib/dom'
 import { queryElem } from '../utils'
 
 interface SwitchConfig {

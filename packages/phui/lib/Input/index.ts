@@ -98,7 +98,7 @@ class Input {
 
   public valid() {
     this._valid(this.input.value)
-    return this.isError
+    return !this.isError
   }
 
   /**
