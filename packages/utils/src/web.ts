@@ -1,7 +1,7 @@
 /**
  * web(浏览器) 端工具类
  */
-import { isBlank, isBoolean, isNumeric } from './index'
+import { isBlank } from './index'
 
 /**
  * 解析 Form 表单中的 input 元素的数据为 JSON 格式，key: input-name；value: input-value
@@ -13,7 +13,10 @@ export const formJson = function <T>(form: HTMLFormElement): T {
   for (let i = 0, len = elems.length; i < len; i++) {
     let item = elems[i] as HTMLSelectElement & HTMLInputElement
     if (!isBlank(item.name)) {
-      if ((item.tagName === 'INPUT' || item.tagName === 'TEXTAREA') && !isBlank(item.value)) {
+      if (
+        (item.tagName === 'INPUT' || item.tagName === 'TEXTAREA') &&
+        !isBlank(item.value)
+      ) {
         let dataType = item.getAttribute('data-type')
         if (dataType === 'number') {
           value[item.name] = Number(item.value)
@@ -28,41 +31,30 @@ export const formJson = function <T>(form: HTMLFormElement): T {
   return value
 }
 
-interface QueryRes {
-  [index: string]: number | boolean | string | string[]
-}
 /**
  * 获取 url query 参数 (get 请求的参数)
  * @param search 如果是 React 应用就需要传递 useLocation().search
  * @returns
  */
-export function query(search?: string): QueryRes {
+export function query(search?: string): { [index: string]: string } {
   if (isBlank(search)) {
     search = location.search
   }
-  let query: QueryRes = {}
-  /*
-    使用正则表达式解析，主要利用 反向字符集
-  */
-  search.replace(/([^?&=]+)=([^&]+)/g, (_: string, k: string, v: string) => {
-    let oldValue: any = query[k]
-    let value: any = decodeURIComponent(v)
-    if (isBoolean(value)) {
-      value = Boolean(value)
-    } else if (isNumeric(value)) {
-      value = Number(value)
-    }
+  const searchParams = new URLSearchParams(search)
+  let query: any = {}
+  for (const [key, value] of searchParams) {
+    let oldValue: any = query[key]
+    let newValue: any = value
     if (oldValue != null) {
       if (oldValue instanceof Array) {
         oldValue.push(value)
-        value = oldValue
+        newValue = oldValue
       } else {
-        value = [value, oldValue]
+        newValue = [value, oldValue]
       }
     }
-    query[k] = value
-    return v
-  })
+    query[key] = newValue
+  }
   return query
 }
 
@@ -134,6 +126,51 @@ export function formatMoney(number: number) {
   let dotStr = usePrecision > 0 ? numberStr.slice(usePrecision + 1) : '00'
   dotStr = dotStr.length > 2 ? dotStr.slice(0, 2) : dotStr
   return (
-    negative + (mod ? base.slice(0, mod) + ',' : '') + base.slice(mod).replace(/(\d{3})(?=\d)/g, '$1,') + '.' + dotStr
+    negative +
+    (mod ? base.slice(0, mod) + ',' : '') +
+    base.slice(mod).replace(/(\d{3})(?=\d)/g, '$1,') +
+    '.' +
+    dotStr
   )
+}
+
+/**
+ * 函数节流 - 每隔单位时间，只执行一次
+ * @param cb    待节流的函数
+ * @param wait  间隔时间
+ * @returns
+ */
+export function throttle<R extends any[], T>(
+  fn: (...args: R) => T,
+  wait = 500
+) {
+  // 上一次的请求时间
+  let last = 0
+  return (...args: R) => {
+    // 当前时间戳
+    const now = Date.now()
+    if (now - last > wait) {
+      fn(...args)
+      last = now
+    }
+  }
+}
+
+/**
+ * 函数防抖 - 当重复触发某一个行为（事件时），只执行最后一次触发
+ * @param fn        防抖函数
+ * @param interval  间隔时间段
+ * @returns
+ */
+export function debounce<R extends any[], T>(
+  fn: (...args: R) => T,
+  interval = 500
+) {
+  let _t = -1
+  return (...args: R) => {
+    clearTimeout(_t)
+    _t = setTimeout(() => {
+      fn(...args)
+    }, interval) as any
+  }
 }
