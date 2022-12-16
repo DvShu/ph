@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "node index.js d -w a"
+    "test": "node index.js d"
   },
   "bin": {
     "deploy": "index.js"

@@ -12,8 +12,8 @@ import mm = require('micromatch')
 import undici = require('undici')
 import fs = require('fs')
 
-const sourcePath = process.cwd()
-// const sourcePath = path.normalize('E:\\workspace1\\vue-app\\packages\\yz-hjfs')
+// const sourcePath = process.cwd()
+const sourcePath = path.normalize('D:\\workspace\\ssp')
 
 async function readJson(jsonPath: string): Promise<any> {
   let jsonData = {}
@@ -113,12 +113,6 @@ program
         initial: true,
       },
       {
-        type: 'confirm',
-        name: 'hashPath',
-        message: '文件名称是否是带 hash 值的名称',
-        initial: false,
-      },
-      {
         type: 'input',
         name: 'url',
         message:
@@ -193,8 +187,8 @@ program
           Buffer.from(JSON.stringify(tp, null, 2), 'utf8')
         )
       } else {
-        // 配置了按 hash path 文件
-        if (/.+\.[a-zA-Z0-9]{8,16}\..+$/.test(mf) && config.hashPath) {
+        // 如果文件是 hash path 则根据文件名判断
+        if (/.+\.[a-zA-Z0-9]{8,16}\..+$/.test(mf)) {
           if (r[1][mf] == null) {
             zip.addLocalFile(absPath, dirPath === '.' ? '' : dirPath)
             uc++
@@ -232,31 +226,31 @@ program
       }
       const file = await fromFile(zipPath)
       formdata.set('file', file)
-      undici
-        .fetch(config.url, {
-          body: formdata,
-          method: 'post',
-        })
-        .then((res) => {
-          if (res.ok) {
-            return res.json()
-          } else {
-            return Promise.reject(
-              new Error(`${res.status} -- ${res.statusText}`)
-            )
-          }
-        })
-        .then((res: any) => {
-          if (res.code === 10000) {
-            spinner.succeed('部署成功！')
-          } else {
-            spinner.fail(`部署失败：${res.message}`)
-          }
-        })
-        .catch((err) => {
-          spinner.fail(`部署失败`)
-          console.error(err)
-        })
+      // undici
+      //   .fetch(config.url, {
+      //     body: formdata,
+      //     method: 'post',
+      //   })
+      //   .then((res) => {
+      //     if (res.ok) {
+      //       return res.json()
+      //     } else {
+      //       return Promise.reject(
+      //         new Error(`${res.status} -- ${res.statusText}`)
+      //       )
+      //     }
+      //   })
+      //   .then((res: any) => {
+      //     if (res.code === 10000) {
+      //       spinner.succeed('部署成功！')
+      //     } else {
+      //       spinner.fail(`部署失败：${res.message}`)
+      //     }
+      //   })
+      //   .catch((err) => {
+      //     spinner.fail(`部署失败`)
+      //     console.error(err)
+      //   })
     } else {
       spinner.warn('没有文件改变，不需要进行打包部署！')
     }
