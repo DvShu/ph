@@ -120,13 +120,13 @@ program
       },
       {
         type: 'input',
-        name: 'htmlPath',
-        message: 'html文件在服务器上的地址',
+        name: 'mainPath',
+        message: '工程主要文件在服务器的地址',
       },
       {
         type: 'input',
-        name: 'mainPath',
-        message: '工程主要文件在服务器的地址',
+        name: 'htmlPath',
+        message: 'html文件在服务器上的地址',
       },
     ])
     await fileUtils.write(path.join(sourcePath, 'deploy.json'), response)

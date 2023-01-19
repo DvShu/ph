@@ -51,7 +51,11 @@ export = {
    * @param callback 遍历到文件后的回调
    * @param done 遍历完成后的回调
    */
-  traverseDir(dir: string, callback?: (filename: string) => void, done?: () => void) {
+  traverseDir(
+    dir: string,
+    callback?: (filename: string) => void,
+    done?: () => void
+  ) {
     let t: any = -1 // 定时任务，简单延迟作为遍历完成计算
     function list(dr: string, cb: (filename: string) => void, d: () => void) {
       fs.readdir(path.resolve(dr), { withFileTypes: true }, (err, files) => {
