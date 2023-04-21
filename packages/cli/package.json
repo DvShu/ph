@@ -1,4 +1,25 @@
 {
-  "name": "cli",
-  "packageManager": "yarn@3.5.0"
+  "name": "@fly_dream/monorepo",
+  "description": "工程化命令行 cli 工具",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https//gitee.com/towardly/ph.git",
+    "directory": "packages/cli"
+  },
+  "license": "MIT",
+  "author": "DvShu <1456207945@qq.com>",
+  "bugs": {
+    "url": "https://gitee.com/towardly/ph/issues"
+  },
+  "homepage": "https://gitee.com/towardly/ph/tree/master/packages/cli",
+  "bin": "index.js",
+  "keywords": [
+    "nodejs",
+    "ph",
+    "cli"
+  ],
+  "dependencies": {
+    
+  }
 }
