@@ -1,12 +1,15 @@
 #!/usr/bin/env node
-
 import { program } from 'commander';
-import pkg from './package.json';
 import { createSpinner } from 'nanospinner';
-import { rm } from './file';
+import { rm } from './file.js';
+import { createRequire } from 'node:module';
+import { gitInit } from './git.js';
 
+const require = createRequire(import.meta.url);
+
+const pkg = require('./package.json');
 // 名称-版本-描述
-program.name(pkg.name).description(pkg.description).version(pkg.version, '-V, --version', '显示版本号');
+program.name('tcli').description(pkg.description).version(pkg.version, '-V, --version', '显示版本号');
 
 // 删除目录工具类
 program
@@ -22,6 +25,15 @@ program
     await rm(dirs);
     const endTime = Date.now();
     spinner.success({ text: `删除文件夹 ${dirs.join(',')} 成功，耗时：${endTime - startTime}ms` });
+  });
+
+// 执行 git init
+program
+  .command('git-init')
+  .description('执行 git init 初始化仓库')
+  .action(async () => {
+    const spinner = createSpinner();
+    await gitInit(spinner);
   });
 
 program.parse(process.argv); // 解析命令行参数

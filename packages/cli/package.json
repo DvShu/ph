@@ -1,7 +1,7 @@
 {
   "name": "@fly_dream/cli",
   "description": "工程化命令行 cli 工具",
-  "version": "0.0.1",
+  "version": "0.0.8",
   "type": "module",
   "repository": {
     "type": "git",
@@ -14,7 +14,9 @@
     "url": "https://gitee.com/towardly/ph/issues"
   },
   "homepage": "https://gitee.com/towardly/ph/tree/master/packages/cli",
-  "bin": "index.js",
+  "bin": {
+    "tcli": "./index.js"
+  },
   "keywords": [
     "nodejs",
     "ph",
@@ -22,13 +24,16 @@
   ],
   "files": [
     "index.js",
-    "file/index.js"
+    "file.js",
+    "util.js",
+    "git.js"
   ],
   "scripts": {
     "test": "node index.js -V"
   },
   "dependencies": {
     "commander": "^10.0.1",
+    "enquirer": "^2.3.6",
     "kleur": "^4.1.5",
     "nanospinner": "^1.1.0"
   },
