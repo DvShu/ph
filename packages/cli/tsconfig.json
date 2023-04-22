@@ -1,10 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "module": "CommonJS",
-    "outDir": "./",
-    "declaration": true,
-    "removeComments": true
+    "outDir": "./"
   },
   "files": ["index.ts"]
 }

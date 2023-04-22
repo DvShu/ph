@@ -2,13 +2,14 @@
   "name": "@fly_dream/cli",
   "description": "工程化命令行 cli 工具",
   "version": "0.0.1",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https//gitee.com/towardly/ph.git",
     "directory": "packages/cli"
   },
   "license": "MIT",
-  "author": "DvShu <1456207945@qq.com>",
+  "author": "fly_dream <tenny.shu@foxmail.com>",
   "bugs": {
     "url": "https://gitee.com/towardly/ph/issues"
   },
@@ -20,11 +21,18 @@
     "cli"
   ],
   "files": [
-    "index.js"
+    "index.js",
+    "file/index.js"
   ],
+  "scripts": {
+    "test": "node index.js -V"
+  },
   "dependencies": {
     "commander": "^10.0.1",
     "kleur": "^4.1.5",
-    "ph-terminal-spinner": "workspace:^"
+    "nanospinner": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.15.13"
   }
 }
