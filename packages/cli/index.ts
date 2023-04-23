@@ -3,7 +3,7 @@ import { program } from 'commander';
 import { createSpinner } from 'nanospinner';
 import { readJSON, rm } from './file.js';
 import { createRequire } from 'node:module';
-import { gitInit } from './project.js';
+import { gitInit, lintInit } from './project.js';
 import path from 'node:path';
 
 const require = createRequire(import.meta.url);
@@ -43,11 +43,13 @@ program
   .description('初始化 eslint + prettier')
   .option('-f, --frame <frame>', '使用的框架,支持vue,react,vanilla', 'vue')
   .action(async (options) => {
-    const cpkg = await readJSON(path.join(process.cwd(), 'package.json'));
-    if (cpkg == null) {
+    const pkg = await readJSON(path.join(process.cwd(), 'package.json'));
+    if (pkg == null) {
       console.error('当前目录下, 还没有工程, 请先初始化工程');
       return;
     }
+    const spinner = createSpinner();
+    await lintInit(spinner, pkg, options.frame);
   });
 
 program.parse(process.argv); // 解析命令行参数

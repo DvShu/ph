@@ -67,3 +67,10 @@ git config user.email "xxx"
 
 git remote add origin xxx
 ```
+
+### `lint-init`
+
+初始化 `eslint` + `prettier`
+
+选项:
+*. `-f, --frame <frame>`: 使用的框架,支持 `vue`, `react`, `vanilla`; 默认: `vue`

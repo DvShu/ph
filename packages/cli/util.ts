@@ -6,7 +6,7 @@ import https from 'https';
  * @param cmd 执行的命令
  * @returns
  */
-export function exec<T>(cmd: string): Promise<T> {
+export function exec(cmd: string): Promise<string> {
   return new Promise((resolve, reject) => {
     execCmd(cmd, { cwd: 'D:/workspace/a' }, (err, stdout, stderr) => {
       if (err) {
@@ -15,7 +15,7 @@ export function exec<T>(cmd: string): Promise<T> {
         if (!isBlank(stderr) && stderr.indexOf('error') !== -1) {
           reject(new Error(stderr));
         } else {
-          resolve((isBlank(stdout) ? stderr : stdout).trim() as T);
+          resolve((isBlank(stdout) ? stderr : stdout).trim() as string);
         }
       }
     });

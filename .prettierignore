@@ -8,3 +8,4 @@ pnpm-workspace.yaml
 LICENSE
 .gitignore
 /packages/**/*.js
+README.md

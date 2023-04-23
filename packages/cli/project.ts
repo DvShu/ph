@@ -2,21 +2,12 @@
 import type { Spinner } from 'nanospinner';
 import { homedir } from 'node:os';
 import { exec, get, isBlank } from './util.js';
-import { read, write } from './file.js';
+import { access, read, readJSON, write } from './file.js';
 import path from 'node:path';
 import Enquirer from 'enquirer';
+import { EDITOR_CONFIG, ESLINT, GIT_IGNORES, PRETTIER, SETTINGS } from './template.js';
+import fs from 'node:fs/promises';
 const prompt = Enquirer.prompt;
-
-// 忽略的文件列表
-const gitIgnores = [
-  '*.log',
-  'node_modules',
-  'dist',
-  '.idea',
-  '.vscode/*',
-  '!.vscode/settings.json',
-  '!.vscode/extensions.json',
-];
 
 /**
  * 初始化 Git 工程
@@ -24,11 +15,7 @@ const gitIgnores = [
  */
 export async function gitInit(spinner: Spinner) {
   const userCfgPath = `${homedir}/.giturc`;
-  const gitUser = await Promise.all([
-    exec<string>(`git config user.name`),
-    exec<string>(`git config user.email`),
-    read(userCfgPath),
-  ]);
+  const gitUser = await Promise.all([exec(`git config user.name`), exec(`git config user.email`), read(userCfgPath)]);
   const gitUsers = [];
   if (!isBlank(gitUser[2])) {
     const userStrs = gitUser[2] || '';
@@ -105,12 +92,12 @@ export async function gitInit(spinner: Spinner) {
   }
   spinner.start({ text: '正在初始化 git ' });
   const queues = [
-    exec<string>(`git config user.name "${response.user}"`),
-    exec<string>(`git config user.email "${response.email}"`),
-    write(path.join(process.cwd(), '.gitignore'), gitIgnores.join('\r\n')),
+    exec(`git config user.name "${response.user}"`),
+    exec(`git config user.email "${response.email}"`),
+    write(path.join(process.cwd(), '.gitignore'), GIT_IGNORES),
   ];
   if (!isBlank(response.remote)) {
-    queues.push(exec<string>(`git remote add origin ${response.remote}`));
+    queues.push(exec(`git remote add origin ${response.remote}`));
   }
   Promise.all(queues).then();
   spinner.success({ text: 'git 初始化完成' });
@@ -131,7 +118,7 @@ async function searchPackage(packageName: string) {
  * @param packages 软件包列表
  * @returns
  */
-async function searchPackages(packages: string[]) {
+export async function searchPackages(packages: string[]) {
   const queues = [];
   for (let i = 0, len = packages.length; i < len; i++) {
     queues.push(searchPackage(packages[i]));
@@ -139,7 +126,13 @@ async function searchPackages(packages: string[]) {
   return Promise.all(queues);
 }
 
-async function lintInit(frame?: string) {
+/**
+ * 初始化 lint 工具
+ * @param spinner
+ * @param opkg
+ * @param frame 框架
+ */
+export async function lintInit(spinner: Spinner, opkg: any, frame?: string) {
   // 依赖项
   const deps = [
     'eslint',
@@ -149,12 +142,61 @@ async function lintInit(frame?: string) {
     '@typescript-eslint/parser',
     '@typescript-eslint/eslint-plugin',
   ];
+  const eslintExtends = ['alloy'];
+  const eslintRc: any = ESLINT;
   if (!isBlank(frame)) {
     if (frame === 'vue') {
       deps.push('@vue/eslint-config-typescript', 'eslint-plugin-vue', 'vue-eslint-parser');
+      eslintExtends.push('alloy/vue');
+      eslintRc['rules']['@typescript-eslint/prefer-optional-chain'] = 'off';
+      eslintRc['parser'] = 'vue-eslint-parser';
+      eslintRc['parserOptions'] = {
+        parser: {
+          js: '@typescript-eslint/parser',
+          jsx: '@typescript-eslint/parser',
+          ts: '@typescript-eslint/parser',
+          tsx: '@typescript-eslint/parser',
+        },
+      };
     } else if (frame === 'react') {
       deps.push('eslint-plugin-react');
+      eslintExtends.push('alloy/react');
     }
+    eslintExtends.push('alloy/typescript');
   }
-  const pkgInfos = await searchPackages(deps);
+  eslintRc.extends = eslintExtends;
+  try {
+    // 安装依赖
+    await access(path.join(process.cwd(), 'node_modules'));
+  } catch (error) {
+    // 之前未执行过 pnpm install, 则先执行 pnpm install
+    console.log(await exec('pnpm install'));
+  }
+  console.log(await exec(`pnpm add ${deps.join(' ')}`)); // 安装依赖
+
+  // 写入文件
+  spinner.start({ text: '正在初始化 lint' });
+  const settingPath = path.join(process.cwd(), '.vscode', 'settings.json');
+  const setting = await readJSON<any>(settingPath);
+  if (setting == null) {
+    await fs.mkdir(settingPath);
+  } else {
+    Object.assign(setting, SETTINGS);
+  }
+  // packge.json
+  const scripts = opkg.scripts || {};
+  scripts['lint'] = 'eslint .';
+  scripts['lint:fix'] = 'eslint . --fix';
+  opkg.scripts = scripts;
+
+  await Promise.all([
+    write(path.join(process.cwd(), '.editorconfig'), EDITOR_CONFIG),
+    write(path.join(process.cwd(), '.prettierignore'), 'README.md'),
+    write(path.join(process.cwd(), '.eslintignore'), 'README.md'),
+    write(path.join(process.cwd(), '.prettierrc'), PRETTIER),
+    write(settingPath, setting),
+    write(path.join(process.cwd(), '.eslintrc.json'), eslintRc),
+    write(path.join(process.cwd(), 'package.json'), opkg),
+  ]);
+  spinner.success({ text: 'lint 初始化成功' });
 }
