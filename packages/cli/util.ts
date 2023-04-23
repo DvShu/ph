@@ -1,4 +1,5 @@
 import { exec as execCmd } from 'node:child_process';
+import https from 'https';
 
 /**
  * 执行命令
@@ -31,4 +32,27 @@ export function isBlank(str?: string | null, ignoreWhitespace = true) {
     return true;
   }
   return (ignoreWhitespace ? str.trim().length : str.length) === 0;
+}
+
+/**
+ * 执行 http get 请请求
+ * @param url 请求地址
+ * @returns
+ */
+export async function get<T>(url: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    https
+      .get(url, (res) => {
+        if (res.statusCode === 200) {
+          res.on('data', (d) => {
+            resolve(JSON.parse(d));
+          });
+        } else {
+          reject(new Error(`${res.statusCode} - ${res.statusMessage}`));
+        }
+      })
+      .on('error', (e) => {
+        reject(e);
+      });
+  });
 }

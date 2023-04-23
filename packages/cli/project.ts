@@ -1,6 +1,7 @@
+/** node 语言工程相关工具 */
 import type { Spinner } from 'nanospinner';
 import { homedir } from 'node:os';
-import { exec, isBlank } from './util.js';
+import { exec, get, isBlank } from './util.js';
 import { read, write } from './file.js';
 import path from 'node:path';
 import Enquirer from 'enquirer';
@@ -30,7 +31,7 @@ export async function gitInit(spinner: Spinner) {
   ]);
   const gitUsers = [];
   if (!isBlank(gitUser[2])) {
-    const userStrs = gitUser[2];
+    const userStrs = gitUser[2] || '';
     const userLines = userStrs.split(/\r\n|\r|\n/);
     for (let i = 0, len = userLines.length; i < len; i++) {
       const ul = userLines[i];
@@ -113,4 +114,47 @@ export async function gitInit(spinner: Spinner) {
   }
   Promise.all(queues).then();
   spinner.success({ text: 'git 初始化完成' });
+}
+
+/**
+ * 搜索软件包信息
+ * @param packageName 软件包名称
+ * @returns
+ */
+async function searchPackage(packageName: string) {
+  const pckInfo = await get<any>(`https://registry.npmmirror.com/${packageName}`);
+  return { name: pckInfo.name, version: pckInfo['dist-tags'].latest };
+}
+
+/**
+ * 查询软件包列表的信息
+ * @param packages 软件包列表
+ * @returns
+ */
+async function searchPackages(packages: string[]) {
+  const queues = [];
+  for (let i = 0, len = packages.length; i < len; i++) {
+    queues.push(searchPackage(packages[i]));
+  }
+  return Promise.all(queues);
+}
+
+async function lintInit(frame?: string) {
+  // 依赖项
+  const deps = [
+    'eslint',
+    'eslint-config-alloy',
+    'prettier',
+    'typescript',
+    '@typescript-eslint/parser',
+    '@typescript-eslint/eslint-plugin',
+  ];
+  if (!isBlank(frame)) {
+    if (frame === 'vue') {
+      deps.push('@vue/eslint-config-typescript', 'eslint-plugin-vue', 'vue-eslint-parser');
+    } else if (frame === 'react') {
+      deps.push('eslint-plugin-react');
+    }
+  }
+  const pkgInfos = await searchPackages(deps);
 }

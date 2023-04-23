@@ -1,7 +1,6 @@
 /** 文件操作相关的命令函数类 */
 import fs from 'fs/promises';
 import path from 'path';
-import { isBlank } from './util.js';
 
 /**
  * 删除目录或者文件
@@ -27,7 +26,7 @@ export async function rm(dirs: string[]) {
  */
 export async function readJSON<T>(filepath: string): Promise<T> {
   let c = await read(filepath);
-  return isBlank(c) ? null : JSON.parse(await read(filepath));
+  return c == null ? null : JSON.parse(c);
 }
 
 /**
@@ -35,12 +34,12 @@ export async function readJSON<T>(filepath: string): Promise<T> {
  * @param filepath 文件路径
  * @returns
  */
-export async function read(filepath: string): Promise<string> {
-  let content = '';
+export async function read(filepath: string): Promise<string | null> {
+  let content = null;
   try {
     content = await fs.readFile(path.resolve(filepath), 'utf-8');
   } catch (err) {
-    content = '';
+    content = null;
   }
   return content;
 }
@@ -59,4 +58,13 @@ export function write(file: string, data: any, opts?: { json: boolean; format: b
     writeData = JSON.stringify(data, null, opts.format === true ? 2 : 0);
   }
   return fs.writeFile(path.resolve(file), writeData);
+}
+
+/**
+ * 检查文件权限
+ * @param filepath  文件目录
+ * @param mode      模式, 默认为检查文件是否存在
+ */
+export async function access(filepath: string, mode?: number) {
+  await fs.access(filepath, mode);
 }
