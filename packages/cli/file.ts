@@ -1,6 +1,8 @@
 /** 文件操作相关的命令函数类 */
-import fs from 'fs/promises';
+import fsc from 'node:fs';
 import path from 'path';
+
+const fs = fsc.promises;
 
 /**
  * 删除目录或者文件
@@ -67,4 +69,42 @@ export function write(file: string, data: any, opts?: { json: boolean; format: b
  */
 export async function access(filepath: string, mode?: number) {
   await fs.access(filepath, mode);
+}
+
+/**
+ * 遍历文件夹
+ * @param dir 待遍历的目录
+ * @param callback 遍历到文件后的回调
+ * @param done 遍历完成后的回调
+ */
+export function traverseDir(dir: string, callback?: (filename: string) => void, done?: () => void) {
+  let t: any = -1; // 定时任务，简单延迟作为遍历完成计算
+  function list(dr: string, cb?: (filename: string) => void, d?: () => void) {
+    fsc.readdir(path.resolve(dr), { withFileTypes: true }, (err, files) => {
+      if (err && err.errno === -4052) {
+        // 本身就是文件
+        if (typeof cb === 'function') cb(dr);
+        if (typeof d === 'function') d(); // 遍历完成
+      } else {
+        for (let i = 0, len = files.length; i < len; i++) {
+          const file = files[i];
+          if (file.isFile()) {
+            if (typeof cb === 'function') cb(path.join(dr, file.name));
+            clearTimeout(t);
+            t = setTimeout(() => {
+              setImmediate(() => {
+                if (typeof done === 'function') {
+                  done();
+                }
+              });
+            }, 10);
+          } else {
+            // 文件夹
+            list(path.join(dr, file.name), cb, d);
+          }
+        }
+      }
+    });
+  }
+  list(dir, callback, done);
 }

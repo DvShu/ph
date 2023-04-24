@@ -3,7 +3,7 @@ import { program } from 'commander';
 import { createSpinner } from 'nanospinner';
 import { readJSON, rm } from './file.js';
 import { createRequire } from 'node:module';
-import { gitInit, lintInit } from './project.js';
+import { gitInit, lintInit, sanicInit } from './project.js';
 import path from 'node:path';
 
 const require = createRequire(import.meta.url);
@@ -50,6 +50,18 @@ program
     }
     const spinner = createSpinner();
     await lintInit(spinner, pkg, options.frame);
+  });
+
+// 初始化 python sanic api 工程
+program
+  .command('sanic-init')
+  .description('初始化 Python3 Sanic Web 工程')
+  .action(async () => {
+    const spinner = createSpinner();
+    await sanicInit(spinner, {
+      name: path.basename(process.cwd()),
+      target: process.cwd(),
+    });
   });
 
 program.parse(process.argv); // 解析命令行参数

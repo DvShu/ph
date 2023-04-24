@@ -1,4 +1,4 @@
-import { exec as execCmd } from 'node:child_process';
+import { exec as execCmd, spawn } from 'node:child_process';
 import https from 'https';
 
 /**
@@ -54,5 +54,23 @@ export async function get<T>(url: string): Promise<T> {
       .on('error', (e) => {
         reject(e);
       });
+  });
+}
+
+/**
+ * 执行 git clone
+ * @param url 克隆工程地址
+ * @param target 克隆项目的保存地址
+ * @returns
+ */
+export function gitClone(url: string, target?: string) {
+  return new Promise((resolve, reject) => {
+    const clone = spawn('git', ['clone', url], { cwd: target });
+    clone.stderr.on('error', (err) => {
+      reject(err);
+    });
+    clone.on('close', () => {
+      resolve(1);
+    });
   });
 }

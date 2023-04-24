@@ -4,5 +4,5 @@
     "declaration": false,
     "outDir": "./"
   },
-  "files": ["index.ts", "util.ts", "file.ts", "project.ts"]
+  "include": ["*.ts", "*.d.ts"]
 }

@@ -1,13 +1,17 @@
 /** node 语言工程相关工具 */
 import type { Spinner } from 'nanospinner';
 import { homedir } from 'node:os';
-import { exec, get, isBlank } from './util.js';
-import { access, read, readJSON, write } from './file.js';
+import { exec, get, gitClone, isBlank } from './util.js';
+import { access, read, readJSON, traverseDir, write } from './file.js';
 import path from 'node:path';
 import Enquirer from 'enquirer';
 import { EDITOR_CONFIG, ESLINT, GIT_IGNORES, PRETTIER, SETTINGS } from './template.js';
 import fs from 'node:fs/promises';
 const prompt = Enquirer.prompt;
+
+const TEMPLATE_URLS = {
+  sanic: 'https://gitee.com/towardly/python-sanic-template.git',
+};
 
 /**
  * 初始化 Git 工程
@@ -199,4 +203,51 @@ export async function lintInit(spinner: Spinner, opkg: any, frame?: string) {
     write(path.join(process.cwd(), 'package.json'), opkg),
   ]);
   spinner.success({ text: 'lint 初始化成功' });
+}
+
+/** 搜索 Python 软件包信息 */
+async function searchPyPackage(name: string) {
+  const pckInfo = await get<any>(`https://pypi.org/pypi/${name}/json`);
+  return { name: pckInfo.info.name, version: pckInfo['info'].version };
+}
+
+/** 搜索多个 Python 软件包信息 */
+async function searchPyPackages(names: string[]) {
+  const queues = [];
+  for (let i = 0, len = names.length; i < len; i++) {
+    queues.push(searchPyPackage(names[i]));
+  }
+  return Promise.all(queues);
+}
+
+/**
+ * 初始化 Sanic 工程参数
+ */
+interface SanicInitParams {
+  /** 工程名称 */
+  name: string;
+  /** 目录 */
+  target: string;
+}
+
+export async function sanicInit(spinner: Spinner, params: SanicInitParams) {
+  spinner.start({ text: '依赖包版本检查……' });
+  const pknames = ['sanic', 'tortoise-orm', 'asyncmy', 'httpx', 'limits'];
+  const pkInfos = await searchPyPackages(pknames);
+  spinner.success({ text: '依赖包版本检查成功' })
+  spinner.start({ text: '下载工程模板……' })
+  const infos = { name: params.name, dependencies: pkInfos };
+  await gitClone(TEMPLATE_URLS['sanic'], params.target);
+  const source = path.join(params.target, 'python-sanic-template');
+  spinner.success({ text: '工程模板下载完成!' })
+  spinner.start({ text: '开始初始化工程……' })
+  traverseDir(
+    path.join(source),
+    (filename) => {
+      
+    },
+    () => {
+      spinner.success({ text: '工程初始化完成!' });
+    },
+  );
 }
