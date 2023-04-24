@@ -1,7 +1,7 @@
 {
   "name": "@fly_dream/cli",
   "description": "工程化命令行 cli 工具",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "type": "module",
   "repository": {
     "type": "git",
@@ -26,7 +26,8 @@
     "index.js",
     "file.js",
     "util.js",
-    "git.js"
+    "project.js",
+    "template.js"
   ],
   "scripts": {
     "test": "node index.js -V"

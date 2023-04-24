@@ -12,7 +12,7 @@ export async function rm(dirs: string[]) {
   const queues = [];
   for (let i = 0, len = dirs.length; i < len; i++) {
     queues.push(
-      fs.rm(path.join(process.cwd(), dirs[i]), {
+      fs.rm(dirs[i], {
         force: true,
         recursive: true,
       }),
@@ -71,11 +71,26 @@ export async function access(filepath: string, mode?: number) {
   await fs.access(filepath, mode);
 }
 
+function fnDone(done?: () => void) {
+  return setTimeout(() => {
+    setImmediate(() => {
+      process.nextTick(() => {
+        Promise.resolve().then(() => {
+          if (typeof done === 'function') {
+            done();
+          }
+        });
+      });
+    });
+  }, 10);
+}
+
 /**
  * 遍历文件夹
  * @param dir 待遍历的目录
  * @param callback 遍历到文件后的回调
  * @param done 遍历完成后的回调
+ * @param ignorePath  待忽略的文件夹
  */
 export function traverseDir(dir: string, callback?: (filename: string) => void, done?: () => void) {
   let t: any = -1; // 定时任务，简单延迟作为遍历完成计算
@@ -91,13 +106,7 @@ export function traverseDir(dir: string, callback?: (filename: string) => void, 
           if (file.isFile()) {
             if (typeof cb === 'function') cb(path.join(dr, file.name));
             clearTimeout(t);
-            t = setTimeout(() => {
-              setImmediate(() => {
-                if (typeof done === 'function') {
-                  done();
-                }
-              });
-            }, 10);
+            t = fnDone(done);
           } else {
             // 文件夹
             list(path.join(dr, file.name), cb, d);

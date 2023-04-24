@@ -23,7 +23,7 @@ program
     }
     const spinner = createSpinner().start({ text: `开始删除目录: ${dirs.join(',')}` });
     const startTime = Date.now();
-    await rm(dirs);
+    await rm(dirs.map((dirItem) => path.join(process.cwd(), dirItem)));
     const endTime = Date.now();
     spinner.success({ text: `删除文件夹 ${dirs.join(',')} 成功，耗时：${endTime - startTime}ms` });
   });

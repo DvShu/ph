@@ -2,11 +2,13 @@
 import type { Spinner } from 'nanospinner';
 import { homedir } from 'node:os';
 import { exec, get, gitClone, isBlank } from './util.js';
-import { access, read, readJSON, traverseDir, write } from './file.js';
+import { access, read, readJSON, rm, traverseDir, write } from './file.js';
 import path from 'node:path';
 import Enquirer from 'enquirer';
 import { EDITOR_CONFIG, ESLINT, GIT_IGNORES, PRETTIER, SETTINGS } from './template.js';
-import fs from 'node:fs/promises';
+import fsc from 'node:fs';
+import laytpl from 'laytpl';
+const fs = fsc.promises;
 const prompt = Enquirer.prompt;
 
 const TEMPLATE_URLS = {
@@ -207,7 +209,8 @@ export async function lintInit(spinner: Spinner, opkg: any, frame?: string) {
 
 /** 搜索 Python 软件包信息 */
 async function searchPyPackage(name: string) {
-  const pckInfo = await get<any>(`https://pypi.org/pypi/${name}/json`);
+  // const pckInfo = await get<any>(`https://pypi.org/pypi/${name}/json`);
+  const pckInfo = await get<any>(`https://pypi.tuna.tsinghua.edu.cn/pypi/${name}/json`);
   return { name: pckInfo.info.name, version: pckInfo['info'].version };
 }
 
@@ -230,24 +233,85 @@ interface SanicInitParams {
   target: string;
 }
 
+/**
+ * 渲染工程模板
+ * @param dir     模板路径
+ * @param pkgInfo 新建工程信息
+ * @param target  目标地址
+ * @returns
+ */
+function renderProject(dir: string, pkgInfo: any, target: string) {
+  return new Promise((resolve, reject) => {
+    let error: Error | null = null;
+    traverseDir(
+      dir,
+      (filename) => {
+        if (filename.includes('.git')) return;
+        const relPath = path.relative(dir, filename);
+        // 需要新建的目录
+        const destDir = path.join(target, path.dirname(relPath));
+        const fileInfo = path.parse(filename);
+        fsc.mkdir(destDir, { recursive: true }, (err) => {
+          if (err != null) {
+            error = err;
+          } else {
+            if (fileInfo.ext === '.tpl') {
+              // 渲染模板文件
+              laytpl.renderFile(filename, pkgInfo, (err, tpl: string) => {
+                tpl = tpl.trim();
+                if (err != null) {
+                  error = err;
+                } else {
+                  fsc.writeFile(path.join(destDir, fileInfo.name), tpl, (err) => {
+                    if (err != null) {
+                      error = err;
+                    }
+                  });
+                  if (fileInfo.name === '.env.example') {
+                    // 如果是环境变量文件, 则加一个 .env 文件
+                    fsc.writeFile(path.join(destDir, '.env'), tpl, (err) => {
+                      if (err != null) {
+                        error = err;
+                      }
+                    });
+                  }
+                }
+              });
+            } else {
+              // 复制文件
+              fsc.copyFile(filename, path.join(destDir, fileInfo.base), () => {});
+            }
+          }
+        });
+      },
+      () => {
+        if (error == null) {
+          resolve(1);
+        } else {
+          reject(error);
+        }
+      },
+    );
+  });
+}
+
+/**
+ * 初始化 Python3 Sanic Web 工程
+ * @param spinner 进度条
+ * @param params  参数
+ */
 export async function sanicInit(spinner: Spinner, params: SanicInitParams) {
   spinner.start({ text: '依赖包版本检查……' });
   const pknames = ['sanic', 'tortoise-orm', 'asyncmy', 'httpx', 'limits'];
   const pkInfos = await searchPyPackages(pknames);
-  spinner.success({ text: '依赖包版本检查成功' })
-  spinner.start({ text: '下载工程模板……' })
+  spinner.success({ text: '依赖包版本检查成功' });
+  spinner.start({ text: '下载工程模板……' });
   const infos = { name: params.name, dependencies: pkInfos };
   await gitClone(TEMPLATE_URLS['sanic'], params.target);
   const source = path.join(params.target, 'python-sanic-template');
-  spinner.success({ text: '工程模板下载完成!' })
-  spinner.start({ text: '开始初始化工程……' })
-  traverseDir(
-    path.join(source),
-    (filename) => {
-      
-    },
-    () => {
-      spinner.success({ text: '工程初始化完成!' });
-    },
-  );
+  spinner.success({ text: '工程模板下载完成!' });
+  spinner.start({ text: '开始初始化工程……' });
+  await renderProject(source, infos, params.target);
+  rm([source]).then();
+  spinner.success({ text: '工程初始化完成!' });
 }

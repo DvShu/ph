@@ -44,8 +44,13 @@ export async function get<T>(url: string): Promise<T> {
     https
       .get(url, (res) => {
         if (res.statusCode === 200) {
-          res.on('data', (d) => {
-            resolve(JSON.parse(d));
+          let chunks: any = [];
+          res.on('data', (chunk) => {
+            chunks.push(chunk);
+          });
+          res.on('end', () => {
+            chunks = Buffer.concat(chunks);
+            resolve(JSON.parse(chunks.toString('utf-8')));
           });
         } else {
           reject(new Error(`${res.statusCode} - ${res.statusMessage}`));

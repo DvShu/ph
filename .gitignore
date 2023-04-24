@@ -8,3 +8,4 @@ node_modules
 /packages/**/*.d.ts
 /packages/**/*.mjs
 pnpm-lock.yaml
+!/packages/cli/env.d.ts
