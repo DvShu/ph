@@ -1,8 +1,8 @@
 /** node 语言工程相关工具 */
 import type { Spinner } from 'nanospinner';
 import { homedir } from 'node:os';
-import { exec, get, gitClone, isBlank } from './util.js';
-import { access, read, readJSON, rm, traverseDir, write } from './file.js';
+import { exec, get, gitClone, isBlank, spawnCmd } from './util.js';
+import { read, readJSON, rm, traverseDir, write } from './file.js';
 import path from 'node:path';
 import Enquirer from 'enquirer';
 import { EDITOR_CONFIG, ESLINT, GIT_IGNORES, PRETTIER, SETTINGS } from './template.js';
@@ -139,6 +139,7 @@ export async function searchPackages(packages: string[]) {
  * @param frame 框架
  */
 export async function lintInit(spinner: Spinner, opkg: any, frame?: string) {
+  spinner.start({ text: '依赖检查……' });
   // 依赖项
   const deps = [
     'eslint',
@@ -171,14 +172,13 @@ export async function lintInit(spinner: Spinner, opkg: any, frame?: string) {
     eslintExtends.push('alloy/typescript');
   }
   eslintRc.extends = eslintExtends;
-  try {
-    // 安装依赖
-    await access(path.join(process.cwd(), 'node_modules'));
-  } catch (error) {
-    // 之前未执行过 pnpm install, 则先执行 pnpm install
-    console.log(await exec('pnpm install'));
+  const depVersions = await searchPackages(deps);
+  const devDeps = opkg.devDependencies || {};
+  for (let i = 0, len = depVersions.length; i < len; i++) {
+    const depItem = depVersions[i];
+    devDeps[depItem.name] = depItem.version;
   }
-  console.log(await exec(`pnpm add ${deps.join(' ')}`)); // 安装依赖
+  spinner.success({ text: '依赖检查完成' });
 
   // 写入文件
   spinner.start({ text: '正在初始化 lint' });
@@ -194,6 +194,7 @@ export async function lintInit(spinner: Spinner, opkg: any, frame?: string) {
   scripts['lint'] = 'eslint .';
   scripts['lint:fix'] = 'eslint . --fix';
   opkg.scripts = scripts;
+  opkg.devDependencies = devDeps;
 
   await Promise.all([
     write(path.join(process.cwd(), '.editorconfig'), EDITOR_CONFIG),
@@ -204,7 +205,7 @@ export async function lintInit(spinner: Spinner, opkg: any, frame?: string) {
     write(path.join(process.cwd(), '.eslintrc.json'), eslintRc),
     write(path.join(process.cwd(), 'package.json'), opkg),
   ]);
-  spinner.success({ text: 'lint 初始化成功' });
+  spinner.success({ text: 'lint 初始化成功; 请进行依赖安装: pnpm install' });
 }
 
 /** 搜索 Python 软件包信息 */
@@ -314,4 +315,20 @@ export async function sanicInit(spinner: Spinner, params: SanicInitParams) {
   await renderProject(source, infos, params.target);
   rm([source]).then();
   spinner.success({ text: '工程初始化完成!' });
+  spinner.start({ text: '依赖安装……' });
+  spawnCmd('pip', ['install', '-r', 'requirements.txt'], { cwd: params.target });
+  spinner.success({ text: '依赖安装成功' });
+  console.log('依次执行以下步骤: ');
+  const steps = [];
+  const realPath = path.relative(process.cwd(), params.target);
+  if (!isBlank(realPath)) {
+    steps.push(`进行目录: cd ${realPath}`);
+  }
+  steps.push('开发运行: python app.py');
+  if (steps.length === 2) {
+    console.log(`  1. ${steps[0]}\r\n`);
+    console.log(`  2. ${steps[1]}\r\n`);
+  } else {
+    console.log(`${steps[0]}`);
+  }
 }
