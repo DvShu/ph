@@ -1,11 +1,11 @@
 {
   "name": "@fly_dream/cli",
   "description": "工程化命令行 cli 工具",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https//gitee.com/towardly/ph.git",
+    "url": "git://gitee.com/towardly/ph.git",
     "directory": "packages/cli"
   },
   "license": "MIT",
@@ -13,7 +13,7 @@
   "bugs": {
     "url": "https://gitee.com/towardly/ph/issues"
   },
-  "homepage": "https://gitee.com/towardly/ph/tree/master/packages/cli",
+  "homepage": "https://gitee.com/towardly/ph/tree/master/packages/cli#readme",
   "bin": {
     "tcli": "./index.js"
   },

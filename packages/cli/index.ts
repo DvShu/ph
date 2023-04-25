@@ -5,6 +5,7 @@ import { readJSON, rm } from './file.js';
 import { createRequire } from 'node:module';
 import { gitInit, lintInit, sanicInit } from './project.js';
 import path from 'node:path';
+import { mkdir } from 'node:fs/promises';
 
 const require = createRequire(import.meta.url);
 
@@ -62,6 +63,19 @@ program
       name: path.basename(process.cwd()),
       target: process.cwd(),
     });
+  });
+
+// 创建 python sanic web 工程
+program
+  .command('sanic-create')
+  .argument('<name>', '工程名称')
+  .description('创建 Python3 Sanic WEB 工程')
+  .action(async (args) => {
+    const spinner = createSpinner();
+    const target = path.join(process.cwd(), args.name);
+    // 创建目录
+    await mkdir(target);
+    await sanicInit(spinner, { name: args.name, target: process.cwd() });
   });
 
 program.parse(process.argv); // 解析命令行参数
