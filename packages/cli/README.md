@@ -74,3 +74,19 @@ git remote add origin xxx
 
 选项:
 *. `-f, --frame <frame>`: 使用的框架,支持 `vue`, `react`, `vanilla`; 默认: `vue`
+
+> 该配置是基于 [eslint-config-alloy](https://github.com/AlloyTeam/eslint-config-alloy/blob/master/README.zh-CN.md) 配置
+
+### `sanic-init`
+
+初始化 `Python3` 基于 `Sanic` 的 `WEB` 工程模板, 功能包括如下:
+*. 参数签名校验
+*. `IP` 限流
+*. 环境配置(`.env`)以及配置文件 `config.py` 加载
+*. `Mysql ORM` 配置
+
+使用了以下框架:
+1. [Sanic](https://sanic.dev/zh/): `Web` 服务器和 `Web` 框架
+2. [Tortoise ORM](https://tortoise.github.io/index.html): `Mysql ORM` 库
+3. [httpx](https://www.python-httpx.org/): 同时支持同步和异步的请求库
+4. [limits](https://github.com/alisaifee/limits): `IP` 限流
