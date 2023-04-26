@@ -5,7 +5,7 @@ import { exec, get, gitClone, isBlank, spawnCmd } from './util.js';
 import { read, readJSON, rm, traverseDir, write } from './file.js';
 import path from 'node:path';
 import Enquirer from 'enquirer';
-import { EDITOR_CONFIG, ESLINT, GIT_IGNORES, PRETTIER, SETTINGS } from './template.js';
+import { EDITOR_CONFIG, ESLINT, ESLINT_IGNORE, GIT_IGNORES, PRETTIER, SETTINGS } from './template.js';
 import fsc from 'node:fs';
 import laytpl from 'laytpl';
 const fs = fsc.promises;
@@ -198,8 +198,8 @@ export async function lintInit(spinner: Spinner, opkg: any, frame?: string) {
 
   await Promise.all([
     write(path.join(process.cwd(), '.editorconfig'), EDITOR_CONFIG),
-    write(path.join(process.cwd(), '.prettierignore'), 'README.md'),
-    write(path.join(process.cwd(), '.eslintignore'), 'README.md'),
+    write(path.join(process.cwd(), '.prettierignore'), ESLINT_IGNORE),
+    write(path.join(process.cwd(), '.eslintignore'), ESLINT_IGNORE),
     write(path.join(process.cwd(), '.prettierrc'), PRETTIER),
     write(settingPath, setting),
     write(path.join(process.cwd(), '.eslintrc.json'), eslintRc),
