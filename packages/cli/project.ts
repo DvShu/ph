@@ -183,12 +183,12 @@ export async function lintInit(spinner: Spinner, opkg: any, frame?: string) {
   // 写入文件
   spinner.start({ text: '正在初始化 lint' });
   const settingPath = path.join(process.cwd(), '.vscode', 'settings.json');
-  const setting = await readJSON<any>(settingPath);
+  let setting = await readJSON<any>(settingPath);
   if (setting == null) {
-    await fs.mkdir(settingPath);
-  } else {
-    Object.assign(setting, SETTINGS);
+    await fs.mkdir(path.dirname(settingPath), { recursive: true });
+    setting = {};
   }
+  Object.assign(setting, SETTINGS);
   // packge.json
   const scripts = opkg.scripts || {};
   scripts['lint'] = 'eslint .';
