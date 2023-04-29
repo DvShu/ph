@@ -1,7 +1,7 @@
 /** node 语言工程相关工具 */
 import type { Spinner } from 'nanospinner';
 import { homedir } from 'node:os';
-import { exec, get, gitClone, isBlank, spawnCmd } from './util.js';
+import { exec, get, gitClone, isBlank, spawnCmd, spawnPromise } from './util.js';
 import { read, readJSON, rm, traverseDir, write } from './file.js';
 import path from 'node:path';
 import Enquirer from 'enquirer';
@@ -21,8 +21,12 @@ const TEMPLATE_URLS = {
  */
 export async function gitInit(spinner: Spinner) {
   const userCfgPath = `${homedir}/.giturc`;
-  const gitUser = await Promise.all([exec(`git config user.name`), exec(`git config user.email`), read(userCfgPath)]);
-  const gitUsers = [];
+  const gitUser = await Promise.all([
+    spawnPromise<string>('git', ['config', 'user.name']),
+    spawnPromise<string>('git', ['config', 'user.email']),
+    read(userCfgPath),
+  ]);
+  const gitUsers: any[] = [];
   if (!isBlank(gitUser[2])) {
     const userStrs = gitUser[2] || '';
     const userLines = userStrs.split(/\r\n|\r|\n/);

@@ -113,7 +113,7 @@ export function spawnCmd(command: string, args?: string[], options?: SpawnCmdOpt
  * @param options 参数
  * @returns
  */
-export function spawnPromise(command: string, args?: string[], options?: SpawnCmdOptions) {
+export function spawnPromise<T>(command: string, args?: string[], options?: SpawnCmdOptions): Promise<T> {
   return new Promise((resolve, reject) => {
     options = options || {};
     options.finally = (err) => {
