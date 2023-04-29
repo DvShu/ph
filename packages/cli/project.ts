@@ -5,7 +5,7 @@ import { exec, get, gitClone, isBlank, spawnCmd, spawnPromise } from './util.js'
 import { read, readJSON, rm, traverseDir, write } from './file.js';
 import path from 'node:path';
 import Enquirer from 'enquirer';
-import { EDITOR_CONFIG, ESLINT, GIT_IGNORES, PRETTIER, SETTINGS } from './template.js';
+import { EDITOR_CONFIG, ESLINT, ESLINT_IGNORE, GIT_IGNORES, PRETTIER, SETTINGS } from './template.js';
 import fsc from 'node:fs';
 import laytpl from 'laytpl';
 const fs = fsc.promises;
@@ -187,12 +187,12 @@ export async function lintInit(spinner: Spinner, opkg: any, frame?: string) {
   // 写入文件
   spinner.start({ text: '正在初始化 lint' });
   const settingPath = path.join(process.cwd(), '.vscode', 'settings.json');
-  const setting = await readJSON<any>(settingPath);
+  let setting = await readJSON<any>(settingPath);
   if (setting == null) {
-    await fs.mkdir(settingPath);
-  } else {
-    Object.assign(setting, SETTINGS);
+    await fs.mkdir(path.dirname(settingPath), { recursive: true });
+    setting = {};
   }
+  Object.assign(setting, SETTINGS);
   // packge.json
   const scripts = opkg.scripts || {};
   scripts['lint'] = 'eslint .';
@@ -202,8 +202,8 @@ export async function lintInit(spinner: Spinner, opkg: any, frame?: string) {
 
   await Promise.all([
     write(path.join(process.cwd(), '.editorconfig'), EDITOR_CONFIG),
-    write(path.join(process.cwd(), '.prettierignore'), 'README.md'),
-    write(path.join(process.cwd(), '.eslintignore'), 'README.md'),
+    write(path.join(process.cwd(), '.prettierignore'), ESLINT_IGNORE),
+    write(path.join(process.cwd(), '.eslintignore'), ESLINT_IGNORE),
     write(path.join(process.cwd(), '.prettierrc'), PRETTIER),
     write(settingPath, setting),
     write(path.join(process.cwd(), '.eslintrc.json'), eslintRc),

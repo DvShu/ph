@@ -27,8 +27,12 @@ export const SETTINGS = {
 /** eslint */
 export const ESLINT = {
   root: true,
+  extends: [],
   rules: {
     eqeqeq: ['error', 'smart'],
     'no-eq-null': 'off',
   },
 };
+
+/** eslint ignore */
+export const ESLINT_IGNORE = 'node_modules/\r\n.github/\r\n.vscode/';
