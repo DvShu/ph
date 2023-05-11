@@ -18,7 +18,8 @@
     "init": "node createPackages.js",
     "dev:cli": "node script.js -d cli index.ts git-init",
     "build:cli": "node script.js -p cli",
-    "d": "tsc -p packages/cli/tsconfig.json"
+    "build:pino": "node script.js -p pino-smart",
+    "d": "tsc -p packages/pino-smart/tsconfig.json"
   },
   "author": "DvShu <tenny.shu@foxmail.com>",
   "repository": {
