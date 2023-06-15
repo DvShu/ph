@@ -14,10 +14,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     'no-empty-function': 'off',
-    '@typescript-eslint/no-empty-function': [
-      'error',
-      { allow: ['arrowFunctions'] },
-    ],
+    '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions'] }],
     'prefer-const': 'off',
     'prefer-rest-params': 'off',
     '@typescript-eslint/no-this-alias': [
@@ -27,5 +24,6 @@ module.exports = {
         allowedNames: ['self'], // Allow `const self = this`; `[]` by default
       },
     ],
+    '@typescript-eslint/ban-ts-comment': 'off',
   },
-}
+};
