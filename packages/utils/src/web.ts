@@ -54,3 +54,38 @@ export function query(search?: string): { [index: string]: string } {
   }
   return query;
 }
+
+/**
+ * 函数节流 - 每隔单位时间，只执行一次
+ * @param cb    待节流的函数
+ * @param wait  间隔时间
+ * @returns
+ */
+export function throttle<R extends any[], T>(fn: (...args: R) => T, wait = 500) {
+  // 上一次的请求时间
+  let last = 0;
+  return (...args: R) => {
+    // 当前时间戳
+    const now = Date.now();
+    if (now - last > wait) {
+      fn(...args);
+      last = now;
+    }
+  };
+}
+
+/**
+ * 函数防抖 - 当重复触发某一个行为（事件时），只执行最后一次触发
+ * @param fn        防抖函数
+ * @param interval  间隔时间段
+ * @returns
+ */
+export function debounce<R extends any[], T>(fn: (...args: R) => T, interval = 500) {
+  let _t = -1;
+  return (...args: R) => {
+    clearTimeout(_t);
+    _t = setTimeout(() => {
+      fn(...args);
+    }, interval) as any;
+  };
+}

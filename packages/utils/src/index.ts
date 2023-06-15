@@ -142,41 +142,6 @@ export class BaseError extends Error {
 }
 
 /**
- * 函数节流 - 每隔单位时间，只执行一次
- * @param cb    待节流的函数
- * @param wait  间隔时间
- * @returns
- */
-export function throttle<R extends any[], T>(fn: (...args: R) => T, wait = 500) {
-  // 上一次的请求时间
-  let last = 0;
-  return (...args: R) => {
-    // 当前时间戳
-    const now = Date.now();
-    if (now - last > wait) {
-      fn(...args);
-      last = now;
-    }
-  };
-}
-
-/**
- * 函数防抖 - 当重复触发某一个行为（事件时），只执行最后一次触发
- * @param fn        防抖函数
- * @param interval  间隔时间段
- * @returns
- */
-export function debounce<R extends any[], T>(fn: (...args: R) => T, interval = 500) {
-  let _t = -1;
-  return (...args: R) => {
-    clearTimeout(_t);
-    _t = setTimeout(() => {
-      fn(...args);
-    }, interval) as any;
-  };
-}
-
-/**
  * 将金额数字格式化为金额格式显示并且会保留两位小数[去除多余的位数，不是四舍五入，而是直接舍去]  1234523432.23 => 123,123,123.23
  * @param {number} number 待转换的金额数字
  * @return string
