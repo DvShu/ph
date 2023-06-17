@@ -95,3 +95,7 @@ git remote add origin xxx
 ### `sanic-create`
 
 创建 `Python3` 基于 `Sanic` 的 `WEB` 工程模板
+
+### `monorepo`
+
+构建 `monorepo` 项目

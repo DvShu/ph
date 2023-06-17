@@ -2,14 +2,23 @@
 import type { Spinner } from 'nanospinner';
 import { homedir } from 'node:os';
 import { get, gitClone, isBlank, spawnCmd, spawnPromise } from './util.js';
-import { read, readJSON, rm, traverseDir, write } from './file.js';
+import { read, rm, traverseDir } from './file.js';
 import path from 'node:path';
 import Enquirer from 'enquirer';
-import { EDITOR_CONFIG, ESLINT, ESLINT_IGNORE, GIT_IGNORES, PRETTIER, SETTINGS } from './template.js';
+import {
+  EDITOR_CONFIG,
+  ESLINT,
+  ESLINT_IGNORE,
+  GIT_IGNORES,
+  PRETTIER,
+  SETTINGS,
+  PNPM_WORKSPACE_YAMR,
+} from './template.js';
 import fsc from 'node:fs';
 import laytpl from 'laytpl';
 const fs = fsc.promises;
 const prompt = Enquirer.prompt;
+import { write, readJSON } from 'ph-utils/lib/file';
 
 const TEMPLATE_URLS = {
   sanic: 'https://gitee.com/towardly/python-sanic-template.git',
@@ -141,10 +150,22 @@ export async function searchPackages(packages: string[]) {
 /**
  * 初始化 lint 工具
  * @param spinner
- * @param opkg
+ * @param opkg  工程配置(package.json)
  * @param frame 框架
+ * @param target 目录目录, 默认为执行命令的目录
  */
-export async function lintInit(spinner: Spinner, opkg: any, frame?: string) {
+export async function lintInit(spinner: Spinner, opkg?: any, frame?: string, target = process.cwd()) {
+  spinner.start({ text: '初始化工程' });
+  if (opkg == null) {
+    opkg = await readJSON(path.join(process.cwd(), 'package.json'));
+  }
+  if (opkg == null) {
+    opkg = {
+      name: path.basename(target),
+      version: '0.0.1',
+    };
+  }
+  spinner.success({ text: '工程初始化完成' });
   spinner.start({ text: '依赖检查……' });
   // 依赖项
   const deps = [
@@ -188,7 +209,7 @@ export async function lintInit(spinner: Spinner, opkg: any, frame?: string) {
 
   // 写入文件
   spinner.start({ text: '正在初始化 lint' });
-  const settingPath = path.join(process.cwd(), '.vscode', 'settings.json');
+  const settingPath = path.join(target, '.vscode', 'settings.json');
   let setting = await readJSON<any>(settingPath);
   if (setting == null) {
     await fs.mkdir(path.dirname(settingPath), { recursive: true });
@@ -203,13 +224,13 @@ export async function lintInit(spinner: Spinner, opkg: any, frame?: string) {
   opkg.devDependencies = devDeps;
 
   await Promise.all([
-    write(path.join(process.cwd(), '.editorconfig'), EDITOR_CONFIG),
-    write(path.join(process.cwd(), '.prettierignore'), ESLINT_IGNORE),
-    write(path.join(process.cwd(), '.eslintignore'), ESLINT_IGNORE),
-    write(path.join(process.cwd(), '.prettierrc'), PRETTIER),
+    write(path.join(target, '.editorconfig'), EDITOR_CONFIG),
+    write(path.join(target, '.prettierignore'), ESLINT_IGNORE),
+    write(path.join(target, '.eslintignore'), ESLINT_IGNORE),
+    write(path.join(target, '.prettierrc'), PRETTIER),
     write(settingPath, setting),
-    write(path.join(process.cwd(), '.eslintrc.json'), eslintRc),
-    write(path.join(process.cwd(), 'package.json'), opkg),
+    write(path.join(target, '.eslintrc.json'), eslintRc),
+    write(path.join(target, 'package.json'), opkg),
   ]);
   spinner.success({ text: 'lint 初始化成功; 请进行依赖安装: pnpm install' });
 }
@@ -337,4 +358,46 @@ export async function sanicInit(spinner: Spinner, params: SanicInitParams) {
   } else {
     console.log(`${steps[0]}`);
   }
+}
+
+interface InitNodeParams {
+  /** 目标目录, 默认: 执行命令的目录 */
+  target?: string;
+}
+
+/**
+ * 初始化 monorepo 工程
+ * @param spinner
+ * @param params
+ */
+export async function initMonorepo(spinner: Spinner, params: InitNodeParams) {
+  const cfg = { target: process.cwd(), packageManager: 'pnpm', ...params };
+  // 列出项目中的所有的文件
+  const files = await fs.readdir(cfg.target);
+  // 如果目录不为空, 并且
+  if (files.length > 0) {
+    // 目录不为空, 且不包含package.json, 则报错
+    if (!files.includes('package.json')) {
+      throw new Error('当前目录不为空且不包含package.json');
+    }
+    spinner.start({ text: '正在转换为 monorepo 项目' });
+    let pkg: any = await readJSON(path.join(cfg.target, 'package.json'));
+    pkg['private'] = true;
+    pkg['workspaces'] = ['packages/*'];
+    const queues = [write(path.join(cfg.target, 'package.json'), pkg)];
+    if (!files.includes('packages')) {
+      queues.push(fs.mkdir(path.join(cfg.target, 'packages')));
+    }
+    await Promise.all(queues);
+  } else {
+    const pkg = {
+      name: path.basename(cfg.target),
+      version: '0.0.1',
+      private: true,
+      workspaces: ['packages/*'],
+    };
+    await Promise.all([lintInit(spinner, pkg, 'vue', cfg.target), fs.mkdir(path.join(cfg.target, 'packages'))]);
+  }
+  await write(path.join(cfg.target, 'pnpm-workspace.yaml'), PNPM_WORKSPACE_YAMR);
+  spinner.success({ text: '初始化 monorepo 成功' });
 }

@@ -36,3 +36,6 @@ export const ESLINT = {
 
 /** eslint ignore */
 export const ESLINT_IGNORE = 'node_modules/\r\n.github/\r\n.vscode/';
+
+/** pnpm monorepo 目标 */
+export const PNPM_WORKSPACE_YAMR = "packages:\r\n\t- 'packages/*'";
