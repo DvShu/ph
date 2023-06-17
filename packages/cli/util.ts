@@ -113,12 +113,16 @@ export function spawnCmd(command: string, args?: string[], options?: SpawnCmdOpt
  * @param options 参数
  * @returns
  */
-export function spawnPromise<T>(command: string, args?: string[], options?: SpawnCmdOptions): Promise<T> {
+export function spawnPromise(command: string, args?: string[], options?: SpawnCmdOptions): Promise<string> {
   return new Promise((resolve, reject) => {
+    const chunks: string[] = [];
     options = options || {};
+    options.data = (chunk) => {
+      chunks.push(chunk as string);
+    };
     options.finally = (err) => {
       if (err == null) {
-        resolve(1);
+        resolve(chunks.join('\r\n'));
       } else {
         reject(err);
       }

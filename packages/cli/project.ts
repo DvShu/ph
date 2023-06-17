@@ -1,7 +1,7 @@
 /** node 语言工程相关工具 */
 import type { Spinner } from 'nanospinner';
 import { homedir } from 'node:os';
-import { exec, get, gitClone, isBlank, spawnCmd, spawnPromise } from './util.js';
+import { get, gitClone, isBlank, spawnCmd, spawnPromise } from './util.js';
 import { read, readJSON, rm, traverseDir, write } from './file.js';
 import path from 'node:path';
 import Enquirer from 'enquirer';
@@ -22,8 +22,8 @@ const TEMPLATE_URLS = {
 export async function gitInit(spinner: Spinner) {
   const userCfgPath = `${homedir}/.giturc`;
   const gitUser = await Promise.all([
-    spawnPromise<string>('git', ['config', 'user.name']),
-    spawnPromise<string>('git', ['config', 'user.email']),
+    spawnPromise('git', ['config', 'user.name']),
+    spawnPromise('git', ['config', 'user.email']),
     read(userCfgPath),
   ]);
   const gitUsers: any[] = [];
@@ -38,7 +38,7 @@ export async function gitInit(spinner: Spinner) {
     }
   }
   if (!isBlank(gitUser[0]) && !isBlank(gitUser[1])) {
-    if (gitUsers.filter((item) => item[0] === gitUser[0]).length === 0) {
+    if (gitUsers.filter((item) => item[0] === gitUser[0].trim()).length === 0) {
       gitUsers.push([gitUser[0].trim(), gitUser[1].trim()]);
     }
   }
@@ -102,14 +102,16 @@ export async function gitInit(spinner: Spinner) {
   }
   spinner.start({ text: '正在初始化 git ' });
   const queues = [
-    exec(`git config user.name "${response.user}"`),
-    exec(`git config user.email "${response.email}"`),
+    spawnPromise('git', ['config', 'user.name', response.user]),
+    spawnPromise('git', ['config', 'user.email', response.email]),
     write(path.join(process.cwd(), '.gitignore'), GIT_IGNORES),
   ];
   if (!isBlank(response.remote)) {
-    queues.push(exec(`git remote add origin ${response.remote}`));
+    queues.push(spawnPromise('git', ['remote', 'add', 'origin', response.remote]));
   }
-  Promise.all(queues).then();
+  spawnPromise('git', ['init'])
+    .then(() => Promise.all(queues))
+    .then();
   spinner.success({ text: 'git 初始化完成' });
 }
 
