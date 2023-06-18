@@ -1,7 +1,7 @@
 {
   "name": "@fly_dream/cli",
   "description": "工程化命令行 cli 工具",
-  "version": "0.0.19",
+  "version": "0.0.21",
   "type": "module",
   "repository": {
     "type": "git",
@@ -30,7 +30,7 @@
     "template.js"
   ],
   "scripts": {
-    "test": "node index.js -V"
+    "test": "node index.js monorepo"
   },
   "dependencies": {
     "commander": "^11.0.0",

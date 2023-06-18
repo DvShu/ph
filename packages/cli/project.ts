@@ -210,10 +210,11 @@ export async function lintInit(spinner: Spinner, opkg?: any, frame?: string, tar
   // 写入文件
   spinner.start({ text: '正在初始化 lint' });
   const settingPath = path.join(target, '.vscode', 'settings.json');
-  let setting = await readJSON<any>(settingPath);
-  if (setting == null) {
+  let setting = {};
+  try {
+    setting = await readJSON(settingPath);
+  } catch (error) {
     await fs.mkdir(path.dirname(settingPath), { recursive: true });
-    setting = {};
   }
   Object.assign(setting, SETTINGS);
   // packge.json
