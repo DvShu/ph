@@ -18,7 +18,7 @@ import fsc from 'node:fs';
 import laytpl from 'laytpl';
 const fs = fsc.promises;
 const prompt = Enquirer.prompt;
-import { write, readJSON } from 'ph-utils/lib/file';
+import { write, readJSON } from 'ph-utils/file';
 
 const TEMPLATE_URLS = {
   sanic: 'https://gitee.com/towardly/python-sanic-template.git',

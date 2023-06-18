@@ -5,7 +5,34 @@
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "browser": "lib/index.js",
-  "version": "0.3.2",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js"
+    },
+    "./file": {
+      "types": "./lib/file.d.ts",
+      "import": "./lib/file.js"
+    },
+    "./date": {
+      "types": "./lib/date.d.ts",
+      "import": "./lib/date.js"
+    },
+    "./validator": {
+      "types": "./lib/validator.d.ts",
+      "import": "./lib/validator.js"
+    },
+    "./crypto": {
+      "types": "./lib/crypto.d.ts",
+      "import": "./lib/crypto.js"
+    },
+    "./crypto_node": {
+      "types": "./lib/crypto_node.d.ts",
+      "import": "./lib/crypto_node.js"
+    },
+    "./*": "./lib/*"
+  },
+  "version": "0.3.3",
   "type": "module",
   "repository": {
     "type": "git",
