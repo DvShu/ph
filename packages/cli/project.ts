@@ -275,7 +275,7 @@ function renderProject(dir: string, pkgInfo: any, target: string) {
     traverseDir(
       dir,
       (filename) => {
-        if (filename.includes('.git')) return;
+        if (filename.includes('.git') && filename !== '.gitignore') return;
         const relPath = path.relative(dir, filename);
         // 需要新建的目录
         const destDir = path.join(target, path.dirname(relPath));
@@ -296,14 +296,6 @@ function renderProject(dir: string, pkgInfo: any, target: string) {
                       error = err;
                     }
                   });
-                  if (fileInfo.name === '.env.example') {
-                    // 如果是环境变量文件, 则加一个 .env 文件
-                    fsc.writeFile(path.join(destDir, '.env'), tpl, (err) => {
-                      if (err != null) {
-                        error = err;
-                      }
-                    });
-                  }
                 }
               });
             } else {
